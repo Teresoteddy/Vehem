@@ -1,0 +1,1977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehem Mawunyo Int. School - Terminal Report System</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            50: '#fdf2f8',
+                            100: '#fce7f3',
+                            500: '#ec4899',
+                            700: '#be185d',
+                            800: '#9d174d',
+                            900: '#831843',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @media print {
+            body * { visibility: hidden; }
+            #printableReport, #printableReport * { visibility: visible; }
+            #printableReport { 
+                position: absolute; 
+                left: 0; 
+                top: 0; 
+                width: 100%; 
+                margin: 0; 
+                padding: 10px; 
+            }
+            .no-print { display: none !important; }
+            .print-page-break { page-break-after: always; break-after: page; }
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased font-sans min-h-screen flex flex-col">
+
+    <header class="bg-slate-900 text-white shadow-md no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-brand-700 text-white p-2 rounded-lg font-bold text-xl shadow-sm">VM</div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight">VEHEM MAWUNYO INT. SCHOOL</h1>
+                    <p class="text-xs text-slate-400">Terminal Report System v2.5 (Creche to JHS 3)</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <div class="text-right hidden sm:block">
+                    <div id="currentUserDisplay" class="text-sm font-semibold">Logged in as: Teacher</div>
+                    <div id="teacherClassBadge" class="text-xs text-brand-300 font-medium"></div>
+                    <div class="flex items-center space-x-2 text-xs">
+                        <span id="termStatusBadge" class="text-emerald-400"><i class="fas fa-unlock"></i> Term Unlocked</span>
+                        <span class="text-slate-600">|</span>
+                        <span id="cloudStatusBadge" class="text-amber-400 font-medium flex items-center gap-1">
+                            <i class="fas fa-spinner fa-spin text-[10px]"></i> Connecting Backend...
+                        </span>
+                    </div>
+                </div>
+                <button onclick="logout()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-1.5 rounded-md text-sm transition flex items-center space-x-2">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Log Out</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm pointer-events-none no-print"></div>
+
+    <!-- Main Container -->
+    <div id="app" class="flex-grow flex max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 gap-6 no-print">
+        
+        <aside class="w-64 flex-shrink-0 bg-white rounded-xl shadow-sm p-4 border border-slate-200 h-fit">
+            <nav class="space-y-1">
+                <button onclick="switchTab('scoreEntry')" id="nav-scoreEntry" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition bg-brand-50 text-brand-700">
+                    <i class="fas fa-edit w-5 text-center"></i>
+                    <span>Score Entry</span>
+                </button>
+
+                <button onclick="switchTab('batchScoreEntry')" id="nav-batchScoreEntry" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-slate-600 hover:bg-slate-50">
+                    <i class="fas fa-table-cells w-5 text-center"></i>
+                    <span>Batch Grid Entry</span>
+                </button>
+                
+                <button onclick="switchTab('students')" id="nav-students" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-slate-600 hover:bg-slate-50">
+                    <i class="fas fa-user-graduate w-5 text-center"></i>
+                    <span>Student Roster</span>
+                </button>
+                
+                <button onclick="switchTab('classTotals')" id="nav-classTotals" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-slate-600 hover:bg-slate-50">
+                    <i class="fas fa-list-ol w-5 text-center"></i>
+                    <span>Class Summary & Ranks</span>
+                </button>
+                
+                <button onclick="switchTab('reportView')" id="nav-reportView" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-slate-600 hover:bg-slate-50">
+                    <i class="fas fa-file-invoice w-5 text-center"></i>
+                    <span>Terminal Reports</span>
+                </button>
+                
+                <div class="pt-4 mt-4 border-t border-slate-200 space-y-1">
+                    <span class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Admin Tools</span>
+                    <button onclick="switchTab('auditLogs')" id="nav-auditLogs" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-slate-600 hover:bg-slate-50">
+                        <i class="fas fa-history w-5 text-center"></i>
+                        <span>Audit & Activity Logs</span>
+                    </button>
+                    <button onclick="switchTab('settings')" id="nav-settings" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-slate-600 hover:bg-slate-50">
+                        <i class="fas fa-cog w-5 text-center"></i>
+                        <span>System Controls</span>
+                    </button>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="flex-grow bg-white rounded-xl shadow-sm border border-slate-200 p-6 overflow-hidden">
+            
+            <section id="tab-scoreEntry" class="tab-content">
+                <div class="border-b border-slate-200 pb-4 mb-6 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800">Single Student Score Entry</h2>
+                        <p class="text-sm text-slate-500">Enter detailed continuous assessment sub-scores and exam marks.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <label class="text-xs font-semibold text-slate-600">Active Term:</label>
+                        <select id="singleScoreTermSelect" onchange="loadStudentSubjects()" class="text-xs font-medium border border-slate-300 rounded-lg p-1.5 bg-slate-50">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                </div>
+
+                <form id="scoreForm" onsubmit="handleScoreSubmit(event)" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Select Student Name</label>
+                            <select id="scoreStudentSelect" onchange="loadStudentSubjects()" required class="w-full rounded-lg border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 p-2.5 border">
+                                <option value="">-- Select Student --</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Class</label>
+                            <input type="text" id="scoreClassDisplay" readonly class="w-full rounded-lg border-slate-200 bg-slate-50 text-slate-500 p-2.5 border">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Select Subject</label>
+                            <select id="scoreSubjectSelect" required onchange="populateCurrentScore()" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 p-2.5 border">
+                                <option value="">-- Choose Subject --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Continuous Assessment Breakdown Grid -->
+                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
+                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3"><i class="fas fa-calculator mr-1"></i> Continuous Assessment Breakdown (50%) & Exam (50%)</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Class Test (20%)</label>
+                                <input type="number" id="inputTestScore" min="0" max="20" step="0.5" required oninput="calculateLiveTotal()" placeholder="0 - 20" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 p-2 border font-bold text-center">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Homework (10%)</label>
+                                <input type="number" id="inputHwScore" min="0" max="10" step="0.5" required oninput="calculateLiveTotal()" placeholder="0 - 10" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 p-2 border font-bold text-center">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">ClassWork (20%)</label>
+                                <input type="number" id="inputClassWorkScore" min="0" max="20" step="0.5" required oninput="calculateLiveTotal()" placeholder="0 - 20" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 p-2 border font-bold text-center">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-brand-800 mb-1">Class Score Total (50%)</label>
+                                <input type="number" id="inputClassScoreTotal" readonly placeholder="0 - 50" class="w-full rounded-lg border-brand-300 bg-brand-50/50 text-brand-900 font-black p-2 border text-center">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 pt-4 border-t border-slate-200">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Exam Mark (50%)</label>
+                                <input type="number" id="inputExamScore" min="0" max="50" step="0.5" required oninput="calculateLiveTotal()" placeholder="0 - 50" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 p-2.5 border font-bold text-lg text-center">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Total (100%) & Remark</label>
+                                <div class="flex items-center space-x-3">
+                                    <div id="liveTotalDisplay" class="text-2xl font-black text-brand-700 bg-white px-4 py-1 rounded-lg border border-slate-300 min-w-[80px] text-center">0</div>
+                                    <span id="liveRemarkDisplay" class="text-sm font-semibold px-3 py-1 rounded-full bg-slate-200 text-slate-700">N/A</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end space-x-3">
+                        <button type="reset" class="px-5 py-2.5 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 font-medium text-sm transition">Reset Form</button>
+                        <button type="submit" id="btnSubmitScore" class="px-6 py-2.5 bg-brand-700 hover:bg-brand-800 text-white rounded-lg font-medium text-sm transition shadow-sm flex items-center space-x-2">
+                            <i class="fas fa-save"></i>
+                            <span>Save & Update Grade</span>
+                        </button>
+                    </div>
+                </form>
+
+                <div class="mt-8">
+                    <h3 class="text-md font-bold text-slate-800 mb-3">All Subjects Overview for Selected Student</h3>
+                    <div class="overflow-x-auto border border-slate-200 rounded-lg">
+                        <table class="w-full text-sm text-left text-slate-600">
+                            <thead class="text-xs uppercase bg-slate-100 text-slate-700">
+                                <tr>
+                                    <th class="px-3 py-3">Subject</th>
+                                    <th class="px-3 py-3 text-center">Test (20)</th>
+                                    <th class="px-3 py-3 text-center">HW (10)</th>
+                                    <th class="px-3 py-3 text-center">CW (20)</th>
+                                    <th class="px-3 py-3 text-center">Class (50)</th>
+                                    <th class="px-3 py-3 text-center">Exams (50)</th>
+                                    <th class="px-3 py-3 text-center">Total (100)</th>
+                                    <th class="px-3 py-3 text-center">Rank</th>
+                                    <th class="px-3 py-3">Remark</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentSubjectOverviewTable">
+                                <tr><td colspan="9" class="px-4 py-4 text-center text-slate-400">Select a student above to view their score sheet.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tab-batchScoreEntry" class="tab-content hidden">
+                <div class="border-b border-slate-200 pb-4 mb-6 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800">Spreadsheet-Style Batch Score Entry</h2>
+                        <p class="text-sm text-slate-500">Enter marks for all students in a class simultaneously using tab navigation.</p>
+                    </div>
+                    <button onclick="saveBatchGridScores()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2 shadow-sm">
+                        <i class="fas fa-check-circle"></i> Save All Batch Scores
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Select Class</label>
+                        <select id="batchClassSelect" onchange="renderBatchGridTable()" class="w-full rounded-lg border-slate-300 p-2 border text-sm font-semibold">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Select Subject</label>
+                        <select id="batchSubjectSelect" onchange="renderBatchGridTable()" class="w-full rounded-lg border-slate-300 p-2 border text-sm font-semibold">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Academic Term</label>
+                        <select id="batchTermSelect" onchange="renderBatchGridTable()" class="w-full rounded-lg border-slate-300 p-2 border text-sm font-semibold">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto border border-slate-200 rounded-lg max-h-[500px] custom-scrollbar">
+                    <table class="w-full text-xs text-left text-slate-700 border-collapse">
+                        <thead class="uppercase bg-slate-100 text-slate-800 sticky top-0 border-b font-bold">
+                            <tr>
+                                <th class="px-3 py-3">Student Name</th>
+                                <th class="px-2 py-3 text-center w-24">Test (20)</th>
+                                <th class="px-2 py-3 text-center w-24">HW (10)</th>
+                                <th class="px-2 py-3 text-center w-24">CW (20)</th>
+                                <th class="px-2 py-3 text-center w-24 bg-brand-50 text-brand-900">Class (50)</th>
+                                <th class="px-2 py-3 text-center w-24">Exam (50)</th>
+                                <th class="px-2 py-3 text-center w-24 font-black">Total (100)</th>
+                                <th class="px-3 py-3 text-center">Remark</th>
+                            </tr>
+                        </thead>
+                        <tbody id="batchGridTableBody">
+                            <tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">Select a Class and Subject above to begin batch score entry.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="tab-students" class="tab-content hidden">
+                <div class="flex justify-between items-center border-b border-slate-200 pb-4 mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800">Student Directory & Profiles</h2>
+                        <p class="text-sm text-slate-500">Manage enrolled students, attendance counts, conduct, remarks, and passport photos.</p>
+                    </div>
+                    <button onclick="openAddStudentModal()" class="bg-brand-700 hover:bg-brand-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-2">
+                        <i class="fas fa-plus"></i>
+                        <span>Add New Student</span>
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto border border-slate-200 rounded-lg">
+                    <table class="w-full text-sm text-left text-slate-600">
+                        <thead class="text-xs uppercase bg-slate-100 text-slate-700">
+                            <tr>
+                                <th class="px-4 py-3">Photo</th>
+                                <th class="px-4 py-3">ID & Name</th>
+                                <th class="px-4 py-3">Class Level</th>
+                                <th class="px-4 py-3">Attendance</th>
+                                <th class="px-4 py-3">Conduct & Remarks</th>
+                                <th class="px-4 py-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsTableBody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="tab-classTotals" class="tab-content hidden">
+                <div class="flex justify-between items-center border-b border-slate-200 pb-4 mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800">Class Summary & Rankings</h2>
+                        <p class="text-sm text-slate-500">Automatically computed grand totals and class positions by selected grade level.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <select id="filterClassSelect" onchange="renderClassTotals()" class="rounded-lg border-slate-300 shadow-sm p-2 border text-sm font-medium">
+                            <option value="ALL">All Classes</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto border border-slate-200 rounded-lg">
+                    <table class="w-full text-sm text-left text-slate-600">
+                        <thead class="text-xs uppercase bg-slate-100 text-slate-700">
+                            <tr>
+                                <th class="px-4 py-3">Class Rank</th>
+                                <th class="px-4 py-3">Student Name</th>
+                                <th class="px-4 py-3">Class</th>
+                                <th class="px-4 py-3">Grand Total Score</th>
+                                <th class="px-4 py-3">Average (%)</th>
+                                <th class="px-4 py-3">Promoted To</th>
+                            </tr>
+                        </thead>
+                        <tbody id="classTotalsTableBody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="tab-reportView" class="tab-content hidden">
+                <div class="flex justify-between items-center border-b border-slate-200 pb-4 mb-6 no-print flex-wrap gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800">Terminal Report Cards</h2>
+                        <p class="text-sm text-slate-500">Generate individual student reports or print full class rosters in batch.</p>
+                    </div>
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <select id="reportModeSelect" onchange="toggleReportPrintMode()" class="rounded-lg border-slate-300 shadow-sm p-2 border text-sm font-bold bg-slate-50">
+                            <option value="single">Single Student Mode</option>
+                            <option value="batch">Batch Entire Class Mode</option>
+                        </select>
+
+                        <div id="singleStudentSelectContainer" class="flex items-center gap-2">
+                            <select id="reportStudentSelect" onchange="generateReportCard()" class="rounded-lg border-slate-300 shadow-sm p-2 border text-sm font-medium">
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+
+                        <div id="batchClassSelectContainer" class="hidden flex items-center gap-2">
+                            <select id="reportClassBatchSelect" onchange="generateBatchReportCards()" class="rounded-lg border-slate-300 shadow-sm p-2 border text-sm font-medium">
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+
+                        <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-2 shadow-sm">
+                            <i class="fas fa-print"></i>
+                            <span id="btnPrintText">Print Report</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="printableReport" class="space-y-8">
+                    <!-- Dynamic Printable Content (Single or Sequential Batch Reports) -->
+                </div>
+            </section>
+
+            <section id="tab-settings" class="tab-content hidden">
+                <div class="border-b border-slate-200 pb-4 mb-6">
+                    <h2 class="text-xl font-bold text-slate-800">System Controls & Administrative Configuration</h2>
+                    <p class="text-sm text-slate-500">Manage real-time cloud sync, term dates, fee bills, required items, and teacher accounts.</p>
+                </div>
+
+                <!-- Term Dates, Bills & Items Config (Feature 2A) -->
+                <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 mb-6">
+                    <h3 class="font-bold text-md text-slate-800 mb-3"><i class="fas fa-calendar-alt text-brand-700 mr-2"></i>Academic Term Dates, Bills & Requirement Config</h3>
+                    <form onsubmit="handleSaveTermConfig(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Academic Year</label>
+                            <input type="text" id="cfgAcademicYear" required placeholder="e.g. 2025/2026" class="w-full rounded border-slate-300 p-2 border font-medium">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Next Term Opening Date</label>
+                            <input type="text" id="cfgNextTermDate" required placeholder="e.g. 25th August, 2026" class="w-full rounded border-slate-300 p-2 border font-medium">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Vacation Date</label>
+                            <input type="text" id="cfgVacationDate" required placeholder="e.g. 25th July, 2026" class="w-full rounded border-slate-300 p-2 border font-medium">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Creche/KG Required Supply Items</label>
+                            <input type="text" id="cfgItemsKG" required placeholder="e.g. 2 Toilet Roll | 2 Geisha Soap" class="w-full rounded border-slate-300 p-2 border font-medium">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Primary Required Supply Items</label>
+                            <input type="text" id="cfgItemsPrimary" required placeholder="e.g. 2 Toilet Roll | 1 Ream A4 Paper" class="w-full rounded border-slate-300 p-2 border font-medium">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">JHS Required Supply Items</label>
+                            <input type="text" id="cfgItemsJHS" required placeholder="e.g. Math Set | Drawing Board" class="w-full rounded border-slate-300 p-2 border font-medium">
+                        </div>
+                        <div class="md:col-span-3 flex justify-end">
+                            <button type="submit" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded font-bold text-xs shadow-sm transition">
+                                <i class="fas fa-save mr-1"></i> Save Term Configuration
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Teacher Account Management Section -->
+                <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="font-bold text-md text-slate-800">Teacher Class Assignments & Passwords</h3>
+                            <p class="text-xs text-slate-500">Assign specific classes (Creche to JHS 3) and login credentials to class teachers.</p>
+                        </div>
+                        <button onclick="openAddTeacherModal()" class="px-3 py-1.5 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-xs font-semibold transition flex items-center space-x-1">
+                            <i class="fas fa-user-plus"></i>
+                            <span>Add New Teacher</span>
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto border border-slate-200 rounded-lg bg-white">
+                        <table class="w-full text-xs text-left text-slate-600">
+                            <thead class="uppercase bg-slate-100 text-slate-700 font-semibold">
+                                <tr>
+                                    <th class="px-3 py-2">Teacher Name</th>
+                                    <th class="px-3 py-2">Assigned Class</th>
+                                    <th class="px-3 py-2">Password</th>
+                                    <th class="px-3 py-2 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="teacherTableBody">
+                                <tr><td colspan="4" class="px-3 py-3 text-center text-slate-400">Loading teachers...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Term Lock -->
+                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
+                        <h3 class="font-bold text-md text-slate-800 mb-2">Term Lock System</h3>
+                        <p class="text-sm text-slate-600 mb-4">Locking the term prevents teachers from making accidental score modifications.</p>
+                        <button onclick="toggleTermLock()" id="btnTermLock" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-sm font-medium transition">
+                            <i class="fas fa-lock"></i> Lock Active Term
+                        </button>
+                    </div>
+
+                    <!-- Cloud Database Control -->
+                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
+                        <h3 class="font-bold text-md text-slate-800 mb-2">Cloud Backend Synchronization</h3>
+                        <p class="text-sm text-slate-600 mb-3">Sync local state directly with Firebase Firestore cloud database.</p>
+                        <div class="text-xs space-y-1 mb-4 bg-white p-3 rounded border border-slate-200 font-mono">
+                            <div><span class="text-slate-500">Backend Status:</span> <strong id="backendStatusDetail" class="text-emerald-600">Connected</strong></div>
+                            <div><span class="text-slate-500">Cloud Students:</span> <strong id="cloudStudentCount">0</strong></div>
+                            <div><span class="text-slate-500">Cloud Score Entries:</span> <strong id="cloudScoreCount">0</strong></div>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <button onclick="seedInitialCloudData()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition flex items-center space-x-1.5">
+                                <i class="fas fa-database"></i>
+                                <span>Seed Initial Data</span>
+                            </button>
+                            <button onclick="exportDatabaseJSON()" class="px-3 py-1.5 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-xs font-semibold transition flex items-center space-x-1.5">
+                                <i class="fas fa-download"></i>
+                                <span>Export Backup (JSON)</span>
+                            </button>
+                            <label class="px-3 py-1.5 bg-slate-700 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold transition cursor-pointer flex items-center space-x-1.5">
+                                <i class="fas fa-upload"></i>
+                                <span>Import JSON</span>
+                                <input type="file" id="importFileInput" accept=".json" onchange="importDatabaseJSON(event)" class="hidden">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tab-auditLogs" class="tab-content hidden">
+                <div class="border-b border-slate-200 pb-4 mb-6 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800">Cloud Activity & Audit Trail</h2>
+                        <p class="text-sm text-slate-500">Real-time log of score updates, student registrations, and administrative changes.</p>
+                    </div>
+                    <button onclick="clearCloudLogs()" class="text-xs text-red-600 hover:text-red-800 font-semibold border border-red-200 bg-red-50 px-3 py-1.5 rounded-lg transition">
+                        Clear Audit Trail
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto border border-slate-200 rounded-lg max-h-[500px] custom-scrollbar">
+                    <table class="w-full text-sm text-left text-slate-600">
+                        <thead class="text-xs uppercase bg-slate-100 text-slate-700 sticky top-0 border-b">
+                            <tr>
+                                <th class="px-4 py-3">Timestamp</th>
+                                <th class="px-4 py-3">Role</th>
+                                <th class="px-4 py-3">Action</th>
+                                <th class="px-4 py-3">Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="auditLogsTableBody">
+                            <tr><td colspan="4" class="px-4 py-6 text-center text-slate-400">No activity logged yet.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="addStudentModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 border border-slate-200 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <h3 id="studentModalTitle" class="text-lg font-bold text-slate-800 mb-4">Add / Edit Student Profile</h3>
+            <form onsubmit="handleAddStudent(event)" class="space-y-3">
+                <input type="hidden" id="editStudentId">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Full Student Name</label>
+                    <input type="text" id="newStudentName" required placeholder="e.g. ABUDU BLESS" class="w-full rounded-lg border-slate-300 p-2 border text-xs">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Class Level</label>
+                        <select id="newStudentClass" required class="w-full rounded-lg border-slate-300 p-2 border text-xs">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Promoted To</label>
+                        <input type="text" id="newStudentPromoted" placeholder="e.g. Basic 6" class="w-full rounded-lg border-slate-300 p-2 border text-xs">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Attendance Days (out of 60)</label>
+                        <input type="number" id="newStudentAttendance" min="0" max="100" value="60" required class="w-full rounded-lg border-slate-300 p-2 border text-xs font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Passport Photo URL</label>
+                        <input type="text" id="newStudentPhoto" placeholder="https://... or base64 image" class="w-full rounded-lg border-slate-300 p-2 border text-xs">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Conduct / Character</label>
+                    <input type="text" id="newStudentConduct" placeholder="e.g. Respectful, Hardworking & Attentive" value="Satisfactory" class="w-full rounded-lg border-slate-300 p-2 border text-xs">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Interests / Aptitude</label>
+                    <input type="text" id="newStudentInterests" placeholder="e.g. Integrated Science & Computing" value="Integrated Science and Ewe" class="w-full rounded-lg border-slate-300 p-2 border text-xs">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Class Teacher's Remark</label>
+                    <textarea id="newTeacherRemark" rows="2" placeholder="e.g. Good performance. Keep it up!!" class="w-full rounded-lg border-slate-300 p-2 border text-xs font-medium">Good performance. Keep it up!!</textarea>
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-2">
+                    <button type="button" onclick="closeAddStudentModal()" class="px-4 py-2 border rounded-lg text-xs font-medium text-slate-600">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-brand-700 text-white rounded-lg text-xs font-medium">Save Student Record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="addTeacherModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 border border-slate-200">
+            <h3 id="teacherModalTitle" class="text-lg font-bold text-slate-800 mb-4">Add New Teacher</h3>
+            <form onsubmit="handleSaveTeacher(event)" class="space-y-4">
+                <input type="hidden" id="editTeacherId">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Teacher Full Name</label>
+                    <input type="text" id="teacherNameInput" required placeholder="e.g. Mr. Kwami Mensah" class="w-full rounded-lg border-slate-300 p-2.5 border text-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Assigned Class Only</label>
+                    <select id="teacherClassInput" required class="w-full rounded-lg border-slate-300 p-2.5 border text-sm">
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Login Password</label>
+                    <input type="text" id="teacherPasswordInput" required placeholder="Enter password" class="w-full rounded-lg border-slate-300 p-2.5 border text-sm font-mono">
+                </div>
+                <div class="flex justify-end space-x-3 pt-3">
+                    <button type="button" onclick="closeAddTeacherModal()" class="px-4 py-2 border rounded-lg text-sm font-medium text-slate-600">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-brand-700 text-white rounded-lg text-sm font-medium">Save Account</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4 no-print">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 border border-slate-200 text-center">
+            <div id="confirmIcon" class="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-3 text-xl font-bold">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 id="confirmTitle" class="text-lg font-bold text-slate-800 mb-2">Confirm Action</h3>
+            <p id="confirmMessage" class="text-xs text-slate-600 mb-6">Are you sure you want to proceed with this operation?</p>
+            <div class="flex justify-center space-x-3">
+                <button type="button" onclick="closeConfirmModal(false)" class="px-4 py-2 border rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+                <button type="button" id="btnConfirmAction" onclick="closeConfirmModal(true)" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold shadow-sm">Proceed</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="loginModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 border border-slate-100 text-left">
+            <div class="w-16 h-16 bg-brand-700 text-white rounded-2xl mx-auto flex items-center justify-center font-bold text-2xl shadow-lg mb-3">VM</div>
+            <h2 class="text-2xl font-black text-slate-800 text-center">VEHEM MAWUNYO INT.</h2>
+            <p class="text-xs text-slate-500 mb-6 uppercase tracking-wider font-semibold text-center">Terminal Report Authentication Portal</p>
+
+            <div class="mb-4">
+                <label class="block text-xs font-bold uppercase text-slate-600 mb-2">Select Login Role</label>
+                <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-lg text-sm font-semibold">
+                    <button type="button" id="roleBtnTeacher" onclick="toggleRoleTab('Teacher')" class="py-2 text-center rounded-md bg-white text-brand-800 shadow-sm transition">
+                        <i class="fas fa-chalkboard-teacher mr-1"></i> Teacher
+                    </button>
+                    <button type="button" id="roleBtnAdmin" onclick="toggleRoleTab('Admin')" class="py-2 text-center rounded-md text-slate-600 hover:text-slate-900 transition">
+                        <i class="fas fa-user-shield mr-1"></i> Admin
+                    </button>
+                </div>
+            </div>
+
+            <div id="authErrorAlert" class="hidden mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg font-medium">
+                <i class="fas fa-exclamation-circle mr-1"></i> <span id="authErrorMsg">Invalid password or login parameters.</span>
+            </div>
+
+            <form id="teacherLoginForm" onsubmit="handleTeacherLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Select Your Name</label>
+                    <select id="loginTeacherSelect" required class="w-full rounded-lg border-slate-300 p-2.5 border text-sm font-medium">
+                        <option value="">-- Choose Teacher Profile --</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Teacher Password</label>
+                    <input type="password" id="loginTeacherPassword" required placeholder="••••••••" class="w-full rounded-lg border-slate-300 p-2.5 border text-sm">
+                </div>
+                <button type="submit" class="w-full py-3 bg-brand-700 hover:bg-brand-800 text-white rounded-xl font-bold transition shadow-md flex items-center justify-center space-x-2">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Log In as Class Teacher</span>
+                </button>
+            </form>
+
+            <form id="adminLoginForm" onsubmit="handleAdminLogin(event)" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Admin Master Password</label>
+                    <input type="password" id="loginAdminPassword" required placeholder="Default: admin123" class="w-full rounded-lg border-slate-300 p-2.5 border text-sm">
+                </div>
+                <button type="submit" class="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold transition shadow-md flex items-center justify-center space-x-2">
+                    <i class="fas fa-user-shield"></i>
+                    <span>Log In as Administrator</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "firebase/app";
+        import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+        apiKey: "AIzaSyBJmBJmyFkxORG9ZtehYOSoAVBQaNCl1og",
+        authDomain: "vehem-mawunyo-int-school.firebaseapp.com",
+        projectId: "vehem-mawunyo-int-school",
+        storageBucket: "vehem-mawunyo-int-school.firebasestorage.app",
+        messagingSenderId: "622390208992",
+        appId: "1:622390208992:web:e429fc60cd294f78152385",
+        measurementId: "G-7TZ6069F84"
+};
+
+// Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        
+
+        const STUDENTS_COLL = collection(db, 'artifacts', appId, 'public', 'data', 'students');
+        const SCORES_COLL = collection(db, 'artifacts', appId, 'public', 'data', 'scores');
+        const TEACHERS_COLL = collection(db, 'artifacts', appId, 'public', 'data', 'teachers');
+        const SETTINGS_DOC = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'config');
+        const AUDIT_COLL = collection(db, 'artifacts', appId, 'public', 'data', 'audit_logs');
+
+        const MASTER_CLASSES = [
+            "Creche", "Nursery 1", "Nursery 2", "KG 1", "KG 2",
+            "Basic 1", "Basic 2", "Basic 3", "Basic 4", "Basic 5", "Basic 6",
+            "JHS 1", "JHS 2", "JHS 3"
+        ];
+
+        const MASTER_TERMS = ["2025-2026_Term1", "2025-2026_Term2", "2025-2026_Term3"];
+
+        const MASTER_SUBJECTS = [
+            "ENGLISH LANGUAGE & LITERACY", "ENGLISH READING", "SPELLING/ DICTATION",
+            "EWE DICTATION", "CREATIVE ARTS", "INTEGRATED SCIENCE", "MATHEMATICS",
+            "OUR WORLD & OUR PEOPLE", "SOCIAL STUDIES", "FRENCH", "FRENCH DICTATION",
+            "WRITING", "GHANAIAN LANGUAGE (EWE)", "HISTORY OF GHANA",
+            "RELIGIOUS & MORAL EDUC.", "COMPUTING / NUMERACY", "CAREER TECHNOLOGY", "MENTAL"
+        ];
+
+        const INITIAL_STUDENTS = [
+            { id: "STU-101", name: "AKUETEY EMMANUEL", class: "Creche", attendance: 60, conduct: "Very Good", interests: "Music & Rhymes", teacherRemark: "Cheerful student", photo: "", promotedTo: "Nursery 1" },
+            { id: "STU-102", name: "ABUDU BLESS", class: "Basic 5", attendance: 58, conduct: "Satisfactory", interests: "Integrated Science", teacherRemark: "Good performance. Keep it up!!", photo: "", promotedTo: "Basic 6" },
+            { id: "STU-103", name: "KOFFI SELORM", class: "Basic 5", attendance: 60, conduct: "Respectful", interests: "Mathematics", teacherRemark: "Hardworking and dedicated.", photo: "", promotedTo: "Basic 6" },
+            { id: "STU-104", name: "AMETOWOFA JESSICA", class: "Basic 6", attendance: 59, conduct: "Exemplary", interests: "Ewe Language", teacherRemark: "Outstanding academic results.", photo: "", promotedTo: "JHS 1" },
+            { id: "STU-105", name: "DOGBE ELIZABETH", class: "JHS 2", attendance: 60, conduct: "Obedient", interests: "Career Tech", teacherRemark: "Consistently focused in class.", photo: "", promotedTo: "JHS 3" }
+        ];
+
+        const INITIAL_TEACHERS = [
+            { id: "TCH-01", name: "Madam Peace Dogbe", assignedClass: "Creche", password: "1234" },
+            { id: "TCH-02", name: "Mr. Kwami Mensah", assignedClass: "Basic 5", password: "1234" },
+            { id: "TCH-03", name: "Mrs. Comfort Addo", assignedClass: "Basic 6", password: "1234" },
+            { id: "TCH-04", name: "Mr. Eric Agbenu", assignedClass: "JHS 2", password: "1234" }
+        ];
+
+        let state = {
+            students: [],
+            scores: {}, // Structure: { [term]: { [studentId]: { [subject]: { testScore, hwScore, projectScore, classScore, examScore } } } }
+            teachers: [],
+            termLocked: false,
+            adminPassword: 'admin123',
+            auditLogs: [],
+            termConfig: {
+                academicYear: '2025/2026',
+                nextTermDate: '25th August, 2026',
+                vacationDate: '25th July, 2026',
+                itemsKG: '2 Toilet Roll | 2 Geisha Soap',
+                itemsPrimary: '2 Toilet Roll | 1 Ream A4 Paper',
+                itemsJHS: '2 Toilet Roll | Mathematical Set'
+            }
+        };
+
+        let currentRole = 'Teacher';
+        let currentTeacher = null;
+        let currentUser = null;
+        let activeTerm = "2025-2026_Term3";
+        let confirmCallback = null;
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            const bgClass = type === 'success' ? 'bg-emerald-800 text-white' : (type === 'error' ? 'bg-red-800 text-white' : 'bg-slate-800 text-white');
+            const icon = type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle');
+
+            toast.className = `p-3 rounded-lg shadow-xl text-xs font-semibold flex items-center gap-2 pointer-events-auto transform transition-all duration-300 translate-y-2 opacity-0 ${bgClass}`;
+            toast.innerHTML = `<i class="fas ${icon}"></i> <span>${message}</span>`;
+
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        function showConfirmModal(title, message, onConfirm) {
+            confirmCallback = onConfirm;
+            document.getElementById('confirmTitle').innerText = title;
+            document.getElementById('confirmMessage').innerText = message;
+            const modal = document.getElementById('confirmModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeConfirmModal(confirmed) {
+            const modal = document.getElementById('confirmModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            if (confirmed && confirmCallback) {
+                confirmCallback();
+            }
+            confirmCallback = null;
+        }
+
+        function renderMasterClassDropdowns() {
+            const filterSelect = document.getElementById('filterClassSelect');
+            if (filterSelect) {
+                const currentVal = filterSelect.value;
+                filterSelect.innerHTML = '<option value="ALL">All Classes</option>';
+                MASTER_CLASSES.forEach(cls => {
+                    filterSelect.innerHTML += `<option value="${cls}">${cls}</option>`;
+                });
+                if (currentVal) filterSelect.value = currentVal;
+            }
+
+            const newStuSelect = document.getElementById('newStudentClass');
+            if (newStuSelect) {
+                newStuSelect.innerHTML = '';
+                MASTER_CLASSES.forEach(cls => {
+                    newStuSelect.innerHTML += `<option value="${cls}">${cls}</option>`;
+                });
+            }
+
+            const teacherClassSelect = document.getElementById('teacherClassInput');
+            if (teacherClassSelect) {
+                teacherClassSelect.innerHTML = '';
+                MASTER_CLASSES.forEach(cls => {
+                    teacherClassSelect.innerHTML += `<option value="${cls}">${cls}</option>`;
+                });
+            }
+
+            // Populate Term Dropdowns
+            ['singleScoreTermSelect', 'batchTermSelect'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.innerHTML = '';
+                    MASTER_TERMS.forEach(t => {
+                        const readable = t.replace('_', ' - ');
+                        el.innerHTML += `<option value="${t}" ${t === activeTerm ? 'selected' : ''}>${readable}</option>`;
+                    });
+                }
+            });
+
+            // Populate Batch Selectors
+            const batchClass = document.getElementById('batchClassSelect');
+            const batchSub = document.getElementById('batchSubjectSelect');
+            const batchRptClass = document.getElementById('reportClassBatchSelect');
+
+            if (batchClass) {
+                batchClass.innerHTML = '';
+                MASTER_CLASSES.forEach(cls => batchClass.innerHTML += `<option value="${cls}">${cls}</option>`);
+            }
+            if (batchRptClass) {
+                batchRptClass.innerHTML = '';
+                MASTER_CLASSES.forEach(cls => batchRptClass.innerHTML += `<option value="${cls}">${cls}</option>`);
+            }
+            if (batchSub) {
+                batchSub.innerHTML = '';
+                MASTER_SUBJECTS.forEach(s => batchSub.innerHTML += `<option value="${s}">${s}</option>`);
+            }
+        }
+
+        async function initBackendAuth() {
+            renderMasterClassDropdowns();
+            try {
+                if (initialAuthToken) {
+                    const userCredential = await signInWithCustomToken(auth, initialAuthToken);
+                    currentUser = userCredential.user;
+                } else {
+                    const userCredential = await signInAnonymously(auth);
+                    currentUser = userCredential.user;
+                }
+                updateCloudStatus("Connected", "text-emerald-400", "fa-check-circle");
+                setupRealtimeListeners();
+            } catch (err) {
+                console.error("Backend Auth Error:", err);
+                updateCloudStatus("Offline Mode", "text-amber-400", "fa-exclamation-triangle");
+            }
+        }
+
+        function updateCloudStatus(msg, colorClass, icon) {
+            const badge = document.getElementById('cloudStatusBadge');
+            const detail = document.getElementById('backendStatusDetail');
+            if (badge) {
+                badge.className = `${colorClass} font-medium flex items-center gap-1`;
+                badge.innerHTML = `<i class="fas ${icon} text-[11px]"></i> ${msg}`;
+            }
+            if (detail) {
+                detail.innerText = msg;
+                detail.className = colorClass.includes('emerald') ? 'text-emerald-600' : 'text-amber-600';
+            }
+        }
+
+        function setupRealtimeListeners() {
+            if (!currentUser) return;
+
+            onSnapshot(TEACHERS_COLL, (snapshot) => {
+                const teachersList = [];
+                snapshot.forEach(docSnap => teachersList.push(docSnap.data()));
+                state.teachers = teachersList;
+                populateTeacherLoginDropdown();
+                renderTeacherTable();
+            });
+
+            onSnapshot(STUDENTS_COLL, (snapshot) => {
+                const studentsList = [];
+                snapshot.forEach(docSnap => studentsList.push(docSnap.data()));
+                state.students = studentsList;
+                document.getElementById('cloudStudentCount').innerText = studentsList.length;
+                populateDropdowns();
+                renderStudentsTable();
+                renderClassTotals();
+            });
+
+            onSnapshot(SCORES_COLL, (snapshot) => {
+                const scoresMap = {};
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    scoresMap[docSnap.id] = data;
+                });
+                state.scores = scoresMap;
+
+                let scoreCount = 0;
+                Object.values(scoresMap).forEach(termObj => {
+                    Object.values(termObj).forEach(studentObj => {
+                        if (typeof studentObj === 'object') {
+                            scoreCount += Object.keys(studentObj).length;
+                        }
+                    });
+                });
+                document.getElementById('cloudScoreCount').innerText = scoreCount;
+
+                renderClassTotals();
+                if (document.getElementById('scoreStudentSelect').value) {
+                    renderStudentSubjectOverview(document.getElementById('scoreStudentSelect').value);
+                }
+            });
+
+            onSnapshot(SETTINGS_DOC, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    state.termLocked = data.termLocked || false;
+                    state.adminPassword = data.adminPassword || 'admin123';
+                    if (data.termConfig) {
+                        state.termConfig = { ...state.termConfig, ...data.termConfig };
+                        populateTermConfigFields();
+                    }
+                }
+                updateTermLockUI();
+            });
+
+            onSnapshot(AUDIT_COLL, (snapshot) => {
+                const logs = [];
+                snapshot.forEach(docSnap => logs.push(docSnap.data()));
+                logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                state.auditLogs = logs;
+                renderAuditLogsTable();
+            });
+        }
+
+        function populateTermConfigFields() {
+            const cfg = state.termConfig;
+            if (document.getElementById('cfgAcademicYear')) document.getElementById('cfgAcademicYear').value = cfg.academicYear || '2025/2026';
+            if (document.getElementById('cfgNextTermDate')) document.getElementById('cfgNextTermDate').value = cfg.nextTermDate || '';
+            if (document.getElementById('cfgVacationDate')) document.getElementById('cfgVacationDate').value = cfg.vacationDate || '';
+            if (document.getElementById('cfgItemsKG')) document.getElementById('cfgItemsKG').value = cfg.itemsKG || '';
+            if (document.getElementById('cfgItemsPrimary')) document.getElementById('cfgItemsPrimary').value = cfg.itemsPrimary || '';
+            if (document.getElementById('cfgItemsJHS')) document.getElementById('cfgItemsJHS').value = cfg.itemsJHS || '';
+        }
+
+        async function handleSaveTermConfig(e) {
+            e.preventDefault();
+            const cfg = {
+                academicYear: document.getElementById('cfgAcademicYear').value,
+                nextTermDate: document.getElementById('cfgNextTermDate').value,
+                vacationDate: document.getElementById('cfgVacationDate').value,
+                itemsKG: document.getElementById('cfgItemsKG').value,
+                itemsPrimary: document.getElementById('cfgItemsPrimary').value,
+                itemsJHS: document.getElementById('cfgItemsJHS').value
+            };
+            state.termConfig = cfg;
+            if (currentUser) {
+                await setDoc(SETTINGS_DOC, { termConfig: cfg }, { merge: true });
+                await logActivity("Update Config", "Saved term dates and requirement supply lists");
+            }
+            showToast("Term configuration updated successfully!", "success");
+        }
+
+        async function logActivity(action, details) {
+            if (!currentUser) return;
+            const logDoc = doc(AUDIT_COLL, 'log-' + Date.now());
+            try {
+                await setDoc(logDoc, {
+                    timestamp: new Date().toLocaleString(),
+                    role: currentRole,
+                    actorName: currentRole === 'Teacher' && currentTeacher ? currentTeacher.name : 'Administrator',
+                    action: action,
+                    details: details,
+                    userId: currentUser.uid
+                });
+            } catch (err) {
+                console.error("Error writing audit log:", err);
+            }
+        }
+
+        function renderAuditLogsTable() {
+            const tbody = document.getElementById('auditLogsTableBody');
+            if (!tbody) return;
+            if (state.auditLogs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-6 text-center text-slate-400">No activity logged yet.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = state.auditLogs.map(log => `
+                <tr class="border-b hover:bg-slate-50 font-mono text-xs">
+                    <td class="px-4 py-2 text-slate-500">${log.timestamp}</td>
+                    <td class="px-4 py-2"><span class="px-2 py-0.5 rounded font-bold ${log.role === 'Admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}">${log.role} (${log.actorName || 'User'})</span></td>
+                    <td class="px-4 py-2 font-bold text-slate-800">${log.action}</td>
+                    <td class="px-4 py-2 text-slate-600">${log.details}</td>
+                </tr>
+            `).join('');
+        }
+
+        function populateTeacherLoginDropdown() {
+            const sel = document.getElementById('loginTeacherSelect');
+            if (!sel) return;
+            const currVal = sel.value;
+            sel.innerHTML = '<option value="">-- Choose Teacher Profile --</option>';
+            state.teachers.forEach(t => {
+                sel.innerHTML += `<option value="${t.id}">${t.name} (${t.assignedClass})</option>`;
+            });
+            if (currVal) sel.value = currVal;
+        }
+
+        function toggleRoleTab(role) {
+            const errAlert = document.getElementById('authErrorAlert');
+            errAlert.classList.add('hidden');
+            if (role === 'Teacher') {
+                document.getElementById('roleBtnTeacher').className = "py-2 text-center rounded-md bg-white text-brand-800 shadow-sm transition";
+                document.getElementById('roleBtnAdmin').className = "py-2 text-center rounded-md text-slate-600 hover:text-slate-900 transition";
+                document.getElementById('teacherLoginForm').classList.remove('hidden');
+                document.getElementById('adminLoginForm').classList.add('hidden');
+            } else {
+                document.getElementById('roleBtnAdmin').className = "py-2 text-center rounded-md bg-white text-slate-900 shadow-sm transition font-bold";
+                document.getElementById('roleBtnTeacher').className = "py-2 text-center rounded-md text-slate-600 hover:text-slate-900 transition";
+                document.getElementById('adminLoginForm').classList.remove('hidden');
+                document.getElementById('teacherLoginForm').classList.add('hidden');
+            }
+        }
+
+        function handleTeacherLogin(e) {
+            e.preventDefault();
+            const teacherId = document.getElementById('loginTeacherSelect').value;
+            const pwdInput = document.getElementById('loginTeacherPassword').value;
+
+            const teacher = state.teachers.find(t => t.id === teacherId);
+            if (!teacher) {
+                showAuthError("Please select a valid teacher profile.");
+                return;
+            }
+
+            if (teacher.password !== pwdInput) {
+                showAuthError("Incorrect password for " + teacher.name);
+                return;
+            }
+
+            currentRole = 'Teacher';
+            currentTeacher = teacher;
+
+            document.getElementById('currentUserDisplay').innerText = `Logged in as: ${teacher.name}`;
+            document.getElementById('teacherClassBadge').innerText = `Class: ${teacher.assignedClass} Teacher`;
+            
+            document.getElementById('nav-settings').classList.add('hidden');
+            document.getElementById('nav-auditLogs').classList.add('hidden');
+
+            document.getElementById('loginModal').classList.add('hidden');
+            document.getElementById('loginModal').classList.remove('flex');
+            document.getElementById('loginTeacherPassword').value = '';
+
+            populateDropdowns();
+            renderStudentsTable();
+            renderClassTotals();
+            switchTab('scoreEntry');
+
+            logActivity("Teacher Login", `Log in successful for ${teacher.name} (${teacher.assignedClass})`);
+            showToast(`Welcome back, ${teacher.name}!`, 'success');
+        }
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const pwdInput = document.getElementById('loginAdminPassword').value.trim();
+
+            if (pwdInput !== state.adminPassword) {
+                showAuthError("Incorrect Admin master password. (Default: admin123)");
+                return;
+            }
+
+            currentRole = 'Admin';
+            currentTeacher = null;
+
+            document.getElementById('currentUserDisplay').innerText = `Logged in as: System Administrator`;
+            document.getElementById('teacherClassBadge').innerText = `All Classes Access (Creche - JHS 3)`;
+
+            document.getElementById('nav-settings').classList.remove('hidden');
+            document.getElementById('nav-auditLogs').classList.remove('hidden');
+
+            const modal = document.getElementById('loginModal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+            document.getElementById('loginAdminPassword').value = '';
+
+            populateDropdowns();
+            renderStudentsTable();
+            renderClassTotals();
+
+            logActivity("Admin Login", "Administrator logged into control console.");
+            showToast("Logged in as System Administrator", 'success');
+        }
+
+        function showAuthError(msg) {
+            const errAlert = document.getElementById('authErrorAlert');
+            document.getElementById('authErrorMsg').innerText = msg;
+            errAlert.classList.remove('hidden');
+        }
+
+        function logout() {
+            currentTeacher = null;
+            document.getElementById('loginModal').classList.remove('hidden');
+            document.getElementById('loginModal').classList.add('flex');
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('bg-brand-50', 'text-brand-700');
+                btn.classList.add('text-slate-600');
+            });
+
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-brand-50', 'text-brand-700');
+                activeBtn.classList.remove('text-slate-600');
+            }
+
+            if (tabId === 'batchScoreEntry') renderBatchGridTable();
+            if (tabId === 'classTotals') renderClassTotals();
+            if (tabId === 'reportView') {
+                const mode = document.getElementById('reportModeSelect').value;
+                if (mode === 'single') generateReportCard();
+                else generateBatchReportCards();
+            }
+        }
+
+        function calculateRemark(total) {
+            if (total >= 80) return "Excellent";
+            if (total >= 70) return "V. Good";
+            if (total >= 60) return "Good";
+            if (total >= 50) return "Credit";
+            if (total >= 40) return "Pass";
+            return "Fail";
+        }
+
+        function getOrdinalSuffix(i) {
+            const j = i % 10, k = i % 100;
+            if (j === 1 && k !== 11) return i + "st";
+            if (j === 2 && k !== 12) return i + "nd";
+            if (j === 3 && k !== 13) return i + "rd";
+            return i + "th";
+        }
+
+        function getSubjectRank(subject, studentId, classGroup, termKey = activeTerm) {
+            let scoresInSubject = [];
+            state.students.filter(s => s.class === classGroup).forEach(stu => {
+                const sc = (state.scores[termKey] && state.scores[termKey][stu.id] && state.scores[termKey][stu.id][subject]);
+                if (sc) {
+                    scoresInSubject.push({ id: stu.id, total: (sc.classScore || 0) + (sc.examScore || 0) });
+                }
+            });
+
+            scoresInSubject.sort((a, b) => b.total - a.total);
+            const index = scoresInSubject.findIndex(item => item.id === studentId);
+            if (index === -1) return "-";
+            
+            return getOrdinalSuffix(index + 1);
+        }
+
+        function populateDropdowns() {
+            const studentSelect = document.getElementById('scoreStudentSelect');
+            const reportSelect = document.getElementById('reportStudentSelect');
+            const subjectSelect = document.getElementById('scoreSubjectSelect');
+
+            const currentStuVal = studentSelect.value;
+            const currentRptVal = reportSelect.value;
+
+            studentSelect.innerHTML = '<option value="">-- Choose Student --</option>';
+            reportSelect.innerHTML = '';
+            subjectSelect.innerHTML = '<option value="">-- Choose Subject --</option>';
+
+            let filteredStudents = state.students;
+            if (currentRole === 'Teacher' && currentTeacher) {
+                filteredStudents = state.students.filter(s => s.class === currentTeacher.assignedClass);
+            }
+
+            filteredStudents.forEach(s => {
+                studentSelect.innerHTML += `<option value="${s.id}">${s.name} (${s.class})</option>`;
+                reportSelect.innerHTML += `<option value="${s.id}">${s.name} (${s.class})</option>`;
+            });
+
+            MASTER_SUBJECTS.forEach(sub => {
+                subjectSelect.innerHTML += `<option value="${sub}">${sub}</option>`;
+            });
+
+            if (currentStuVal) studentSelect.value = currentStuVal;
+            if (currentRptVal) reportSelect.value = currentRptVal;
+        }
+
+        function loadStudentSubjects() {
+            const stuId = document.getElementById('scoreStudentSelect').value;
+            const student = state.students.find(s => s.id === stuId);
+            document.getElementById('scoreClassDisplay').value = student ? student.class : '';
+            renderStudentSubjectOverview(stuId);
+        }
+
+        function calculateLiveTotal() {
+            const t = parseFloat(document.getElementById('inputTestScore').value) || 0;
+            const hw = parseFloat(document.getElementById('inputHwScore').value) || 0;
+            const pr = parseFloat(document.getElementById('inputCWScore').value) || 0;
+            
+            const classTotal = t + hw + pr;
+            document.getElementById('inputClassScoreTotal').value = classTotal;
+
+            const e = parseFloat(document.getElementById('inputExamScore').value) || 0;
+            const grandTotal = classTotal + e;
+            
+            document.getElementById('liveTotalDisplay').innerText = grandTotal;
+            const remark = calculateRemark(grandTotal);
+            const badge = document.getElementById('liveRemarkDisplay');
+            badge.innerText = remark;
+            badge.className = `text-sm font-semibold px-3 py-1 rounded-full ${grandTotal >= 70 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`;
+        }
+
+        function populateCurrentScore() {
+            const stuId = document.getElementById('scoreStudentSelect').value;
+            const subject = document.getElementById('scoreSubjectSelect').value;
+            const termKey = document.getElementById('singleScoreTermSelect').value || activeTerm;
+            
+            const sc = (state.scores[termKey] && state.scores[termKey][stuId] && state.scores[termKey][stuId][subject]) ? state.scores[termKey][stuId][subject] : null;
+
+            if (sc) {
+                document.getElementById('inputTestScore').value = sc.testScore || 0;
+                document.getElementById('inputHwScore').value = sc.hwScore || 0;
+                document.getElementById('inputCWScore').value = sc.cwScore || 0;
+                document.getElementById('inputExamScore').value = sc.examScore || 0;
+            } else {
+                document.getElementById('inputTestScore').value = '';
+                document.getElementById('inputHwScore').value = '';
+                document.getElementById('inputCWScore').value = '';
+                document.getElementById('inputExamScore').value = '';
+            }
+            calculateLiveTotal();
+        }
+
+        async function handleScoreSubmit(e) {
+            e.preventDefault();
+            if (state.termLocked) {
+                showToast("Term is locked by Admin. Scores cannot be updated.", "error");
+                return;
+            }
+
+            const stuId = document.getElementById('scoreStudentSelect').value;
+            const student = state.students.find(s => s.id === stuId);
+
+            if (!student) {
+                showToast("Please select a valid student.", "error");
+                return;
+            }
+
+            if (currentRole === 'Teacher' && currentTeacher && student.class !== currentTeacher.assignedClass) {
+                showToast(`Access Denied: You are assigned to ${currentTeacher.assignedClass} only.`, "error");
+                return;
+            }
+
+            const termKey = document.getElementById('singleScoreTermSelect').value || activeTerm;
+            const subject = document.getElementById('scoreSubjectSelect').value;
+            
+            const t = parseFloat(document.getElementById('inputTestScore').value) || 0;
+            const hw = parseFloat(document.getElementById('inputHwScore').value) || 0;
+            const cw = parseFloat(document.getElementById('inputCWScore').value) || 0;
+            const cTotal = t + hw + cw;
+            const ex = parseFloat(document.getElementById('inputExamScore').value) || 0;
+
+            if (!state.scores[termKey]) state.scores[termKey] = {};
+            if (!state.scores[termKey][stuId]) state.scores[termKey][stuId] = {};
+            
+            state.scores[termKey][stuId][subject] = { 
+                testScore: t, hwScore: hw, cwScore: cw, classScore: cTotal, examScore: ex 
+            };
+
+            if (currentUser) {
+                const scoreDocRef = doc(SCORES_COLL, stuId);
+                await setDoc(scoreDocRef, { [termKey]: state.scores[termKey][stuId] }, { merge: true });
+                await logActivity("Score Entry", `Updated ${subject} for ${student.name} (${student.class}) [${termKey}]`);
+            }
+
+            renderStudentSubjectOverview(stuId);
+            showToast("Score saved & synced to cloud database!", "success");
+        }
+
+        function renderStudentSubjectOverview(stuId) {
+            const tbody = document.getElementById('studentSubjectOverviewTable');
+            const student = state.students.find(s => s.id === stuId);
+            if (!student) {
+                tbody.innerHTML = '<tr><td colspan="9" class="px-4 py-4 text-center text-slate-400">Select a student above to view their score sheet.</td></tr>';
+                return;
+            }
+
+            const termKey = document.getElementById('singleScoreTermSelect').value || activeTerm;
+
+            let html = '';
+            MASTER_SUBJECTS.forEach(sub => {
+                const sc = (state.scores[termKey] && state.scores[termKey][stuId] && state.scores[termKey][stuId][sub]) ? state.scores[termKey][stuId][sub] : null;
+                const test = sc ? sc.testScore : '-';
+                const hw = sc ? sc.hwScore : '-';
+                const cw = sc ? sc.cwScore : '-';
+                const c = sc ? sc.classScore : '-';
+                const ex = sc ? sc.examScore : '-';
+                const tot = sc ? (sc.classScore + sc.examScore) : '-';
+                const rank = sc ? getSubjectRank(sub, stuId, student.class, termKey) : '-';
+                const rem = sc ? calculateRemark(tot) : '-';
+
+                html += `
+                    <tr class="border-b hover:bg-slate-50 text-xs">
+                        <td class="px-3 py-2 font-semibold text-slate-800">${sub}</td>
+                        <td class="px-3 py-2 text-center">${test}</td>
+                        <td class="px-3 py-2 text-center">${hw}</td>
+                        <td class="px-3 py-2 text-center">${cw}</td>
+                        <td class="px-3 py-2 text-center font-bold bg-slate-50">${c}</td>
+                        <td class="px-3 py-2 text-center">${ex}</td>
+                        <td class="px-3 py-2 text-center font-black text-brand-800">${tot}</td>
+                        <td class="px-3 py-2 text-center font-bold">${rank}</td>
+                        <td class="px-3 py-2"><span class="px-2 py-0.5 rounded bg-slate-100 font-semibold text-[11px]">${rem}</span></td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function renderBatchGridTable() {
+            const tbody = document.getElementById('batchGridTableBody');
+            if (!tbody) return;
+
+            const selectedClass = document.getElementById('batchClassSelect').value;
+            const selectedSubject = document.getElementById('batchSubjectSelect').value;
+            const termKey = document.getElementById('batchTermSelect').value || activeTerm;
+
+            let classStudents = state.students.filter(s => s.class === selectedClass);
+            if (currentRole === 'Teacher' && currentTeacher && selectedClass !== currentTeacher.assignedClass) {
+                tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-red-500 font-semibold">Access Restricted: You are assigned to ${currentTeacher.assignedClass} only.</td></tr>`;
+                return;
+            }
+
+            if (classStudents.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">No students enrolled in this class roster.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = classStudents.map((stu, idx) => {
+                const sc = (state.scores[termKey] && state.scores[termKey][stu.id] && state.scores[termKey][stu.id][selectedSubject]) ? state.scores[termKey][stu.id][selectedSubject] : {};
+                const t = sc.testScore !== undefined ? sc.testScore : '';
+                const hw = sc.hwScore !== undefined ? sc.hwScore : '';
+                const cw = sc.cwScore !== undefined ? sc.cwScore : '';
+                const c = sc.classScore !== undefined ? sc.classScore : 0;
+                const ex = sc.examScore !== undefined ? sc.examScore : '';
+                const tot = c + (parseFloat(ex) || 0);
+
+                return `
+                    <tr class="border-b hover:bg-slate-50 text-xs">
+                        <td class="px-3 py-2 font-bold text-slate-800">${idx + 1}. ${stu.name}</td>
+                        <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.5" value="${t}" data-stuid="${stu.id}" data-type="test" oninput="updateGridRowTotal(this)" class="w-full rounded border-slate-300 p-1 text-center font-semibold text-xs border"></td>
+                        <td class="px-2 py-2"><input type="number" min="0" max="10" step="0.5" value="${hw}" data-stuid="${stu.id}" data-type="hw" oninput="updateGridRowTotal(this)" class="w-full rounded border-slate-300 p-1 text-center font-semibold text-xs border"></td>
+                        <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.5" value="${pr}" data-stuid="${stu.id}" data-type="project" oninput="updateGridRowTotal(this)" class="w-full rounded border-slate-300 p-1 text-center font-semibold text-xs border"></td>
+                        <td class="px-2 py-2 bg-brand-50/50 text-center font-bold text-brand-900" id="gridClassTotal-${stu.id}">${c}</td>
+                        <td class="px-2 py-2"><input type="number" min="0" max="50" step="0.5" value="${ex}" data-stuid="${stu.id}" data-type="exam" oninput="updateGridRowTotal(this)" class="w-full rounded border-slate-300 p-1 text-center font-bold text-xs border"></td>
+                        <td class="px-2 py-2 text-center font-black text-sm text-slate-800" id="gridGrandTotal-${stu.id}">${tot}</td>
+                        <td class="px-3 py-2 text-center" id="gridRemark-${stu.id}"><span class="px-2 py-0.5 rounded bg-slate-100 font-semibold text-[11px]">${calculateRemark(tot)}</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function updateGridRowTotal(input) {
+            const stuId = input.dataset.stuid;
+            const row = input.closest('tr');
+            
+            const t = parseFloat(row.querySelector('[data-type="test"]').value) || 0;
+            const hw = parseFloat(row.querySelector('[data-type="hw"]').value) || 0;
+            const pr = parseFloat(row.querySelector('[data-type="project"]').value) || 0;
+            const ex = parseFloat(row.querySelector('[data-type="exam"]').value) || 0;
+
+            const cTotal = t + hw + pr;
+            const grandTotal = cTotal + ex;
+
+            document.getElementById(`gridClassTotal-${stuId}`).innerText = cTotal;
+            document.getElementById(`gridGrandTotal-${stuId}`).innerText = grandTotal;
+            document.getElementById(`gridRemark-${stuId}`).innerHTML = `<span class="px-2 py-0.5 rounded bg-slate-100 font-semibold text-[11px]">${calculateRemark(grandTotal)}</span>`;
+        }
+
+        async function saveBatchGridScores() {
+            if (state.termLocked) {
+                showToast("Term is locked. Cannot save marks.", "error");
+                return;
+            }
+
+            const selectedClass = document.getElementById('batchClassSelect').value;
+            const selectedSubject = document.getElementById('batchSubjectSelect').value;
+            const termKey = document.getElementById('batchTermSelect').value || activeTerm;
+
+            const rows = document.querySelectorAll('#batchGridTableBody tr');
+            if (rows.length === 0) return;
+
+            if (!state.scores[termKey]) state.scores[termKey] = {};
+
+            for (const row of rows) {
+                const testEl = row.querySelector('[data-type="test"]');
+                if (!testEl) continue;
+                const stuId = testEl.dataset.stuid;
+
+                const t = parseFloat(row.querySelector('[data-type="test"]').value) || 0;
+                const hw = parseFloat(row.querySelector('[data-type="hw"]').value) || 0;
+                const pr = parseFloat(row.querySelector('[data-type="CW"]').value) || 0;
+                const ex = parseFloat(row.querySelector('[data-type="exam"]').value) || 0;
+
+                if (!state.scores[termKey][stuId]) state.scores[termKey][stuId] = {};
+                
+                state.scores[termKey][stuId][selectedSubject] = {
+                    testScore: t, hwScore: hw, projectScore: pr, classScore: t + hw + pr, examScore: ex
+                };
+
+                if (currentUser) {
+                    await setDoc(doc(SCORES_COLL, stuId), { [termKey]: state.scores[termKey][stuId] }, { merge: true });
+                }
+            }
+
+            await logActivity("Batch Score Entry", `Batch updated ${selectedSubject} for all students in ${selectedClass} [${termKey}]`);
+            showToast(`All scores saved for ${selectedClass} - ${selectedSubject}!`, "success");
+        }
+
+        function renderClassTotals() {
+            const tbody = document.getElementById('classTotalsTableBody');
+            if (!tbody) return;
+            const filterSelect = document.getElementById('filterClassSelect');
+
+            if (currentRole === 'Teacher' && currentTeacher) {
+                filterSelect.value = currentTeacher.assignedClass;
+                filterSelect.disabled = true;
+            } else {
+                filterSelect.disabled = false;
+            }
+
+            const filterClass = filterSelect.value;
+            let filteredStudents = filterClass === 'ALL' ? state.students : state.students.filter(s => s.class === filterClass);
+
+            let summaryList = filteredStudents.map(stu => {
+                let grandTotal = 0;
+                let count = 0;
+                const stuScores = (state.scores[activeTerm] && state.scores[activeTerm][stu.id]) ? state.scores[activeTerm][stu.id] : {};
+                
+                Object.values(stuScores).forEach(sc => {
+                    grandTotal += ((sc.classScore || 0) + (sc.examScore || 0));
+                    count++;
+                });
+                const avg = count > 0 ? (grandTotal / count).toFixed(1) : 0;
+                return { ...stu, grandTotal, avg };
+            });
+
+            summaryList.sort((a, b) => b.grandTotal - a.grandTotal);
+
+            tbody.innerHTML = summaryList.map((stu, idx) => `
+                <tr class="border-b hover:bg-slate-50">
+                    <td class="px-4 py-3 font-bold text-brand-800">#${idx + 1}</td>
+                    <td class="px-4 py-3 font-semibold">${stu.name}</td>
+                    <td class="px-4 py-3"><span class="px-2 py-0.5 rounded bg-slate-100 text-slate-800 font-medium text-xs">${stu.class}</span></td>
+                    <td class="px-4 py-3 font-black text-slate-800">${stu.grandTotal}</td>
+                    <td class="px-4 py-3">${stu.avg}%</td>
+                    <td class="px-4 py-3">${stu.promotedTo}</td>
+                </tr>
+            `).join('');
+        }
+
+        function toggleReportPrintMode() {
+            const mode = document.getElementById('reportModeSelect').value;
+            const singleContainer = document.getElementById('singleStudentSelectContainer');
+            const batchContainer = document.getElementById('batchClassSelectContainer');
+            const btnText = document.getElementById('btnPrintText');
+
+            if (mode === 'single') {
+                singleContainer.classList.remove('hidden');
+                batchContainer.classList.add('hidden');
+                btnText.innerText = "Print Report";
+                generateReportCard();
+            } else {
+                singleContainer.classList.add('hidden');
+                batchContainer.classList.remove('hidden');
+                btnText.innerText = "Print Entire Class Roster";
+                generateBatchReportCards();
+            }
+        }
+
+        function buildSingleReportCardHTML(student, termKey = activeTerm) {
+            const classCount = state.students.filter(s => s.class === student.class).length;
+
+            let summaryList = state.students.filter(s => s.class === student.class).map(s => {
+                let tot = 0;
+                const scs = (state.scores[termKey] && state.scores[termKey][s.id]) ? state.scores[termKey][s.id] : {};
+                Object.values(scs).forEach(sc => tot += ((sc.classScore || 0) + (sc.examScore || 0)));
+                return { id: s.id, tot };
+            }).sort((a, b) => b.tot - a.tot);
+
+            const rankIdx = summaryList.findIndex(item => item.id === student.id) + 1;
+            const overallPosition = rankIdx > 0 ? getOrdinalSuffix(rankIdx) : '--';
+
+            let grandTotal = 0;
+            let rowsHtml = '';
+
+            MASTER_SUBJECTS.forEach(sub => {
+                const sc = (state.scores[termKey] && state.scores[termKey][student.id] && state.scores[termKey][student.id][sub]) ? state.scores[termKey][student.id][sub] : null;
+                const c = sc ? sc.classScore : '';
+                const ex = sc ? sc.examScore : '';
+                const tot = sc ? (sc.classScore + sc.examScore) : '';
+                if (sc) grandTotal += tot;
+                const rank = sc ? getSubjectRank(sub, student.id, student.class, termKey) : '';
+                const rem = sc ? calculateRemark(tot) : '';
+
+                rowsHtml += `
+                    <tr class="border-b border-slate-800 text-center font-semibold">
+                        <td class="border border-slate-800 px-2 py-1 text-left font-bold">${sub}</td>
+                        <td class="border border-slate-800 px-2 py-1">${c}</td>
+                        <td class="border border-slate-800 px-2 py-1">${ex}</td>
+                        <td class="border border-slate-800 px-2 py-1 font-bold">${tot}</td>
+                        <td class="border border-slate-800 px-2 py-1">${rank}</td>
+                        <td class="border border-slate-800 px-2 py-1">${rem}</td>
+                    </tr>
+                `;
+            });
+
+            const cfg = state.termConfig;
+            let supplyItem = cfg.itemsPrimary;
+            if (student.class.includes('Creche') || student.class.includes('KG') || student.class.includes('Nursery')) supplyItem = cfg.itemsKG;
+            if (student.class.includes('JHS')) supplyItem = cfg.itemsJHS;
+
+            return `
+                <div class="bg-white p-6 border-2 border-slate-800 rounded-lg max-w-4xl mx-auto shadow-sm text-slate-900 print-page-break">
+                    <div class="text-center border-b-2 border-slate-800 pb-3 mb-4 flex justify-between items-center">
+                        <div class="w-16 h-16 border-2 border-brand-800 flex items-center justify-center font-bold text-brand-800 text-[10px] text-center p-1 uppercase">
+                            ${student.photo ? `<img src="${student.photo}" class="w-full h-full object-cover rounded">` : 'VMIS LOGO'}
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-black uppercase tracking-wide text-brand-900">VEHEM MAWUNYO INT. SCHOOL</h1>
+                            <p class="text-xs font-semibold">Firm Foundation For Excellence</p>
+                            <p class="text-xs">P.O. Box DJ 138, Dzodze-Penyi | Tel: 0249 271 535 / 0245 001 183</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xs font-bold text-slate-500">NO. <span class="text-red-600 font-mono text-sm">${student.id}</span></div>
+                            <div class="text-md font-black uppercase mt-1 border border-slate-800 px-2 py-0.5">TERMINAL REPORT</div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-x-6 gap-y-2 text-xs font-semibold mb-4 bg-pink-50/50 p-3 rounded border border-pink-100">
+                        <div>Name: <span class="font-bold underline text-slate-900">${student.name}</span></div>
+                        <div>VACATION: <span class="font-bold">${cfg.vacationDate}</span></div>
+                        <div>Class: <span class="font-bold">${student.class}</span> | Academic Year: <span class="font-bold">${cfg.academicYear}</span></div>
+                        <div>NEXT TERM BEGINS: <span class="font-bold">${cfg.nextTermDate}</span></div>
+                        <div>No. in Class: <span class="font-bold">${classCount}</span> | Overall Position: <span class="font-bold text-brand-800">${overallPosition}</span></div>
+                        <div>Promoted To: <span class="font-bold">${student.promotedTo || '--'}</span></div>
+                    </div>
+
+                    <table class="w-full text-xs text-left border-collapse border-2 border-slate-800 mb-4">
+                        <thead>
+                            <tr class="bg-pink-100 text-slate-900 border-b-2 border-slate-800 text-center font-bold">
+                                <th class="border border-slate-800 px-2 py-1.5 text-left">SUBJECT</th>
+                                <th class="border border-slate-800 px-2 py-1.5 w-16">CLASS<br>50%</th>
+                                <th class="border border-slate-800 px-2 py-1.5 w-16">EXAMS<br>50%</th>
+                                <th class="border border-slate-800 px-2 py-1.5 w-20">TOTAL<br>100%</th>
+                                <th class="border border-slate-800 px-2 py-1.5 w-24">POSITION IN SUBJECTS</th>
+                                <th class="border border-slate-800 px-2 py-1.5 w-28">REMARK</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rowsHtml}</tbody>
+                        <tfoot>
+                            <tr class="font-bold bg-slate-100 border-t-2 border-slate-800">
+                                <td class="border border-slate-800 px-2 py-1.5">OVERALL GRAND TOTAL</td>
+                                <td colspan="2" class="border border-slate-800 px-2 py-1.5 text-center">--</td>
+                                <td class="border border-slate-800 px-2 py-1.5 text-center text-sm font-black text-brand-900">${grandTotal}</td>
+                                <td colspan="2" class="border border-slate-800 px-2 py-1.5"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                    <div class="grid grid-cols-2 gap-4 text-xs border-t-2 border-slate-800 pt-3">
+                        <div class="space-y-1.5">
+                            <div>Attendance: <span class="font-bold">${student.attendance || 60}</span> Out of <span class="font-bold">60</span></div>
+                            <div>Conduct / Character: <span class="font-bold">${student.conduct || 'Satisfactory'}</span></div>
+                            <div>Interest: <span class="font-bold">${student.interests || 'Integrated Science and Ewe'}</span></div>
+                            <div>Class Teacher's Remark: <span class="font-bold italic">${student.teacherRemark || 'Good performance. Keep it up!!'}</span></div>
+                        </div>
+                        <div class="space-y-1 text-right flex flex-col justify-between">
+                            <div>Class Teacher's Signature: <span class="font-bold underline">_________________</span></div>
+                            <div class="text-left bg-slate-50 p-2 border border-slate-300 rounded text-[11px]">
+                                <div class="font-bold text-slate-800">Please submit next term:</div>
+                                <div class="font-semibold text-slate-600">${supplyItem}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateReportCard() {
+            const stuId = document.getElementById('reportStudentSelect').value;
+            const student = state.students.find(s => s.id === stuId);
+            const container = document.getElementById('printableReport');
+
+            if (!student) {
+                container.innerHTML = '<div class="text-center p-8 text-slate-400">Please select a student above.</div>';
+                return;
+            }
+
+            container.innerHTML = buildSingleReportCardHTML(student);
+        }
+
+        function generateBatchReportCards() {
+            const selectedClass = document.getElementById('reportClassBatchSelect').value;
+            const classStudents = state.students.filter(s => s.class === selectedClass);
+            const container = document.getElementById('printableReport');
+
+            if (classStudents.length === 0) {
+                container.innerHTML = `<div class="text-center p-8 text-slate-400">No students found in ${selectedClass}.</div>`;
+                return;
+            }
+
+            container.innerHTML = classStudents.map(s => buildSingleReportCardHTML(s)).join('');
+        }
+
+        function renderStudentsTable() {
+            const tbody = document.getElementById('studentsTableBody');
+            if (!tbody) return;
+
+            let displayStudents = state.students;
+            if (currentRole === 'Teacher' && currentTeacher) {
+                displayStudents = state.students.filter(s => s.class === currentTeacher.assignedClass);
+            }
+
+            tbody.innerHTML = displayStudents.map(s => `
+                <tr class="border-b hover:bg-slate-50">
+                    <td class="px-4 py-3">
+                        ${s.photo ? `<img src="${s.photo}" class="w-8 h-8 rounded-full object-cover border">` : `<div class="w-8 h-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs">${s.name.charAt(0)}</div>`}
+                    </td>
+                    <td class="px-4 py-3 font-bold text-slate-800">${s.name} <div class="text-[10px] font-mono font-normal text-slate-400">${s.id}</div></td>
+                    <td class="px-4 py-3"><span class="px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 font-semibold text-xs">${s.class}</span></td>
+                    <td class="px-4 py-3 font-bold">${s.attendance || 60} / 60 days</td>
+                    <td class="px-4 py-3 text-xs">
+                        <div class="font-semibold text-slate-700">${s.conduct || 'Satisfactory'}</div>
+                        <div class="text-slate-500 italic text-[11px] max-w-xs truncate">${s.teacherRemark || 'Keep it up!'}</div>
+                    </td>
+                    <td class="px-4 py-3 text-right space-x-2">
+                        <button onclick="editStudent('${s.id}')" class="text-indigo-600 hover:text-indigo-800 font-semibold text-xs">Edit</button>
+                        ${currentRole === 'Admin' ? `<button onclick="deleteStudent('${s.id}')" class="text-red-600 hover:text-red-800 font-semibold text-xs">Delete</button>` : ''}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openAddStudentModal() {
+            document.getElementById('studentModalTitle').innerText = "Add New Student Record";
+            document.getElementById('editStudentId').value = "";
+            document.getElementById('newStudentName').value = "";
+            document.getElementById('newStudentPromoted').value = "";
+            document.getElementById('newStudentAttendance').value = "60";
+            document.getElementById('newStudentPhoto').value = "";
+            document.getElementById('newStudentConduct').value = "Satisfactory";
+            document.getElementById('newStudentInterests').value = "Integrated Science and Ewe";
+            document.getElementById('newTeacherRemark').value = "Good performance. Keep it up!!";
+
+            if (currentRole === 'Teacher' && currentTeacher) {
+                document.getElementById('newStudentClass').value = currentTeacher.assignedClass;
+            }
+            document.getElementById('addStudentModal').classList.remove('hidden');
+            document.getElementById('addStudentModal').classList.add('flex');
+        }
+
+        function editStudent(id) {
+            const student = state.students.find(s => s.id === id);
+            if (!student) return;
+
+            document.getElementById('studentModalTitle').innerText = "Edit Student Profile & Remarks";
+            document.getElementById('editStudentId').value = student.id;
+            document.getElementById('newStudentName').value = student.name;
+            document.getElementById('newStudentClass').value = student.class;
+            document.getElementById('newStudentPromoted').value = student.promotedTo || "";
+            document.getElementById('newStudentAttendance').value = student.attendance || 60;
+            document.getElementById('newStudentPhoto').value = student.photo || "";
+            document.getElementById('newStudentConduct').value = student.conduct || "Satisfactory";
+            document.getElementById('newStudentInterests').value = student.interests || "Integrated Science and Ewe";
+            document.getElementById('newTeacherRemark').value = student.teacherRemark || "Good performance. Keep it up!!";
+
+            document.getElementById('addStudentModal').classList.remove('hidden');
+            document.getElementById('addStudentModal').classList.add('flex');
+        }
+
+        function closeAddStudentModal() {
+            document.getElementById('addStudentModal').classList.add('hidden');
+            document.getElementById('addStudentModal').classList.remove('flex');
+        }
+
+        async function handleAddStudent(e) {
+            e.preventDefault();
+            const editId = document.getElementById('editStudentId').value;
+            const name = document.getElementById('newStudentName').value.toUpperCase();
+            const cls = document.getElementById('newStudentClass').value;
+            const prom = document.getElementById('newStudentPromoted').value;
+            const att = parseInt(document.getElementById('newStudentAttendance').value) || 60;
+            const photo = document.getElementById('newStudentPhoto').value;
+            const conduct = document.getElementById('newStudentConduct').value;
+            const interests = document.getElementById('newStudentInterests').value;
+            const teacherRemark = document.getElementById('newTeacherRemark').value;
+
+            const newStu = {
+                id: editId || ('STU-' + (Math.floor(Math.random() * 900) + 100)),
+                name: name,
+                class: cls,
+                promotedTo: prom,
+                attendance: att,
+                photo: photo,
+                conduct: conduct,
+                interests: interests,
+                teacherRemark: teacherRemark
+            };
+
+            if (currentUser) {
+                await setDoc(doc(STUDENTS_COLL, newStu.id), newStu, { merge: true });
+                await logActivity("Save Student Profile", `Saved details for ${newStu.name} (${newStu.id})`);
+            }
+
+            closeAddStudentModal();
+            showToast("Student profile saved!", "success");
+        }
+
+        function deleteStudent(id) {
+            showConfirmModal("Delete Student Record", `Are you sure you want to permanently delete student ${id} and all marks?`, async () => {
+                if (currentUser) {
+                    await deleteDoc(doc(STUDENTS_COLL, id));
+                    await deleteDoc(doc(SCORES_COLL, id));
+                    await logActivity("Delete Student", `Deleted student record ${id}`);
+                    showToast("Student deleted successfully.", "info");
+                }
+            });
+        }
+
+        function renderTeacherTable() {
+            const tbody = document.getElementById('teacherTableBody');
+            if (!tbody) return;
+            if (state.teachers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="px-3 py-3 text-center text-slate-400">No teachers configured yet.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = state.teachers.map(t => `
+                <tr class="border-b hover:bg-slate-50">
+                    <td class="px-3 py-2 font-bold text-slate-800">${t.name}</td>
+                    <td class="px-3 py-2"><span class="px-2 py-0.5 rounded bg-brand-50 text-brand-700 font-semibold text-xs">${t.assignedClass}</span></td>
+                    <td class="px-3 py-2 font-mono text-slate-500">${t.password}</td>
+                    <td class="px-3 py-2 text-right space-x-2">
+                        <button onclick="editTeacher('${t.id}')" class="text-indigo-600 hover:text-indigo-800 font-medium">Edit</button>
+                        <button onclick="deleteTeacher('${t.id}')" class="text-red-600 hover:text-red-800 font-medium">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openAddTeacherModal() {
+            document.getElementById('teacherModalTitle').innerText = "Add New Teacher Account";
+            document.getElementById('editTeacherId').value = "";
+            document.getElementById('teacherNameInput').value = "";
+            document.getElementById('teacherClassInput').value = "Creche";
+            document.getElementById('teacherPasswordInput').value = "1234";
+            document.getElementById('addTeacherModal').classList.remove('hidden');
+            document.getElementById('addTeacherModal').classList.add('flex');
+        }
+
+        function closeAddTeacherModal() {
+            document.getElementById('addTeacherModal').classList.add('hidden');
+            document.getElementById('addTeacherModal').classList.remove('flex');
+        }
+
+        function editTeacher(id) {
+            const teacher = state.teachers.find(t => t.id === id);
+            if (!teacher) return;
+            document.getElementById('teacherModalTitle').innerText = "Edit Teacher Account";
+            document.getElementById('editTeacherId').value = teacher.id;
+            document.getElementById('teacherNameInput').value = teacher.name;
+            document.getElementById('teacherClassInput').value = teacher.assignedClass;
+            document.getElementById('teacherPasswordInput').value = teacher.password;
+            document.getElementById('addTeacherModal').classList.remove('hidden');
+            document.getElementById('addTeacherModal').classList.add('flex');
+        }
+
+        async function handleSaveTeacher(e) {
+            e.preventDefault();
+            const editId = document.getElementById('editTeacherId').value;
+            const name = document.getElementById('teacherNameInput').value;
+            const cls = document.getElementById('teacherClassInput').value;
+            const pwd = document.getElementById('teacherPasswordInput').value;
+
+            const teacherObj = {
+                id: editId || ('TCH-' + (Math.floor(Math.random() * 90) + 10)),
+                name: name,
+                assignedClass: cls,
+                password: pwd
+            };
+
+            if (currentUser) {
+                await setDoc(doc(TEACHERS_COLL, teacherObj.id), teacherObj);
+                await logActivity("Manage Teacher", `${editId ? 'Updated' : 'Added'} teacher ${teacherObj.name} assigned to ${cls}`);
+            }
+
+            closeAddTeacherModal();
+            showToast("Teacher account saved!", "success");
+        }
+
+        function deleteTeacher(id) {
+            showConfirmModal("Delete Teacher Account", "Are you sure you want to remove this teacher account?", async () => {
+                if (currentUser) {
+                    await deleteDoc(doc(TEACHERS_COLL, id));
+                    await logActivity("Manage Teacher", `Deleted teacher account ${id}`);
+                    showToast("Teacher account removed.", "info");
+                }
+            });
+        }
+
+        async function toggleTermLock() {
+            state.termLocked = !state.termLocked;
+            if (currentUser) {
+                await setDoc(SETTINGS_DOC, { termLocked: state.termLocked }, { merge: true });
+                await logActivity("Term Lock Toggle", `Term status changed to ${state.termLocked ? 'LOCKED' : 'UNLOCKED'}`);
+            }
+            updateTermLockUI();
+            showToast(`Term is now ${state.termLocked ? 'LOCKED' : 'UNLOCKED'}`);
+        }
+
+        function updateTermLockUI() {
+            const badge = document.getElementById('termStatusBadge');
+            const btn = document.getElementById('btnTermLock');
+
+            if (state.termLocked) {
+                if (badge) badge.innerHTML = '<i class="fas fa-lock text-amber-400"></i> Term Locked';
+                if (btn) {
+                    btn.innerHTML = '<i class="fas fa-unlock"></i> Unlock Active Term';
+                    btn.className = 'px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition';
+                }
+            } else {
+                if (badge) badge.innerHTML = '<i class="fas fa-unlock text-emerald-400"></i> Term Unlocked';
+                if (btn) {
+                    btn.innerHTML = '<i class="fas fa-lock"></i> Lock Active Term';
+                    btn.className = 'px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-sm font-medium transition';
+                }
+            }
+        }
+
+        function seedInitialCloudData() {
+            showConfirmModal("Seed Cloud Database", "This will upload initial sample teacher accounts and students across Creche to JHS 3 into Cloud Firestore. Continue?", async () => {
+                if (!currentUser) return;
+                for (const t of INITIAL_TEACHERS) {
+                    await setDoc(doc(TEACHERS_COLL, t.id), t);
+                }
+                for (const stu of INITIAL_STUDENTS) {
+                    await setDoc(doc(STUDENTS_COLL, stu.id), stu);
+                }
+                await logActivity("Seed Database", "Initialized database with sample records.");
+                showToast("Database seeded successfully!", "success");
+            });
+        }
+
+        function clearCloudLogs() {
+            showConfirmModal("Clear Audit Trail", "Are you sure you want to clear all cloud audit activity logs?", async () => {
+                if (!currentUser) return;
+                const snapshot = await getDocs(AUDIT_COLL);
+                snapshot.forEach(async (d) => await deleteDoc(d.ref));
+                showToast("Audit logs cleared.", "info");
+            });
+        }
+
+        function exportDatabaseJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", `VMIS_Cloud_Report_Backup_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
+            showToast("Database exported to JSON backup file.", "success");
+        }
+
+        async function importDatabaseJSON(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function(evt) {
+                try {
+                    const importedDb = JSON.parse(evt.target.result);
+                    if (importedDb.students && currentUser) {
+                        for (const stu of importedDb.students) {
+                            await setDoc(doc(STUDENTS_COLL, stu.id), stu, { merge: true });
+                        }
+                        if (importedDb.teachers) {
+                            for (const t of importedDb.teachers) {
+                                await setDoc(doc(TEACHERS_COLL, t.id), t, { merge: true });
+                            }
+                        }
+                        if (importedDb.scores) {
+                            for (const [stuId, termObj] of Object.entries(importedDb.scores)) {
+                                await setDoc(doc(SCORES_COLL, stuId), termObj, { merge: true });
+                            }
+                        }
+                        await logActivity("Import Database", "Imported JSON backup into Cloud Firestore");
+                        showToast("Database imported & synced to cloud successfully!", "success");
+                    } else {
+                        showToast("Invalid backup file format.", "error");
+                    }
+                } catch(err) {
+                    showToast("Error parsing JSON file.", "error");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        window.toggleRoleTab = toggleRoleTab;
+        window.handleTeacherLogin = handleTeacherLogin;
+        window.handleAdminLogin = handleAdminLogin;
+        window.logout = logout;
+        window.switchTab = switchTab;
+        window.loadStudentSubjects = loadStudentSubjects;
+        window.calculateLiveTotal = calculateLiveTotal;
+        window.populateCurrentScore = populateCurrentScore;
+        window.handleScoreSubmit = handleScoreSubmit;
+        window.renderBatchGridTable = renderBatchGridTable;
+        window.updateGridRowTotal = updateGridRowTotal;
+        window.saveBatchGridScores = saveBatchGridScores;
+        window.renderClassTotals = renderClassTotals;
+        window.toggleReportPrintMode = toggleReportPrintMode;
+        window.generateReportCard = generateReportCard;
+        window.generateBatchReportCards = generateBatchReportCards;
+        window.openAddStudentModal = openAddStudentModal;
+        window.closeAddStudentModal = closeAddStudentModal;
+        window.editStudent = editStudent;
+        window.handleAddStudent = handleAddStudent;
+        window.deleteStudent = deleteStudent;
+        window.openAddTeacherModal = openAddTeacherModal;
+        window.closeAddTeacherModal = closeAddTeacherModal;
+        window.editTeacher = editTeacher;
+        window.handleSaveTeacher = handleSaveTeacher;
+        window.deleteTeacher = deleteTeacher;
+        window.toggleTermLock = toggleTermLock;
+        window.handleSaveTermConfig = handleSaveTermConfig;
+        window.seedInitialCloudData = seedInitialCloudData;
+        window.clearCloudLogs = clearCloudLogs;
+        window.exportDatabaseJSON = exportDatabaseJSON;
+        window.importDatabaseJSON = importDatabaseJSON;
+        window.closeConfirmModal = closeConfirmModal;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initBackendAuth();
+        });
+    </script>
+</body>
+</html>
