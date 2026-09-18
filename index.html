@@ -766,17 +766,14 @@
         const INITIAL_STUDENTS = [];
 
         // Initial default teachers list
-        const INITIAL_TEACHERS = [
-            { id: "TCH-01", name: "Madam Peace Dogbe", assignedClass: "Creche", password: "123" },
-            { id: "TCH-02", name: "Mr. Kwami Mensah", assignedClass: "Basic 5", password: "123" }
-        ];
+        const INITIAL_TEACHERS = [];
 
         let state = {
             students: INITIAL_STUDENTS,
             scores: {},
             teachers: INITIAL_TEACHERS,
             termLocked: false,
-            adminPassword: 'admin123',
+            adminPassword: "",
             auditLogs: [],
             termConfig: {
                 academicYear: '2025/2026',
