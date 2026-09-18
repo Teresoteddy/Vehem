@@ -83,7 +83,6 @@
 
     <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm pointer-events-none no-print"></div>
 
-    <!-- Main Container -->
     <div id="app" class="flex-grow flex max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 gap-6 no-print">
         
         <aside class="w-64 flex-shrink-0 bg-white rounded-xl shadow-sm p-4 border border-slate-200 h-fit">
@@ -382,14 +381,45 @@
                 </div>
 
                 <div id="printableReport" class="space-y-8">
-                    <!-- Dynamic Printable Content (Single or Sequential Batch Reports) -->
+                    <!-- Dynamic Printable Content -->
                 </div>
             </section>
 
             <section id="tab-settings" class="tab-content hidden">
                 <div class="border-b border-slate-200 pb-4 mb-6">
                     <h2 class="text-xl font-bold text-slate-800">System Controls & Administrative Configuration</h2>
-                    <p class="text-sm text-slate-500">Manage real-time cloud sync, term dates, fee bills, required items, and teacher accounts.</p>
+                    <p class="text-sm text-slate-500">Manage real-time cloud sync, term dates, fee bills, required items, teacher accounts, and security controls.</p>
+                </div>
+
+                <!-- Admin Security Password Change Card -->
+                <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 mb-6">
+                    <h3 class="font-bold text-md text-slate-800 mb-2"><i class="fas fa-user-shield text-brand-700 mr-2"></i>Admin Security & Password Control</h3>
+                    <p class="text-xs text-slate-500 mb-4">Change the system administrator master password. This controls access to all admin tools.</p>
+                    <form onsubmit="handleAdminPasswordChange(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs items-end">
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">New Master Password</label>
+                            <div class="relative">
+                                <input type="password" id="newAdminPassword" required placeholder="Enter new admin password" class="w-full rounded-lg border-slate-300 p-2.5 border pr-10 font-mono text-xs">
+                                <button type="button" onclick="toggleInputVisibility('newAdminPassword', 'newAdminPwdIcon')" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600">
+                                    <i id="newAdminPwdIcon" class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Confirm New Password</label>
+                            <div class="relative">
+                                <input type="password" id="confirmAdminPassword" required placeholder="Re-enter new password" class="w-full rounded-lg border-slate-300 p-2.5 border pr-10 font-mono text-xs">
+                                <button type="button" onclick="toggleInputVisibility('confirmAdminPassword', 'confirmAdminPwdIcon')" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600">
+                                    <i id="confirmAdminPwdIcon" class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <button type="submit" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-bold text-xs shadow-sm transition flex items-center justify-center gap-2">
+                                <i class="fas fa-key"></i> Update Admin Password
+                            </button>
+                        </div>
+                    </form>
                 </div>
 
                 <!-- Term Dates, Bills & Items Config -->
@@ -428,12 +458,12 @@
                     </form>
                 </div>
 
-                <!-- Teacher Account Management Section -->
+                <!-- Teacher Account Management Section with Password Visibility Toggle -->
                 <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 mb-6">
                     <div class="flex justify-between items-center mb-4">
                         <div>
                             <h3 class="font-bold text-md text-slate-800">Teacher Class Assignments & Passwords</h3>
-                            <p class="text-xs text-slate-500">Assign specific classes (Creche to JHS 3) and login credentials to class teachers.</p>
+                            <p class="text-xs text-slate-500">Assign specific classes (Creche to JHS 3) and manage teacher login credentials.</p>
                         </div>
                         <button onclick="openAddTeacherModal()" class="px-3 py-1.5 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-xs font-semibold transition flex items-center space-x-1">
                             <i class="fas fa-user-plus"></i>
@@ -478,10 +508,6 @@
                             <div><span class="text-slate-500">Cloud Score Entries:</span> <strong id="cloudScoreCount">0</strong></div>
                         </div>
                         <div class="flex flex-wrap gap-2">
-                            <button onclick="seedInitialCloudData()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition flex items-center space-x-1.5">
-                                <i class="fas fa-database"></i>
-                                <span>Seed Initial Data</span>
-                            </button>
                             <button onclick="exportDatabaseJSON()" class="px-3 py-1.5 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-xs font-semibold transition flex items-center space-x-1.5">
                                 <i class="fas fa-download"></i>
                                 <span>Export Backup (JSON)</span>
@@ -526,7 +552,6 @@
         </main>
     </div>
 
-    <!-- Add Student Modal -->
     <div id="addStudentModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 border border-slate-200 max-h-[90vh] overflow-y-auto custom-scrollbar">
             <h3 id="studentModalTitle" class="text-lg font-bold text-slate-800 mb-4">Add / Edit Student Profile</h3>
@@ -556,7 +581,7 @@
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 mb-1">Passport Photo URL</label>
-                        <input type="text" id="newStudentPhoto" placeholder="https://... or base64 image" class="w-full rounded-lg border-slate-300 p-2 border text-xs">
+                        <input type="text" id="newStudentPhoto" placeholder="https://... image URL" class="w-full rounded-lg border-slate-300 p-2 border text-xs">
                     </div>
                 </div>
 
@@ -583,10 +608,9 @@
         </div>
     </div>
 
-    <!-- Add Teacher Modal -->
     <div id="addTeacherModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 border border-slate-200">
-            <h3 id="teacherModalTitle" class="text-lg font-bold text-slate-800 mb-4">Add New Teacher</h3>
+            <h3 id="teacherModalTitle" class="text-lg font-bold text-slate-800 mb-4">Add / Edit Teacher Account</h3>
             <form onsubmit="handleSaveTeacher(event)" class="space-y-4">
                 <input type="hidden" id="editTeacherId">
                 <div>
@@ -601,7 +625,12 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1">Login Password</label>
-                    <input type="text" id="teacherPasswordInput" required placeholder="Enter password" class="w-full rounded-lg border-slate-300 p-2.5 border text-sm font-mono">
+                    <div class="relative">
+                        <input type="password" id="teacherPasswordInput" required placeholder="Enter login password" class="w-full rounded-lg border-slate-300 p-2.5 border pr-10 text-sm font-mono">
+                        <button type="button" onclick="toggleInputVisibility('teacherPasswordInput', 'teacherPwdToggleIcon')" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 focus:outline-none">
+                            <i id="teacherPwdToggleIcon" class="fas fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="flex justify-end space-x-3 pt-3">
                     <button type="button" onclick="closeAddTeacherModal()" class="px-4 py-2 border rounded-lg text-sm font-medium text-slate-600">Cancel</button>
@@ -611,7 +640,6 @@
         </div>
     </div>
 
-    <!-- Confirmation Modal -->
     <div id="confirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4 no-print">
         <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 border border-slate-200 text-center">
             <div id="confirmIcon" class="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-3 text-xl font-bold">
@@ -626,7 +654,6 @@
         </div>
     </div>
 
-    <!-- Login Authentication Modal -->
     <div id="loginModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 border border-slate-100 text-left">
             <div class="w-16 h-16 bg-brand-700 text-white rounded-2xl mx-auto flex items-center justify-center font-bold text-2xl shadow-lg mb-3">VM</div>
@@ -658,7 +685,12 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1">Teacher Password</label>
-                    <input type="password" id="loginTeacherPassword" required placeholder="••••••••" class="w-full rounded-lg border-slate-300 p-2.5 border text-sm">
+                    <div class="relative">
+                        <input type="password" id="loginTeacherPassword" required placeholder="••••••••" class="w-full rounded-lg border-slate-300 p-2.5 border text-sm pr-10">
+                        <button type="button" onclick="toggleInputVisibility('loginTeacherPassword', 'loginTeacherPwdIcon')" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600">
+                            <i id="loginTeacherPwdIcon" class="fas fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
                 <button type="submit" class="w-full py-3 bg-brand-700 hover:bg-brand-800 text-white rounded-xl font-bold transition shadow-md flex items-center justify-center space-x-2">
                     <i class="fas fa-sign-in-alt"></i>
@@ -669,7 +701,12 @@
             <form id="adminLoginForm" onsubmit="handleAdminLogin(event)" class="space-y-4 hidden">
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1">Admin Master Password</label>
-                    <input type="password" id="loginAdminPassword" required placeholder="Default: admin123" class="w-full rounded-lg border-slate-300 p-2.5 border text-sm">
+                    <div class="relative">
+                        <input type="password" id="loginAdminPassword" required placeholder="Default: admin123" class="w-full rounded-lg border-slate-300 p-2.5 border text-sm pr-10">
+                        <button type="button" onclick="toggleInputVisibility('loginAdminPassword', 'loginAdminPwdIcon')" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600">
+                            <i id="loginAdminPwdIcon" class="fas fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
                 <button type="submit" class="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold transition shadow-md flex items-center justify-center space-x-2">
                     <i class="fas fa-user-shield"></i>
@@ -725,19 +762,13 @@
             "RELIGIOUS & MORAL EDUC.", "COMPUTING / NUMERACY", "CAREER TECHNOLOGY", "MENTAL"
         ];
 
-        const INITIAL_STUDENTS = [
-            { id: "STU-101", name: "AKUETEY EMMANUEL", class: "Creche", attendance: 60, conduct: "Very Good", interests: "Music & Rhymes", teacherRemark: "Cheerful student", photo: "", promotedTo: "Nursery 1" },
-            { id: "STU-102", name: "ABUDU BLESS", class: "Basic 5", attendance: 58, conduct: "Satisfactory", interests: "Integrated Science", teacherRemark: "Good performance. Keep it up!!", photo: "", promotedTo: "Basic 6" },
-            { id: "STU-103", name: "KOFFI SELORM", class: "Basic 5", attendance: 60, conduct: "Respectful", interests: "Mathematics", teacherRemark: "Hardworking and dedicated.", photo: "", promotedTo: "Basic 6" },
-            { id: "STU-104", name: "AMETOWOFA JESSICA", class: "Basic 6", attendance: 59, conduct: "Exemplary", interests: "Ewe Language", teacherRemark: "Outstanding academic results.", photo: "", promotedTo: "JHS 1" },
-            { id: "STU-105", name: "DOGBE ELIZABETH", class: "JHS 2", attendance: 60, conduct: "Obedient", interests: "Career Tech", teacherRemark: "Consistently focused in class.", photo: "", promotedTo: "JHS 3" }
-        ];
+        // Cleared predefined students array per request so system starts clean
+        const INITIAL_STUDENTS = [];
 
+        // Initial default teachers list
         const INITIAL_TEACHERS = [
-            { id: "TCH-01", name: "Madam Peace Dogbe", assignedClass: "Creche", password: "1234" },
-            { id: "TCH-02", name: "Mr. Kwami Mensah", assignedClass: "Basic 5", password: "1234" },
-            { id: "TCH-03", name: "Mrs. Comfort Addo", assignedClass: "Basic 6", password: "1234" },
-            { id: "TCH-04", name: "Mr. Eric Agbenu", assignedClass: "JHS 2", password: "1234" }
+            { id: "TCH-01", name: "Madam Peace Dogbe", assignedClass: "Creche", password: "123" },
+            { id: "TCH-02", name: "Mr. Kwami Mensah", assignedClass: "Basic 5", password: "123" }
         ];
 
         let state = {
@@ -762,6 +793,29 @@
         let currentUser = null;
         let activeTerm = "2025-2026_Term3";
         let confirmCallback = null;
+        
+        // Track password visibility state per teacher ID in system controls
+        const teacherPasswordVisibilityMap = {};
+
+        function toggleInputVisibility(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (!input || !icon) return;
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'fas fa-eye';
+            }
+        }
+        window.toggleInputVisibility = toggleInputVisibility;
+
+        function toggleTeacherPasswordVisibility(teacherId) {
+            teacherPasswordVisibilityMap[teacherId] = !teacherPasswordVisibilityMap[teacherId];
+            renderTeacherTable();
+        }
+        window.toggleTeacherPasswordVisibility = toggleTeacherPasswordVisibility;
 
         function showToast(message, type = 'info') {
             const container = document.getElementById('toastContainer');
@@ -784,6 +838,7 @@
                 setTimeout(() => toast.remove(), 300);
             }, 3500);
         }
+        window.showToast = showToast;
 
         function showConfirmModal(title, message, onConfirm) {
             confirmCallback = onConfirm;
@@ -793,6 +848,7 @@
             modal.classList.remove('hidden');
             modal.classList.add('flex');
         }
+        window.showConfirmModal = showConfirmModal;
 
         function closeConfirmModal(confirmed) {
             const modal = document.getElementById('confirmModal');
@@ -803,6 +859,7 @@
             }
             confirmCallback = null;
         }
+        window.closeConfirmModal = closeConfirmModal;
 
         function renderMasterClassDropdowns() {
             const filterSelect = document.getElementById('filterClassSelect');
@@ -910,7 +967,7 @@
             onSnapshot(STUDENTS_COLL, (snapshot) => {
                 const studentsList = [];
                 snapshot.forEach(docSnap => studentsList.push(docSnap.data()));
-                if (studentsList.length > 0) state.students = studentsList;
+                state.students = studentsList;
                 document.getElementById('cloudStudentCount').innerText = state.students.length;
                 populateDropdowns();
                 renderStudentsTable();
@@ -962,6 +1019,35 @@
             });
         }
 
+        async function handleAdminPasswordChange(e) {
+            e.preventDefault();
+            const newPwd = document.getElementById('newAdminPassword').value.trim();
+            const confirmPwd = document.getElementById('confirmAdminPassword').value.trim();
+
+            if (!newPwd) {
+                showToast("Password cannot be empty.", "error");
+                return;
+            }
+
+            if (newPwd !== confirmPwd) {
+                showToast("New passwords do not match. Please verify.", "error");
+                return;
+            }
+
+            state.adminPassword = newPwd;
+
+            if (currentUser) {
+                await setDoc(SETTINGS_DOC, { adminPassword: newPwd }, { merge: true });
+                await logActivity("Change Admin Password", "Administrator master password updated.");
+            }
+
+            document.getElementById('newAdminPassword').value = '';
+            document.getElementById('confirmAdminPassword').value = '';
+
+            showToast("Admin master password updated successfully!", "success");
+        }
+        window.handleAdminPasswordChange = handleAdminPasswordChange;
+
         function populateTermConfigFields() {
             const cfg = state.termConfig;
             if (document.getElementById('cfgAcademicYear')) document.getElementById('cfgAcademicYear').value = cfg.academicYear || '2025/2026';
@@ -989,6 +1075,7 @@
             }
             showToast("Term configuration updated successfully!", "success");
         }
+        window.handleSaveTermConfig = handleSaveTermConfig;
 
         async function logActivity(action, details) {
             if (!currentUser) return;
@@ -1025,6 +1112,116 @@
             `).join('');
         }
 
+        function renderTeacherTable() {
+            const tbody = document.getElementById('teacherTableBody');
+            if (!tbody) return;
+            if (state.teachers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="px-3 py-3 text-center text-slate-400">No teachers registered yet. Click "Add New Teacher" to create accounts.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = state.teachers.map(t => {
+                const isVisible = !!teacherPasswordVisibilityMap[t.id];
+                const displayPwd = isVisible ? t.password : '••••••••';
+                return `
+                    <tr class="border-b hover:bg-slate-50">
+                        <td class="px-3 py-2 font-semibold text-slate-800">${t.name}</td>
+                        <td class="px-3 py-2"><span class="px-2 py-0.5 rounded bg-brand-50 text-brand-800 font-bold text-[11px]">${t.assignedClass}</span></td>
+                        <td class="px-3 py-2 font-mono">
+                            <div class="flex items-center space-x-2">
+                                <span class="bg-slate-100 px-2 py-0.5 rounded text-slate-700 min-w-[70px] inline-block text-center font-bold">${displayPwd}</span>
+                                <button type="button" onclick="toggleTeacherPasswordVisibility('${t.id}')" class="text-slate-400 hover:text-slate-700 transition focus:outline-none px-1" title="Toggle password visibility">
+                                    <i class="fas ${isVisible ? 'fa-eye-slash text-brand-700' : 'fa-eye'}"></i>
+                                </button>
+                            </div>
+                        </td>
+                        <td class="px-3 py-2 text-right space-x-2">
+                            <button onclick="openEditTeacherModal('${t.id}')" class="text-indigo-600 hover:text-indigo-800 font-semibold text-xs">Edit</button>
+                            <button onclick="deleteTeacher('${t.id}')" class="text-red-600 hover:text-red-800 font-semibold text-xs">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        window.renderTeacherTable = renderTeacherTable;
+
+        function openAddTeacherModal() {
+            document.getElementById('teacherModalTitle').innerText = "Add New Teacher";
+            document.getElementById('editTeacherId').value = "";
+            document.getElementById('teacherNameInput').value = "";
+            document.getElementById('teacherPasswordInput').value = "";
+            const modal = document.getElementById('addTeacherModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+        window.openAddTeacherModal = openAddTeacherModal;
+
+        function openEditTeacherModal(id) {
+            const teacher = state.teachers.find(t => t.id === id);
+            if (!teacher) return;
+            document.getElementById('teacherModalTitle').innerText = "Edit Teacher Account";
+            document.getElementById('editTeacherId').value = teacher.id;
+            document.getElementById('teacherNameInput').value = teacher.name;
+            document.getElementById('teacherClassInput').value = teacher.assignedClass;
+            document.getElementById('teacherPasswordInput').value = teacher.password;
+
+            const modal = document.getElementById('addTeacherModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+        window.openEditTeacherModal = openEditTeacherModal;
+
+        function closeAddTeacherModal() {
+            const modal = document.getElementById('addTeacherModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+        window.closeAddTeacherModal = closeAddTeacherModal;
+
+        async function handleSaveTeacher(e) {
+            e.preventDefault();
+            const editId = document.getElementById('editTeacherId').value;
+            const name = document.getElementById('teacherNameInput').value;
+            const cls = document.getElementById('teacherClassInput').value;
+            const pwd = document.getElementById('teacherPasswordInput').value;
+
+            const teacherObj = {
+                id: editId || ('TCH-' + (Math.floor(Math.random() * 900) + 100)),
+                name: name,
+                assignedClass: cls,
+                password: pwd
+            };
+
+            const existingIdx = state.teachers.findIndex(t => t.id === teacherObj.id);
+            if (existingIdx !== -1) state.teachers[existingIdx] = teacherObj;
+            else state.teachers.push(teacherObj);
+
+            if (currentUser) {
+                await setDoc(doc(TEACHERS_COLL, teacherObj.id), teacherObj, { merge: true });
+                await logActivity("Save Teacher", `Saved account for ${name} (${cls})`);
+            }
+
+            populateTeacherLoginDropdown();
+            renderTeacherTable();
+            closeAddTeacherModal();
+            showToast("Teacher account saved successfully!", "success");
+        }
+        window.handleSaveTeacher = handleSaveTeacher;
+
+        function deleteTeacher(id) {
+            showConfirmModal("Delete Teacher Account", `Are you sure you want to remove teacher account ${id}?`, async () => {
+                state.teachers = state.teachers.filter(t => t.id !== id);
+                if (currentUser) {
+                    await deleteDoc(doc(TEACHERS_COLL, id));
+                    await logActivity("Delete Teacher", `Removed teacher account ${id}`);
+                }
+                populateTeacherLoginDropdown();
+                renderTeacherTable();
+                showToast("Teacher account deleted.", "info");
+            });
+        }
+        window.deleteTeacher = deleteTeacher;
+
         function populateTeacherLoginDropdown() {
             const sel = document.getElementById('loginTeacherSelect');
             if (!sel) return;
@@ -1051,6 +1248,7 @@
                 document.getElementById('teacherLoginForm').classList.add('hidden');
             }
         }
+        window.toggleRoleTab = toggleRoleTab;
 
         function handleTeacherLogin(e) {
             e.preventDefault();
@@ -1089,13 +1287,14 @@
             logActivity("Teacher Login", `Log in successful for ${teacher.name} (${teacher.assignedClass})`);
             showToast(`Welcome back, ${teacher.name}!`, 'success');
         }
+        window.handleTeacherLogin = handleTeacherLogin;
 
         function handleAdminLogin(e) {
             e.preventDefault();
             const pwdInput = document.getElementById('loginAdminPassword').value.trim();
 
             if (pwdInput !== state.adminPassword) {
-                showAuthError("Incorrect Admin master password. (Default: admin123)");
+                showAuthError("Incorrect Admin master password.");
                 return;
             }
 
@@ -1122,6 +1321,7 @@
             logActivity("Admin Login", "Administrator logged into control console.");
             showToast("Logged in as System Administrator", 'success');
         }
+        window.handleAdminLogin = handleAdminLogin;
 
         function showAuthError(msg) {
             const errAlert = document.getElementById('authErrorAlert');
@@ -1134,6 +1334,7 @@
             document.getElementById('loginModal').classList.remove('hidden');
             document.getElementById('loginModal').classList.add('flex');
         }
+        window.logout = logout;
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
@@ -1157,6 +1358,7 @@
                 else generateBatchReportCards();
             }
         }
+        window.switchTab = switchTab;
 
         function calculateRemark(total) {
             if (total >= 80) return "Excellent";
@@ -1201,18 +1403,24 @@
 
             studentSelect.innerHTML = '<option value="">-- Choose Student --</option>';
             reportSelect.innerHTML = '';
-            subjectSelect.innerHTML = '<option value="">-- Choose Subject --</option>';
+            subjectSelect.innerHTML = '<option value="">-- Choose Student First --</option>';
 
             let filteredStudents = state.students;
             if (currentRole === 'Teacher' && currentTeacher) {
                 filteredStudents = state.students.filter(s => s.class === currentTeacher.assignedClass);
             }
 
-            filteredStudents.forEach(s => {
-                studentSelect.innerHTML += `<option value="${s.id}">${s.name} (${s.class})</option>`;
-                reportSelect.innerHTML += `<option value="${s.id}">${s.name} (${s.class})</option>`;
-            });
+            if (filteredStudents.length === 0) {
+                studentSelect.innerHTML = '<option value="">-- No Students Available --</option>';
+                reportSelect.innerHTML = '<option value="">-- No Students Available --</option>';
+            } else {
+                filteredStudents.forEach(s => {
+                    studentSelect.innerHTML += `<option value="${s.id}">${s.name} (${s.class})</option>`;
+                    reportSelect.innerHTML += `<option value="${s.id}">${s.name} (${s.class})</option>`;
+                });
+            }
 
+            subjectSelect.innerHTML = '<option value="">-- Choose Subject --</option>';
             MASTER_SUBJECTS.forEach(sub => {
                 subjectSelect.innerHTML += `<option value="${sub}">${sub}</option>`;
             });
@@ -1227,6 +1435,7 @@
             document.getElementById('scoreClassDisplay').value = student ? student.class : '';
             renderStudentSubjectOverview(stuId);
         }
+        window.loadStudentSubjects = loadStudentSubjects;
 
         function calculateLiveTotal() {
             const t = parseFloat(document.getElementById('inputTestScore').value) || 0;
@@ -1245,6 +1454,7 @@
             badge.innerText = remark;
             badge.className = `text-sm font-semibold px-3 py-1 rounded-full ${grandTotal >= 70 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`;
         }
+        window.calculateLiveTotal = calculateLiveTotal;
 
         function populateCurrentScore() {
             const stuId = document.getElementById('scoreStudentSelect').value;
@@ -1266,6 +1476,7 @@
             }
             calculateLiveTotal();
         }
+        window.populateCurrentScore = populateCurrentScore;
 
         async function handleScoreSubmit(e) {
             e.preventDefault();
@@ -1312,6 +1523,7 @@
             renderStudentSubjectOverview(stuId);
             showToast("Score saved & synced to cloud database!", "success");
         }
+        window.handleScoreSubmit = handleScoreSubmit;
 
         function renderStudentSubjectOverview(stuId) {
             const tbody = document.getElementById('studentSubjectOverviewTable');
@@ -1367,7 +1579,7 @@
             }
 
             if (classStudents.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">No students enrolled in this class roster.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="px-4 py-8 text-center text-slate-400">No students enrolled in this class roster. Click "Add New Student" to enroll.</td></tr>';
                 return;
             }
 
@@ -1394,6 +1606,7 @@
                 `;
             }).join('');
         }
+        window.renderBatchGridTable = renderBatchGridTable;
 
         function updateGridRowTotal(input) {
             const stuId = input.dataset.stuid;
@@ -1411,6 +1624,7 @@
             document.getElementById(`gridGrandTotal-${stuId}`).innerText = grandTotal;
             document.getElementById(`gridRemark-${stuId}`).innerHTML = `<span class="px-2 py-0.5 rounded bg-slate-100 font-semibold text-[11px]">${calculateRemark(grandTotal)}</span>`;
         }
+        window.updateGridRowTotal = updateGridRowTotal;
 
         async function saveBatchGridScores() {
             if (state.termLocked) {
@@ -1451,6 +1665,7 @@
             await logActivity("Batch Score Entry", `Batch updated ${selectedSubject} for all students in ${selectedClass} [${termKey}]`);
             showToast(`All scores saved for ${selectedClass} - ${selectedSubject}!`, "success");
         }
+        window.saveBatchGridScores = saveBatchGridScores;
 
         function renderClassTotals() {
             const tbody = document.getElementById('classTotalsTableBody');
@@ -1466,6 +1681,11 @@
 
             const filterClass = filterSelect.value;
             let filteredStudents = filterClass === 'ALL' ? state.students : state.students.filter(s => s.class === filterClass);
+
+            if (filteredStudents.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-6 text-center text-slate-400">No student records found.</td></tr>';
+                return;
+            }
 
             let summaryList = filteredStudents.map(stu => {
                 let grandTotal = 0;
@@ -1489,10 +1709,11 @@
                     <td class="px-4 py-3"><span class="px-2 py-0.5 rounded bg-slate-100 text-slate-800 font-medium text-xs">${stu.class}</span></td>
                     <td class="px-4 py-3 font-black text-slate-800">${stu.grandTotal}</td>
                     <td class="px-4 py-3">${stu.avg}%</td>
-                    <td class="px-4 py-3">${stu.promotedTo}</td>
+                    <td class="px-4 py-3">${stu.promotedTo || '--'}</td>
                 </tr>
             `).join('');
         }
+        window.renderClassTotals = renderClassTotals;
 
         function toggleReportPrintMode() {
             const mode = document.getElementById('reportModeSelect').value;
@@ -1512,6 +1733,7 @@
                 generateBatchReportCards();
             }
         }
+        window.toggleReportPrintMode = toggleReportPrintMode;
 
         function buildSingleReportCardHTML(student, termKey = activeTerm) {
             const classCount = state.students.filter(s => s.class === student.class).length;
@@ -1558,7 +1780,7 @@
             return `
                 <div class="bg-white p-6 border-2 border-slate-800 rounded-lg max-w-4xl mx-auto shadow-sm text-slate-900 print-page-break">
                     <div class="text-center border-b-2 border-slate-800 pb-3 mb-4 flex justify-between items-center">
-                        <div class="w-16 h-16 border-2 border-brand-800 flex items-center justify-center font-bold text-brand-800 text-[10px] text-center p-1 uppercase">
+                        <div class="w-16 h-16 border-2 border-brand-800 flex items-center justify-center font-bold text-brand-800 text-[10px] text-center p-1 uppercase overflow-hidden">
                             ${student.photo ? `<img src="${student.photo}" class="w-full h-full object-cover rounded">` : 'VMIS LOGO'}
                         </div>
                         <div>
@@ -1628,12 +1850,13 @@
             const container = document.getElementById('printableReport');
 
             if (!student) {
-                container.innerHTML = '<div class="text-center p-8 text-slate-400">Please select a student above.</div>';
+                container.innerHTML = '<div class="text-center p-8 text-slate-400">Please select a student above to view terminal report card.</div>';
                 return;
             }
 
             container.innerHTML = buildSingleReportCardHTML(student);
         }
+        window.generateReportCard = generateReportCard;
 
         function generateBatchReportCards() {
             const selectedClass = document.getElementById('reportClassBatchSelect').value;
@@ -1647,6 +1870,7 @@
 
             container.innerHTML = classStudents.map(s => buildSingleReportCardHTML(s)).join('');
         }
+        window.generateBatchReportCards = generateBatchReportCards;
 
         function renderStudentsTable() {
             const tbody = document.getElementById('studentsTableBody');
@@ -1655,6 +1879,11 @@
             let displayStudents = state.students;
             if (currentRole === 'Teacher' && currentTeacher) {
                 displayStudents = state.students.filter(s => s.class === currentTeacher.assignedClass);
+            }
+
+            if (displayStudents.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-slate-400">No students registered in roster. Click "Add New Student" to enroll.</td></tr>';
+                return;
             }
 
             tbody.innerHTML = displayStudents.map(s => `
@@ -1676,6 +1905,7 @@
                 </tr>
             `).join('');
         }
+        window.renderStudentsTable = renderStudentsTable;
 
         function openAddStudentModal() {
             document.getElementById('studentModalTitle').innerText = "Add New Student Record";
@@ -1694,6 +1924,7 @@
             document.getElementById('addStudentModal').classList.remove('hidden');
             document.getElementById('addStudentModal').classList.add('flex');
         }
+        window.openAddStudentModal = openAddStudentModal;
 
         function editStudent(id) {
             const student = state.students.find(s => s.id === id);
@@ -1713,11 +1944,13 @@
             document.getElementById('addStudentModal').classList.remove('hidden');
             document.getElementById('addStudentModal').classList.add('flex');
         }
+        window.editStudent = editStudent;
 
         function closeAddStudentModal() {
             document.getElementById('addStudentModal').classList.add('hidden');
             document.getElementById('addStudentModal').classList.remove('flex');
         }
+        window.closeAddStudentModal = closeAddStudentModal;
 
         async function handleAddStudent(e) {
             e.preventDefault();
@@ -1757,9 +1990,10 @@
             closeAddStudentModal();
             showToast("Student profile saved!", "success");
         }
+        window.handleAddStudent = handleAddStudent;
 
         function deleteStudent(id) {
-            showConfirmModal("Delete Student Record", `Are you sure you want to permanently delete student ${id} and all marks?`, async () => {
+            showConfirmModal("Delete Student Record", `Are you sure you want to permanently delete student ${id} and all associated marks?`, async () => {
                 state.students = state.students.filter(s => s.id !== id);
                 if (currentUser) {
                     await deleteDoc(doc(STUDENTS_COLL, id));
@@ -1768,248 +2002,91 @@
                 }
                 populateDropdowns();
                 renderStudentsTable();
-                showToast("Student deleted successfully.", "info");
+                showToast("Student record deleted successfully.", "info");
             });
         }
-
-        function renderTeacherTable() {
-            const tbody = document.getElementById('teacherTableBody');
-            if (!tbody) return;
-            if (state.teachers.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="px-3 py-3 text-center text-slate-400">No teachers configured yet.</td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = state.teachers.map(t => `
-                <tr class="border-b hover:bg-slate-50">
-                    <td class="px-3 py-2 font-bold text-slate-800">${t.name}</td>
-                    <td class="px-3 py-2"><span class="px-2 py-0.5 rounded bg-brand-50 text-brand-700 font-semibold text-xs">${t.assignedClass}</span></td>
-                    <td class="px-3 py-2 font-mono text-slate-500">${t.password}</td>
-                    <td class="px-3 py-2 text-right space-x-2">
-                        <button onclick="editTeacher('${t.id}')" class="text-indigo-600 hover:text-indigo-800 font-medium">Edit</button>
-                        <button onclick="deleteTeacher('${t.id}')" class="text-red-600 hover:text-red-800 font-medium">Delete</button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function openAddTeacherModal() {
-            document.getElementById('teacherModalTitle').innerText = "Add New Teacher Account";
-            document.getElementById('editTeacherId').value = "";
-            document.getElementById('teacherNameInput').value = "";
-            document.getElementById('teacherClassInput').value = "Creche";
-            document.getElementById('teacherPasswordInput').value = "1234";
-            document.getElementById('addTeacherModal').classList.remove('hidden');
-            document.getElementById('addTeacherModal').classList.add('flex');
-        }
-
-        function closeAddTeacherModal() {
-            document.getElementById('addTeacherModal').classList.add('hidden');
-            document.getElementById('addTeacherModal').classList.remove('flex');
-        }
-
-        function editTeacher(id) {
-            const teacher = state.teachers.find(t => t.id === id);
-            if (!teacher) return;
-            document.getElementById('teacherModalTitle').innerText = "Edit Teacher Account";
-            document.getElementById('editTeacherId').value = teacher.id;
-            document.getElementById('teacherNameInput').value = teacher.name;
-            document.getElementById('teacherClassInput').value = teacher.assignedClass;
-            document.getElementById('teacherPasswordInput').value = teacher.password;
-            document.getElementById('addTeacherModal').classList.remove('hidden');
-            document.getElementById('addTeacherModal').classList.add('flex');
-        }
-
-        async function handleSaveTeacher(e) {
-            e.preventDefault();
-            const editId = document.getElementById('editTeacherId').value;
-            const name = document.getElementById('teacherNameInput').value;
-            const cls = document.getElementById('teacherClassInput').value;
-            const pwd = document.getElementById('teacherPasswordInput').value;
-
-            const teacherObj = {
-                id: editId || ('TCH-' + (Math.floor(Math.random() * 90) + 10)),
-                name: name,
-                assignedClass: cls,
-                password: pwd
-            };
-
-            const existingIdx = state.teachers.findIndex(t => t.id === teacherObj.id);
-            if (existingIdx !== -1) state.teachers[existingIdx] = teacherObj;
-            else state.teachers.push(teacherObj);
-
-            if (currentUser) {
-                await setDoc(doc(TEACHERS_COLL, teacherObj.id), teacherObj);
-                await logActivity("Manage Teacher", `${editId ? 'Updated' : 'Added'} teacher ${teacherObj.name} assigned to ${cls}`);
-            }
-
-            populateTeacherLoginDropdown();
-            renderTeacherTable();
-            closeAddTeacherModal();
-            showToast("Teacher account saved!", "success");
-        }
-
-        function deleteTeacher(id) {
-            showConfirmModal("Delete Teacher Account", "Are you sure you want to remove this teacher account?", async () => {
-                state.teachers = state.teachers.filter(t => t.id !== id);
-                if (currentUser) {
-                    await deleteDoc(doc(TEACHERS_COLL, id));
-                    await logActivity("Manage Teacher", `Deleted teacher account ${id}`);
-                }
-                populateTeacherLoginDropdown();
-                renderTeacherTable();
-                showToast("Teacher account removed.", "info");
-            });
-        }
-
-        async function toggleTermLock() {
-            state.termLocked = !state.termLocked;
-            if (currentUser) {
-                await setDoc(SETTINGS_DOC, { termLocked: state.termLocked }, { merge: true });
-                await logActivity("Term Lock Toggle", `Term status changed to ${state.termLocked ? 'LOCKED' : 'UNLOCKED'}`);
-            }
-            updateTermLockUI();
-            showToast(`Term is now ${state.termLocked ? 'LOCKED' : 'UNLOCKED'}`);
-        }
-
-        function updateTermLockUI() {
-            const badge = document.getElementById('termStatusBadge');
-            const btn = document.getElementById('btnTermLock');
-
-            if (state.termLocked) {
-                if (badge) badge.innerHTML = '<i class="fas fa-lock text-amber-400"></i> Term Locked';
-                if (btn) {
-                    btn.innerHTML = '<i class="fas fa-unlock"></i> Unlock Active Term';
-                    btn.className = 'px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition';
-                }
-            } else {
-                if (badge) badge.innerHTML = '<i class="fas fa-unlock text-emerald-400"></i> Term Unlocked';
-                if (btn) {
-                    btn.innerHTML = '<i class="fas fa-lock"></i> Lock Active Term';
-                    btn.className = 'px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-sm font-medium transition';
-                }
-            }
-        }
-
-        function seedInitialCloudData() {
-            showConfirmModal("Seed Cloud Database", "This will upload initial sample teacher accounts and students across Creche to JHS 3 into Cloud Firestore. Continue?", async () => {
-                if (!currentUser) return;
-                for (const t of INITIAL_TEACHERS) {
-                    await setDoc(doc(TEACHERS_COLL, t.id), t);
-                }
-                for (const stu of INITIAL_STUDENTS) {
-                    await setDoc(doc(STUDENTS_COLL, stu.id), stu);
-                }
-                await logActivity("Seed Database", "Initialized database with sample records.");
-                showToast("Database seeded successfully!", "success");
-            });
-        }
-
-        function clearCloudLogs() {
-            showConfirmModal("Clear Audit Trail", "Are you sure you want to clear all cloud audit activity logs?", async () => {
-                if (!currentUser) return;
-                const snapshot = await getDocs(AUDIT_COLL);
-                snapshot.forEach(async (d) => await deleteDoc(d.ref));
-                state.auditLogs = [];
-                renderAuditLogsTable();
-                showToast("Audit logs cleared.", "info");
-            });
-        }
+        window.deleteStudent = deleteStudent;
 
         function exportDatabaseJSON() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
             const dlAnchor = document.createElement('a');
             dlAnchor.setAttribute("href", dataStr);
-            dlAnchor.setAttribute("download", `VMIS_Cloud_Report_Backup_${new Date().toISOString().slice(0,10)}.json`);
+            dlAnchor.setAttribute("download", `VMIS_Terminal_Report_Backup_${new Date().toISOString().slice(0,10)}.json`);
             document.body.appendChild(dlAnchor);
             dlAnchor.click();
             dlAnchor.remove();
-            showToast("Database exported to JSON backup file.", "success");
+            showToast("Database exported as JSON file", "success");
         }
+        window.exportDatabaseJSON = exportDatabaseJSON;
 
-        async function importDatabaseJSON(e) {
+        function importDatabaseJSON(e) {
             const file = e.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
-            reader.onload = async function(evt) {
+            reader.onload = async (event) => {
                 try {
-                    const importedDb = JSON.parse(evt.target.result);
-                    if (importedDb.students) {
-                        state.students = importedDb.students;
-                        if (importedDb.teachers) state.teachers = importedDb.teachers;
-                        if (importedDb.scores) state.scores = importedDb.scores;
-                        
-                        if (currentUser) {
-                            for (const stu of importedDb.students) {
-                                await setDoc(doc(STUDENTS_COLL, stu.id), stu, { merge: true });
-                            }
-                            if (importedDb.teachers) {
-                                for (const t of importedDb.teachers) {
-                                    await setDoc(doc(TEACHERS_COLL, t.id), t, { merge: true });
-                                }
-                            }
-                            if (importedDb.scores) {
-                                for (const [stuId, termObj] of Object.entries(importedDb.scores)) {
-                                    await setDoc(doc(SCORES_COLL, stuId), termObj, { merge: true });
-                                }
-                            }
-                            await logActivity("Import Database", "Imported JSON backup into Cloud Firestore");
-                        }
-                        
-                        populateDropdowns();
-                        populateTeacherLoginDropdown();
-                        renderStudentsTable();
-                        renderTeacherTable();
-                        renderClassTotals();
-                        showToast("Database imported successfully!", "success");
-                    } else {
-                        showToast("Invalid backup file format.", "error");
-                    }
-                } catch(err) {
-                    showToast("Error parsing JSON file.", "error");
+                    const importedState = JSON.parse(event.target.result);
+                    if (importedState.students) state.students = importedState.students;
+                    if (importedState.scores) state.scores = importedState.scores;
+                    if (importedState.teachers) state.teachers = importedState.teachers;
+                    if (importedState.termConfig) state.termConfig = importedState.termConfig;
+
+                    populateDropdowns();
+                    renderStudentsTable();
+                    renderTeacherTable();
+                    renderClassTotals();
+                    showToast("Database imported successfully!", "success");
+                } catch (err) {
+                    showToast("Failed to parse JSON backup file.", "error");
                 }
             };
             reader.readAsText(file);
         }
-
-        // Attach functions to window object for global HTML event handlers
-        window.switchTab = switchTab;
-        window.logout = logout;
-        window.toggleRoleTab = toggleRoleTab;
-        window.handleTeacherLogin = handleTeacherLogin;
-        window.handleAdminLogin = handleAdminLogin;
-        window.loadStudentSubjects = loadStudentSubjects;
-        window.populateCurrentScore = populateCurrentScore;
-        window.calculateLiveTotal = calculateLiveTotal;
-        window.handleScoreSubmit = handleScoreSubmit;
-        window.renderBatchGridTable = renderBatchGridTable;
-        window.updateGridRowTotal = updateGridRowTotal;
-        window.saveBatchGridScores = saveBatchGridScores;
-        window.openAddStudentModal = openAddStudentModal;
-        window.closeAddStudentModal = closeAddStudentModal;
-        window.handleAddStudent = handleAddStudent;
-        window.editStudent = editStudent;
-        window.deleteStudent = deleteStudent;
-        window.renderClassTotals = renderClassTotals;
-        window.toggleReportPrintMode = toggleReportPrintMode;
-        window.generateReportCard = generateReportCard;
-        window.generateBatchReportCards = generateBatchReportCards;
-        window.handleSaveTermConfig = handleSaveTermConfig;
-        window.openAddTeacherModal = openAddTeacherModal;
-        window.closeAddTeacherModal = closeAddTeacherModal;
-        window.handleSaveTeacher = handleSaveTeacher;
-        window.editTeacher = editTeacher;
-        window.deleteTeacher = deleteTeacher;
-        window.toggleTermLock = toggleTermLock;
-        window.seedInitialCloudData = seedInitialCloudData;
-        window.clearCloudLogs = clearCloudLogs;
-        window.exportDatabaseJSON = exportDatabaseJSON;
         window.importDatabaseJSON = importDatabaseJSON;
-        window.closeConfirmModal = closeConfirmModal;
 
-        // Start initialization
-        initBackendAuth();
+        async function toggleTermLock() {
+            state.termLocked = !state.termLocked;
+            if (currentUser) {
+                await setDoc(SETTINGS_DOC, { termLocked: state.termLocked }, { merge: true });
+                await logActivity("Term Lock Toggle", `Term lock set to: ${state.termLocked}`);
+            }
+            updateTermLockUI();
+            showToast(state.termLocked ? "Term is now LOCKED." : "Term is UNLOCKED.", state.termLocked ? "error" : "success");
+        }
+        window.toggleTermLock = toggleTermLock;
+
+        function updateTermLockUI() {
+            const badge = document.getElementById('termStatusBadge');
+            const btn = document.getElementById('btnTermLock');
+            if (badge) {
+                badge.className = state.termLocked ? "text-red-400 font-bold" : "text-emerald-400";
+                badge.innerHTML = state.termLocked ? `<i class="fas fa-lock"></i> Term Locked` : `<i class="fas fa-unlock"></i> Term Unlocked`;
+            }
+            if (btn) {
+                btn.className = state.termLocked ? "px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition" : "px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-sm font-medium transition";
+                btn.innerHTML = state.termLocked ? `<i class="fas fa-unlock"></i> Unlock Term` : `<i class="fas fa-lock"></i> Lock Active Term`;
+            }
+        }
+
+        async function clearCloudLogs() {
+            showConfirmModal("Clear Audit Logs", "Are you sure you want to clear all recorded activity logs?", async () => {
+                if (currentUser) {
+                    const snapshot = await getDocs(AUDIT_COLL);
+                    snapshot.forEach(async (docSnap) => {
+                        await deleteDoc(docSnap.ref);
+                    });
+                }
+                state.auditLogs = [];
+                renderAuditLogsTable();
+                showToast("Audit logs cleared.", "info");
+            });
+        }
+        window.clearCloudLogs = clearCloudLogs;
+
+        // Start initialization on window load
+        window.onload = function() {
+            initBackendAuth();
+        };
     </script>
 </body>
 </html>
