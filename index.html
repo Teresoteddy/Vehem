@@ -177,7 +177,7 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 mb-1">ClassWork (20%)</label>
-                                <input type="number" id="inputClassWorkScore" min="0" max="20" step="0.5" required oninput="calculateLiveTotal()" placeholder="0 - 20" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 p-2 border font-bold text-center">
+                                <input type="number" id="inputCWScore" min="0" max="20" step="0.5" required oninput="calculateLiveTotal()" placeholder="0 - 20" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 p-2 border font-bold text-center">
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-brand-800 mb-1">Class Score Total (50%)</label>
@@ -392,7 +392,7 @@
                     <p class="text-sm text-slate-500">Manage real-time cloud sync, term dates, fee bills, required items, and teacher accounts.</p>
                 </div>
 
-                <!-- Term Dates, Bills & Items Config (Feature 2A) -->
+                <!-- Term Dates, Bills & Items Config -->
                 <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 mb-6">
                     <h3 class="font-bold text-md text-slate-800 mb-3"><i class="fas fa-calendar-alt text-brand-700 mr-2"></i>Academic Term Dates, Bills & Requirement Config</h3>
                     <form onsubmit="handleSaveTermConfig(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
@@ -526,6 +526,7 @@
         </main>
     </div>
 
+    <!-- Add Student Modal -->
     <div id="addStudentModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 border border-slate-200 max-h-[90vh] overflow-y-auto custom-scrollbar">
             <h3 id="studentModalTitle" class="text-lg font-bold text-slate-800 mb-4">Add / Edit Student Profile</h3>
@@ -582,6 +583,7 @@
         </div>
     </div>
 
+    <!-- Add Teacher Modal -->
     <div id="addTeacherModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 border border-slate-200">
             <h3 id="teacherModalTitle" class="text-lg font-bold text-slate-800 mb-4">Add New Teacher</h3>
@@ -609,6 +611,7 @@
         </div>
     </div>
 
+    <!-- Confirmation Modal -->
     <div id="confirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4 no-print">
         <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 border border-slate-200 text-center">
             <div id="confirmIcon" class="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-3 text-xl font-bold">
@@ -623,6 +626,7 @@
         </div>
     </div>
 
+    <!-- Login Authentication Modal -->
     <div id="loginModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 border border-slate-100 text-left">
             <div class="w-16 h-16 bg-brand-700 text-white rounded-2xl mx-auto flex items-center justify-center font-bold text-2xl shadow-lg mb-3">VM</div>
@@ -676,28 +680,28 @@
     </div>
 
     <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "firebase/app";
-        import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, deleteDoc, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
         const firebaseConfig = {
-        apiKey: "AIzaSyBJmBJmyFkxORG9ZtehYOSoAVBQaNCl1og",
-        authDomain: "vehem-mawunyo-int-school.firebaseapp.com",
-        projectId: "vehem-mawunyo-int-school",
-        storageBucket: "vehem-mawunyo-int-school.firebasestorage.app",
-        messagingSenderId: "622390208992",
-        appId: "1:622390208992:web:e429fc60cd294f78152385",
-        measurementId: "G-7TZ6069F84"
-};
+            apiKey: "AIzaSyBJmBJmyFkxORG9ZtehYOSoAVBQaNCl1og",
+            authDomain: "vehem-mawunyo-int-school.firebaseapp.com",
+            projectId: "vehem-mawunyo-int-school",
+            storageBucket: "vehem-mawunyo-int-school.firebasestorage.app",
+            messagingSenderId: "622390208992",
+            appId: "1:622390208992:web:e429fc60cd294f78152385",
+            measurementId: "G-7TZ6069F84"
+        };
 
-// Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
-        
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const appId = "vehem-mawunyo-int-school";
+        let initialAuthToken = null;
 
         const STUDENTS_COLL = collection(db, 'artifacts', appId, 'public', 'data', 'students');
         const SCORES_COLL = collection(db, 'artifacts', appId, 'public', 'data', 'scores');
@@ -737,9 +741,9 @@
         ];
 
         let state = {
-            students: [],
-            scores: {}, // Structure: { [term]: { [studentId]: { [subject]: { testScore, hwScore, projectScore, classScore, examScore } } } }
-            teachers: [],
+            students: INITIAL_STUDENTS,
+            scores: {},
+            teachers: INITIAL_TEACHERS,
             termLocked: false,
             adminPassword: 'admin123',
             auditLogs: [],
@@ -827,7 +831,6 @@
                 });
             }
 
-            // Populate Term Dropdowns
             ['singleScoreTermSelect', 'batchTermSelect'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
@@ -839,7 +842,6 @@
                 }
             });
 
-            // Populate Batch Selectors
             const batchClass = document.getElementById('batchClassSelect');
             const batchSub = document.getElementById('batchSubjectSelect');
             const batchRptClass = document.getElementById('reportClassBatchSelect');
@@ -860,6 +862,11 @@
 
         async function initBackendAuth() {
             renderMasterClassDropdowns();
+            populateTeacherLoginDropdown();
+            populateDropdowns();
+            renderStudentsTable();
+            renderTeacherTable();
+
             try {
                 if (initialAuthToken) {
                     const userCredential = await signInWithCustomToken(auth, initialAuthToken);
@@ -871,7 +878,7 @@
                 updateCloudStatus("Connected", "text-emerald-400", "fa-check-circle");
                 setupRealtimeListeners();
             } catch (err) {
-                console.error("Backend Auth Error:", err);
+                console.warn("Backend Auth Warning (Running local state):", err);
                 updateCloudStatus("Offline Mode", "text-amber-400", "fa-exclamation-triangle");
             }
         }
@@ -895,7 +902,7 @@
             onSnapshot(TEACHERS_COLL, (snapshot) => {
                 const teachersList = [];
                 snapshot.forEach(docSnap => teachersList.push(docSnap.data()));
-                state.teachers = teachersList;
+                if (teachersList.length > 0) state.teachers = teachersList;
                 populateTeacherLoginDropdown();
                 renderTeacherTable();
             });
@@ -903,8 +910,8 @@
             onSnapshot(STUDENTS_COLL, (snapshot) => {
                 const studentsList = [];
                 snapshot.forEach(docSnap => studentsList.push(docSnap.data()));
-                state.students = studentsList;
-                document.getElementById('cloudStudentCount').innerText = studentsList.length;
+                if (studentsList.length > 0) state.students = studentsList;
+                document.getElementById('cloudStudentCount').innerText = state.students.length;
                 populateDropdowns();
                 renderStudentsTable();
                 renderClassTotals();
@@ -913,8 +920,7 @@
             onSnapshot(SCORES_COLL, (snapshot) => {
                 const scoresMap = {};
                 snapshot.forEach(docSnap => {
-                    const data = docSnap.data();
-                    scoresMap[docSnap.id] = data;
+                    scoresMap[docSnap.id] = docSnap.data();
                 });
                 state.scores = scoresMap;
 
@@ -1225,9 +1231,9 @@
         function calculateLiveTotal() {
             const t = parseFloat(document.getElementById('inputTestScore').value) || 0;
             const hw = parseFloat(document.getElementById('inputHwScore').value) || 0;
-            const pr = parseFloat(document.getElementById('inputCWScore').value) || 0;
+            const cw = parseFloat(document.getElementById('inputCWScore').value) || 0;
             
-            const classTotal = t + hw + pr;
+            const classTotal = t + hw + cw;
             document.getElementById('inputClassScoreTotal').value = classTotal;
 
             const e = parseFloat(document.getElementById('inputExamScore').value) || 0;
@@ -1379,7 +1385,7 @@
                         <td class="px-3 py-2 font-bold text-slate-800">${idx + 1}. ${stu.name}</td>
                         <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.5" value="${t}" data-stuid="${stu.id}" data-type="test" oninput="updateGridRowTotal(this)" class="w-full rounded border-slate-300 p-1 text-center font-semibold text-xs border"></td>
                         <td class="px-2 py-2"><input type="number" min="0" max="10" step="0.5" value="${hw}" data-stuid="${stu.id}" data-type="hw" oninput="updateGridRowTotal(this)" class="w-full rounded border-slate-300 p-1 text-center font-semibold text-xs border"></td>
-                        <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.5" value="${pr}" data-stuid="${stu.id}" data-type="project" oninput="updateGridRowTotal(this)" class="w-full rounded border-slate-300 p-1 text-center font-semibold text-xs border"></td>
+                        <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.5" value="${cw}" data-stuid="${stu.id}" data-type="cw" oninput="updateGridRowTotal(this)" class="w-full rounded border-slate-300 p-1 text-center font-semibold text-xs border"></td>
                         <td class="px-2 py-2 bg-brand-50/50 text-center font-bold text-brand-900" id="gridClassTotal-${stu.id}">${c}</td>
                         <td class="px-2 py-2"><input type="number" min="0" max="50" step="0.5" value="${ex}" data-stuid="${stu.id}" data-type="exam" oninput="updateGridRowTotal(this)" class="w-full rounded border-slate-300 p-1 text-center font-bold text-xs border"></td>
                         <td class="px-2 py-2 text-center font-black text-sm text-slate-800" id="gridGrandTotal-${stu.id}">${tot}</td>
@@ -1395,10 +1401,10 @@
             
             const t = parseFloat(row.querySelector('[data-type="test"]').value) || 0;
             const hw = parseFloat(row.querySelector('[data-type="hw"]').value) || 0;
-            const pr = parseFloat(row.querySelector('[data-type="project"]').value) || 0;
+            const cw = parseFloat(row.querySelector('[data-type="cw"]').value) || 0;
             const ex = parseFloat(row.querySelector('[data-type="exam"]').value) || 0;
 
-            const cTotal = t + hw + pr;
+            const cTotal = t + hw + cw;
             const grandTotal = cTotal + ex;
 
             document.getElementById(`gridClassTotal-${stuId}`).innerText = cTotal;
@@ -1428,13 +1434,13 @@
 
                 const t = parseFloat(row.querySelector('[data-type="test"]').value) || 0;
                 const hw = parseFloat(row.querySelector('[data-type="hw"]').value) || 0;
-                const pr = parseFloat(row.querySelector('[data-type="CW"]').value) || 0;
+                const cw = parseFloat(row.querySelector('[data-type="cw"]').value) || 0;
                 const ex = parseFloat(row.querySelector('[data-type="exam"]').value) || 0;
 
                 if (!state.scores[termKey][stuId]) state.scores[termKey][stuId] = {};
                 
                 state.scores[termKey][stuId][selectedSubject] = {
-                    testScore: t, hwScore: hw, projectScore: pr, classScore: t + hw + pr, examScore: ex
+                    testScore: t, hwScore: hw, cwScore: cw, classScore: t + hw + cw, examScore: ex
                 };
 
                 if (currentUser) {
@@ -1737,23 +1743,32 @@
                 teacherRemark: teacherRemark
             };
 
+            const existingIdx = state.students.findIndex(s => s.id === newStu.id);
+            if (existingIdx !== -1) state.students[existingIdx] = newStu;
+            else state.students.push(newStu);
+
             if (currentUser) {
                 await setDoc(doc(STUDENTS_COLL, newStu.id), newStu, { merge: true });
                 await logActivity("Save Student Profile", `Saved details for ${newStu.name} (${newStu.id})`);
             }
 
+            populateDropdowns();
+            renderStudentsTable();
             closeAddStudentModal();
             showToast("Student profile saved!", "success");
         }
 
         function deleteStudent(id) {
             showConfirmModal("Delete Student Record", `Are you sure you want to permanently delete student ${id} and all marks?`, async () => {
+                state.students = state.students.filter(s => s.id !== id);
                 if (currentUser) {
                     await deleteDoc(doc(STUDENTS_COLL, id));
                     await deleteDoc(doc(SCORES_COLL, id));
                     await logActivity("Delete Student", `Deleted student record ${id}`);
-                    showToast("Student deleted successfully.", "info");
                 }
+                populateDropdowns();
+                renderStudentsTable();
+                showToast("Student deleted successfully.", "info");
             });
         }
 
@@ -1819,22 +1834,31 @@
                 password: pwd
             };
 
+            const existingIdx = state.teachers.findIndex(t => t.id === teacherObj.id);
+            if (existingIdx !== -1) state.teachers[existingIdx] = teacherObj;
+            else state.teachers.push(teacherObj);
+
             if (currentUser) {
                 await setDoc(doc(TEACHERS_COLL, teacherObj.id), teacherObj);
                 await logActivity("Manage Teacher", `${editId ? 'Updated' : 'Added'} teacher ${teacherObj.name} assigned to ${cls}`);
             }
 
+            populateTeacherLoginDropdown();
+            renderTeacherTable();
             closeAddTeacherModal();
             showToast("Teacher account saved!", "success");
         }
 
         function deleteTeacher(id) {
             showConfirmModal("Delete Teacher Account", "Are you sure you want to remove this teacher account?", async () => {
+                state.teachers = state.teachers.filter(t => t.id !== id);
                 if (currentUser) {
                     await deleteDoc(doc(TEACHERS_COLL, id));
                     await logActivity("Manage Teacher", `Deleted teacher account ${id}`);
-                    showToast("Teacher account removed.", "info");
                 }
+                populateTeacherLoginDropdown();
+                renderTeacherTable();
+                showToast("Teacher account removed.", "info");
             });
         }
 
@@ -1886,6 +1910,8 @@
                 if (!currentUser) return;
                 const snapshot = await getDocs(AUDIT_COLL);
                 snapshot.forEach(async (d) => await deleteDoc(d.ref));
+                state.auditLogs = [];
+                renderAuditLogsTable();
                 showToast("Audit logs cleared.", "info");
             });
         }
@@ -1909,22 +1935,34 @@
             reader.onload = async function(evt) {
                 try {
                     const importedDb = JSON.parse(evt.target.result);
-                    if (importedDb.students && currentUser) {
-                        for (const stu of importedDb.students) {
-                            await setDoc(doc(STUDENTS_COLL, stu.id), stu, { merge: true });
-                        }
-                        if (importedDb.teachers) {
-                            for (const t of importedDb.teachers) {
-                                await setDoc(doc(TEACHERS_COLL, t.id), t, { merge: true });
+                    if (importedDb.students) {
+                        state.students = importedDb.students;
+                        if (importedDb.teachers) state.teachers = importedDb.teachers;
+                        if (importedDb.scores) state.scores = importedDb.scores;
+                        
+                        if (currentUser) {
+                            for (const stu of importedDb.students) {
+                                await setDoc(doc(STUDENTS_COLL, stu.id), stu, { merge: true });
                             }
-                        }
-                        if (importedDb.scores) {
-                            for (const [stuId, termObj] of Object.entries(importedDb.scores)) {
-                                await setDoc(doc(SCORES_COLL, stuId), termObj, { merge: true });
+                            if (importedDb.teachers) {
+                                for (const t of importedDb.teachers) {
+                                    await setDoc(doc(TEACHERS_COLL, t.id), t, { merge: true });
+                                }
                             }
+                            if (importedDb.scores) {
+                                for (const [stuId, termObj] of Object.entries(importedDb.scores)) {
+                                    await setDoc(doc(SCORES_COLL, stuId), termObj, { merge: true });
+                                }
+                            }
+                            await logActivity("Import Database", "Imported JSON backup into Cloud Firestore");
                         }
-                        await logActivity("Import Database", "Imported JSON backup into Cloud Firestore");
-                        showToast("Database imported & synced to cloud successfully!", "success");
+                        
+                        populateDropdowns();
+                        populateTeacherLoginDropdown();
+                        renderStudentsTable();
+                        renderTeacherTable();
+                        renderClassTotals();
+                        showToast("Database imported successfully!", "success");
                     } else {
                         showToast("Invalid backup file format.", "error");
                     }
@@ -1935,43 +1973,43 @@
             reader.readAsText(file);
         }
 
+        // Attach functions to window object for global HTML event handlers
+        window.switchTab = switchTab;
+        window.logout = logout;
         window.toggleRoleTab = toggleRoleTab;
         window.handleTeacherLogin = handleTeacherLogin;
         window.handleAdminLogin = handleAdminLogin;
-        window.logout = logout;
-        window.switchTab = switchTab;
         window.loadStudentSubjects = loadStudentSubjects;
-        window.calculateLiveTotal = calculateLiveTotal;
         window.populateCurrentScore = populateCurrentScore;
+        window.calculateLiveTotal = calculateLiveTotal;
         window.handleScoreSubmit = handleScoreSubmit;
         window.renderBatchGridTable = renderBatchGridTable;
         window.updateGridRowTotal = updateGridRowTotal;
         window.saveBatchGridScores = saveBatchGridScores;
+        window.openAddStudentModal = openAddStudentModal;
+        window.closeAddStudentModal = closeAddStudentModal;
+        window.handleAddStudent = handleAddStudent;
+        window.editStudent = editStudent;
+        window.deleteStudent = deleteStudent;
         window.renderClassTotals = renderClassTotals;
         window.toggleReportPrintMode = toggleReportPrintMode;
         window.generateReportCard = generateReportCard;
         window.generateBatchReportCards = generateBatchReportCards;
-        window.openAddStudentModal = openAddStudentModal;
-        window.closeAddStudentModal = closeAddStudentModal;
-        window.editStudent = editStudent;
-        window.handleAddStudent = handleAddStudent;
-        window.deleteStudent = deleteStudent;
+        window.handleSaveTermConfig = handleSaveTermConfig;
         window.openAddTeacherModal = openAddTeacherModal;
         window.closeAddTeacherModal = closeAddTeacherModal;
-        window.editTeacher = editTeacher;
         window.handleSaveTeacher = handleSaveTeacher;
+        window.editTeacher = editTeacher;
         window.deleteTeacher = deleteTeacher;
         window.toggleTermLock = toggleTermLock;
-        window.handleSaveTermConfig = handleSaveTermConfig;
         window.seedInitialCloudData = seedInitialCloudData;
         window.clearCloudLogs = clearCloudLogs;
         window.exportDatabaseJSON = exportDatabaseJSON;
         window.importDatabaseJSON = importDatabaseJSON;
         window.closeConfirmModal = closeConfirmModal;
 
-        window.addEventListener('DOMContentLoaded', () => {
-            initBackendAuth();
-        });
+        // Start initialization
+        initBackendAuth();
     </script>
 </body>
 </html>
