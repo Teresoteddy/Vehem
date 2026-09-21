@@ -19,6 +19,7 @@
                         brand: {
                             50: '#fdf2f8',
                             100: '#fce7f3',
+                            300: '#f472b6',
                             500: '#ec4899',
                             700: '#be185d',
                             800: '#9d174d',
@@ -47,182 +48,185 @@
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 antialiased font-sans min-h-screen flex flex-col">
 
-    <header class="bg-slate-900 text-white shadow-md no-print">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="bg-brand-700 text-white p-2 rounded-lg font-bold text-xl shadow-sm">VM</div>
-                <div>
-                    <h1 class="font-bold text-lg leading-tight">VEHEM MAWUNYO INT. SCHOOL</h1>
-                    <p class="text-xs text-slate-400">Terminal Report System v2.5 (Creche to JHS 3)</p>
+    <header class="bg-slate-900 text-white shadow-md no-print sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-2 sm:space-x-3 min-w-0">
+                <div class="bg-brand-700 text-white p-1.5 sm:p-2 rounded-lg font-bold text-lg sm:text-xl shadow-sm flex-shrink-0">VM</div>
+                <div class="min-w-0">
+                    <h1 class="font-bold text-sm sm:text-lg leading-tight truncate">VEHEM MAWUNYO INT. SCHOOL</h1>
+                    <p class="text-[10px] sm:text-xs text-slate-400 truncate">Terminal Report System v2.5 (Creche - JHS 3)</p>
                 </div>
             </div>
             
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
                 <div class="text-right hidden sm:block">
-                    <div id="currentUserDisplay" class="text-sm font-semibold">Logged in as: Teacher</div>
-                    <div id="teacherClassBadge" class="text-xs text-brand-300 font-medium"></div>
-                    <div class="flex items-center space-x-2 text-xs">
+                    <div id="currentUserDisplay" class="text-xs sm:text-sm font-semibold truncate">Logged in as: Teacher</div>
+                    <div id="teacherClassBadge" class="text-[11px] text-brand-300 font-medium truncate"></div>
+                    <div class="flex items-center justify-end space-x-2 text-[11px]">
                         <span id="termStatusBadge" class="text-emerald-400"><i class="fas fa-unlock"></i> Term Unlocked</span>
                         <span class="text-slate-600">|</span>
                         <span id="cloudStatusBadge" class="text-amber-400 font-medium flex items-center gap-1">
-                            <i class="fas fa-spinner fa-spin text-[10px]"></i> Connecting Backend...
+                            <i class="fas fa-spinner fa-spin text-[10px]"></i> Connecting...
                         </span>
                     </div>
                 </div>
-                <button onclick="logout()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3 py-1.5 rounded-md text-sm transition flex items-center space-x-2">
+                <button onclick="logout()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-2.5 sm:px-3 py-1.5 rounded-md text-xs sm:text-sm transition flex items-center space-x-1.5">
                     <i class="fas fa-sign-out-alt"></i>
-                    <span>Log Out</span>
+                    <span class="hidden sm:inline">Log Out</span>
                 </button>
             </div>
         </div>
     </header>
 
-    <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm pointer-events-none no-print"></div>
+    <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-xs sm:max-w-sm pointer-events-none no-print"></div>
 
-    <div id="app" class="flex-grow flex max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 gap-6 no-print">
+    <div id="app" class="flex-grow flex flex-col lg:flex-row max-w-7xl w-full mx-auto p-3 sm:p-6 lg:p-8 gap-4 sm:gap-6 no-print">
         
-        <aside class="w-64 flex-shrink-0 bg-white rounded-xl shadow-sm p-4 border border-slate-200 h-fit">
-            <nav class="space-y-1">
-                <button onclick="switchTab('scoreEntry')" id="nav-scoreEntry" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition bg-brand-50 text-brand-700">
-                    <i class="fas fa-edit w-5 text-center"></i>
+        <!-- Responsive Navigation Sidebar / Top Tab-Bar on Mobile -->
+        <aside class="w-full lg:w-64 flex-shrink-0 bg-white rounded-xl shadow-sm p-2 sm:p-4 border border-slate-200 h-fit">
+            <nav class="flex lg:flex-col overflow-x-auto no-scrollbar sm:custom-scrollbar gap-1.5 pb-1 lg:pb-0 whitespace-nowrap">
+                <button onclick="switchTab('scoreEntry')" id="nav-scoreEntry" class="flex-shrink-0 lg:flex-shrink w-auto lg:w-full flex items-center space-x-2 sm:space-x-3 px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition bg-brand-50 text-brand-700">
+                    <i class="fas fa-edit w-4 sm:w-5 text-center"></i>
                     <span>Score Entry</span>
                 </button>
 
-                <button onclick="switchTab('batchScoreEntry')" id="nav-batchScoreEntry" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-slate-600 hover:bg-slate-50">
-                    <i class="fas fa-table-cells w-5 text-center"></i>
+                <button onclick="switchTab('batchScoreEntry')" id="nav-batchScoreEntry" class="flex-shrink-0 lg:flex-shrink w-auto lg:w-full flex items-center space-x-2 sm:space-x-3 px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition text-slate-600 hover:bg-slate-50">
+                    <i class="fas fa-table-cells w-4 sm:w-5 text-center"></i>
                     <span>Batch Grid Entry</span>
                 </button>
                 
-                <button onclick="switchTab('students')" id="nav-students" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-slate-600 hover:bg-slate-50">
-                    <i class="fas fa-user-graduate w-5 text-center"></i>
+                <button onclick="switchTab('students')" id="nav-students" class="flex-shrink-0 lg:flex-shrink w-auto lg:w-full flex items-center space-x-2 sm:space-x-3 px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition text-slate-600 hover:bg-slate-50">
+                    <i class="fas fa-user-graduate w-4 sm:w-5 text-center"></i>
                     <span>Student Roster</span>
                 </button>
                 
-                <button onclick="switchTab('classTotals')" id="nav-classTotals" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-slate-600 hover:bg-slate-50">
-                    <i class="fas fa-list-ol w-5 text-center"></i>
-                    <span>Class Summary & Ranks</span>
+                <button onclick="switchTab('classTotals')" id="nav-classTotals" class="flex-shrink-0 lg:flex-shrink w-auto lg:w-full flex items-center space-x-2 sm:space-x-3 px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition text-slate-600 hover:bg-slate-50">
+                    <i class="fas fa-list-ol w-4 sm:w-5 text-center"></i>
+                    <span>Class Ranks</span>
                 </button>
                 
-                <button onclick="switchTab('reportView')" id="nav-reportView" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-slate-600 hover:bg-slate-50">
-                    <i class="fas fa-file-invoice w-5 text-center"></i>
+                <button onclick="switchTab('reportView')" id="nav-reportView" class="flex-shrink-0 lg:flex-shrink w-auto lg:w-full flex items-center space-x-2 sm:space-x-3 px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition text-slate-600 hover:bg-slate-50">
+                    <i class="fas fa-file-invoice w-4 sm:w-5 text-center"></i>
                     <span>Terminal Reports</span>
                 </button>
-                
-                <div class="pt-4 mt-4 border-t border-slate-200 space-y-1">
-                    <span class="px-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">Admin Tools</span>
-                    <button onclick="switchTab('auditLogs')" id="nav-auditLogs" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-slate-600 hover:bg-slate-50">
-                        <i class="fas fa-history w-5 text-center"></i>
-                        <span>Audit & Activity Logs</span>
-                    </button>
-                    <button onclick="switchTab('settings')" id="nav-settings" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-slate-600 hover:bg-slate-50">
-                        <i class="fas fa-cog w-5 text-center"></i>
-                        <span>System Controls</span>
-                    </button>
-                </div>
+
+                <button onclick="switchTab('auditLogs')" id="nav-auditLogs" class="admin-nav-item flex-shrink-0 lg:flex-shrink w-auto lg:w-full flex items-center space-x-2 sm:space-x-3 px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition text-slate-600 hover:bg-slate-50">
+                    <i class="fas fa-history w-4 sm:w-5 text-center"></i>
+                    <span>Audit Trail</span>
+                </button>
+
+                <button onclick="switchTab('settings')" id="nav-settings" class="admin-nav-item flex-shrink-0 lg:flex-shrink w-auto lg:w-full flex items-center space-x-2 sm:space-x-3 px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition text-slate-600 hover:bg-slate-50">
+                    <i class="fas fa-cog w-4 sm:w-5 text-center"></i>
+                    <span>System Controls</span>
+                </button>
             </nav>
         </aside>
 
-        <main class="flex-grow bg-white rounded-xl shadow-sm border border-slate-200 p-6 overflow-hidden">
+        <main class="flex-grow bg-white rounded-xl shadow-sm border border-slate-200 p-3 sm:p-6 overflow-hidden min-w-0">
             
+            <!-- Tab: Score Entry -->
             <section id="tab-scoreEntry" class="tab-content">
-                <div class="border-b border-slate-200 pb-4 mb-6 flex justify-between items-center">
+                <div class="border-b border-slate-200 pb-3 mb-4 sm:mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                     <div>
-                        <h2 class="text-xl font-bold text-slate-800">Single Student Score Entry</h2>
-                        <p class="text-sm text-slate-500">Enter detailed continuous assessment sub-scores and exam marks.</p>
+                        <h2 class="text-lg sm:text-xl font-bold text-slate-800">Single Student Score Entry</h2>
+                        <p class="text-xs sm:text-sm text-slate-500">Enter detailed continuous assessment sub-scores and exam marks.</p>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <label class="text-xs font-semibold text-slate-600">Active Term:</label>
-                        <select id="singleScoreTermSelect" onchange="loadStudentSubjects()" class="text-xs font-medium border border-slate-300 rounded-lg p-1.5 bg-slate-50">
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <label class="text-xs font-semibold text-slate-600 whitespace-nowrap">Active Term:</label>
+                        <select id="singleScoreTermSelect" onchange="loadStudentSubjects()" class="text-xs font-medium border border-slate-300 rounded-lg p-1.5 bg-slate-50 w-full sm:w-auto">
                             <!-- Populated dynamically -->
                         </select>
                     </div>
                 </div>
 
-                <form id="scoreForm" onsubmit="handleScoreSubmit(event)" class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <form id="scoreForm" onsubmit="handleScoreSubmit(event)" class="space-y-4 sm:space-y-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Select Student Name</label>
-                            <select id="scoreStudentSelect" onchange="loadStudentSubjects()" required class="w-full rounded-lg border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 p-2.5 border">
+                            <label class="block text-xs sm:text-sm font-medium text-slate-700 mb-1">Select Student Name</label>
+                            <select id="scoreStudentSelect" onchange="loadStudentSubjects()" required class="w-full rounded-lg border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 p-2 sm:p-2.5 border text-xs sm:text-sm">
                                 <option value="">-- Select Student --</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Class</label>
-                            <input type="text" id="scoreClassDisplay" readonly class="w-full rounded-lg border-slate-200 bg-slate-50 text-slate-500 p-2.5 border">
+                            <label class="block text-xs sm:text-sm font-medium text-slate-700 mb-1">Class</label>
+                            <input type="text" id="scoreClassDisplay" readonly class="w-full rounded-lg border-slate-200 bg-slate-50 text-slate-500 p-2 sm:p-2.5 border text-xs sm:text-sm font-semibold">
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Select Subject</label>
-                            <select id="scoreSubjectSelect" required onchange="populateCurrentScore()" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 p-2.5 border">
+                        <div class="sm:col-span-2 md:col-span-1">
+                            <label class="block text-xs sm:text-sm font-medium text-slate-700 mb-1">Select Subject</label>
+                            <select id="scoreSubjectSelect" required onchange="populateCurrentScore()" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 p-2 sm:p-2.5 border text-xs sm:text-sm">
                                 <option value="">-- Choose Subject --</option>
                             </select>
                         </div>
                     </div>
 
                     <!-- Continuous Assessment Breakdown Grid -->
-                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
-                        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3"><i class="fas fa-calculator mr-1"></i> Continuous Assessment Breakdown (50%) & Exam (50%)</h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-slate-50 p-3 sm:p-5 rounded-xl border border-slate-200">
+                        <h3 class="text-[11px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider mb-3"><i class="fas fa-calculator mr-1"></i> Assessment Breakdown (50%) & Exam (50%)</h3>
+                        
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4">
                             <div>
-                                <label class="block text-xs font-semibold text-slate-700 mb-1">Class Test (20%)</label>
-                                <input type="number" id="inputTestScore" min="0" max="20" step="0.5" required oninput="calculateLiveTotal()" placeholder="0 - 20" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 p-2 border font-bold text-center">
+                                <label class="block text-[11px] sm:text-xs font-semibold text-slate-700 mb-1">Class Test (20%)</label>
+                                <input type="number" id="inputTestScore" min="0" max="20" step="0.5" required oninput="calculateLiveTotal()" placeholder="0-20" class="w-full rounded-lg border-slate-300 p-2 border font-bold text-center text-xs sm:text-sm">
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-slate-700 mb-1">Homework (10%)</label>
-                                <input type="number" id="inputHwScore" min="0" max="10" step="0.5" required oninput="calculateLiveTotal()" placeholder="0 - 10" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 p-2 border font-bold text-center">
+                                <label class="block text-[11px] sm:text-xs font-semibold text-slate-700 mb-1">Homework (10%)</label>
+                                <input type="number" id="inputHwScore" min="0" max="10" step="0.5" required oninput="calculateLiveTotal()" placeholder="0-10" class="w-full rounded-lg border-slate-300 p-2 border font-bold text-center text-xs sm:text-sm">
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-slate-700 mb-1">ClassWork (20%)</label>
-                                <input type="number" id="inputCWScore" min="0" max="20" step="0.5" required oninput="calculateLiveTotal()" placeholder="0 - 20" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 p-2 border font-bold text-center">
+                                <label class="block text-[11px] sm:text-xs font-semibold text-slate-700 mb-1">ClassWork (20%)</label>
+                                <input type="number" id="inputCWScore" min="0" max="20" step="0.5" required oninput="calculateLiveTotal()" placeholder="0-20" class="w-full rounded-lg border-slate-300 p-2 border font-bold text-center text-xs sm:text-sm">
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-brand-800 mb-1">Class Score Total (50%)</label>
-                                <input type="number" id="inputClassScoreTotal" readonly placeholder="0 - 50" class="w-full rounded-lg border-brand-300 bg-brand-50/50 text-brand-900 font-black p-2 border text-center">
+                                <label class="block text-[11px] sm:text-xs font-semibold text-brand-800 mb-1">Class Score (50%)</label>
+                                <input type="number" id="inputClassScoreTotal" readonly placeholder="0-50" class="w-full rounded-lg border-brand-300 bg-brand-50/50 text-brand-900 font-black p-2 border text-center text-xs sm:text-sm">
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 pt-4 border-t border-slate-200">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-4 pt-4 border-t border-slate-200">
                             <div>
-                                <label class="block text-xs font-semibold text-slate-700 mb-1">Exam Mark (50%)</label>
-                                <input type="number" id="inputExamScore" min="0" max="50" step="0.5" required oninput="calculateLiveTotal()" placeholder="0 - 50" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 p-2.5 border font-bold text-lg text-center">
+                                <label class="block text-[11px] sm:text-xs font-semibold text-slate-700 mb-1">Exam Mark (50%)</label>
+                                <input type="number" id="inputExamScore" min="0" max="50" step="0.5" required oninput="calculateLiveTotal()" placeholder="0 - 50" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-brand-500 p-2 sm:p-2.5 border font-bold text-sm sm:text-lg text-center">
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-slate-700 mb-1">Total (100%) & Remark</label>
+                                <label class="block text-[11px] sm:text-xs font-semibold text-slate-700 mb-1">Total Score (100%) & Remark</label>
                                 <div class="flex items-center space-x-3">
-                                    <div id="liveTotalDisplay" class="text-2xl font-black text-brand-700 bg-white px-4 py-1 rounded-lg border border-slate-300 min-w-[80px] text-center">0</div>
-                                    <span id="liveRemarkDisplay" class="text-sm font-semibold px-3 py-1 rounded-full bg-slate-200 text-slate-700">N/A</span>
+                                    <div id="liveTotalDisplay" class="text-xl sm:text-2xl font-black text-brand-700 bg-white px-3 sm:px-4 py-1.5 rounded-lg border border-slate-300 min-w-[70px] sm:min-w-[80px] text-center">0</div>
+                                    <span id="liveRemarkDisplay" class="text-xs sm:text-sm font-semibold px-2.5 sm:px-3 py-1 rounded-full bg-slate-200 text-slate-700">N/A</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="flex justify-end space-x-3">
-                        <button type="reset" class="px-5 py-2.5 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 font-medium text-sm transition">Reset Form</button>
-                        <button type="submit" id="btnSubmitScore" class="px-6 py-2.5 bg-brand-700 hover:bg-brand-800 text-white rounded-lg font-medium text-sm transition shadow-sm flex items-center space-x-2">
+                    <div class="flex justify-end space-x-2 sm:space-x-3 pt-2">
+                        <button type="reset" class="px-3 sm:px-5 py-2 sm:py-2.5 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 font-medium text-xs sm:text-sm transition">Reset Form</button>
+                        <button type="submit" id="btnSubmitScore" class="px-4 sm:px-6 py-2 sm:py-2.5 bg-brand-700 hover:bg-brand-800 text-white rounded-lg font-medium text-xs sm:text-sm transition shadow-sm flex items-center space-x-2">
                             <i class="fas fa-save"></i>
-                            <span>Save & Update Grade</span>
+                            <span>Save Score</span>
                         </button>
                     </div>
                 </form>
 
-                <div class="mt-8">
-                    <h3 class="text-md font-bold text-slate-800 mb-3">All Subjects Overview for Selected Student</h3>
-                    <div class="overflow-x-auto border border-slate-200 rounded-lg">
-                        <table class="w-full text-sm text-left text-slate-600">
-                            <thead class="text-xs uppercase bg-slate-100 text-slate-700">
+                <div class="mt-6 sm:mt-8">
+                    <h3 class="text-sm sm:text-md font-bold text-slate-800 mb-3">All Subjects Overview for Selected Student</h3>
+                    <div class="overflow-x-auto border border-slate-200 rounded-lg custom-scrollbar">
+                        <table class="w-full text-xs sm:text-sm text-left text-slate-600 min-w-[650px]">
+                            <thead class="text-[11px] uppercase bg-slate-100 text-slate-700 font-bold">
                                 <tr>
-                                    <th class="px-3 py-3">Subject</th>
-                                    <th class="px-3 py-3 text-center">Test (20)</th>
-                                    <th class="px-3 py-3 text-center">HW (10)</th>
-                                    <th class="px-3 py-3 text-center">CW (20)</th>
-                                    <th class="px-3 py-3 text-center">Class (50)</th>
-                                    <th class="px-3 py-3 text-center">Exams (50)</th>
-                                    <th class="px-3 py-3 text-center">Total (100)</th>
-                                    <th class="px-3 py-3 text-center">Rank</th>
-                                    <th class="px-3 py-3">Remark</th>
+                                    <th class="px-3 py-2.5">Subject</th>
+                                    <th class="px-2 py-2.5 text-center">Test (20)</th>
+                                    <th class="px-2 py-2.5 text-center">HW (10)</th>
+                                    <th class="px-2 py-2.5 text-center">CW (20)</th>
+                                    <th class="px-2 py-2.5 text-center bg-slate-200/50">Class (50)</th>
+                                    <th class="px-2 py-2.5 text-center">Exams (50)</th>
+                                    <th class="px-2 py-2.5 text-center">Total (100)</th>
+                                    <th class="px-2 py-2.5 text-center">Rank</th>
+                                    <th class="px-3 py-2.5">Remark</th>
                                 </tr>
                             </thead>
                             <tbody id="studentSubjectOverviewTable">
@@ -233,50 +237,51 @@
                 </div>
             </section>
 
+            <!-- Tab: Batch Grid Entry -->
             <section id="tab-batchScoreEntry" class="tab-content hidden">
-                <div class="border-b border-slate-200 pb-4 mb-6 flex justify-between items-center">
+                <div class="border-b border-slate-200 pb-3 mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                     <div>
-                        <h2 class="text-xl font-bold text-slate-800">Spreadsheet-Style Batch Score Entry</h2>
-                        <p class="text-sm text-slate-500">Enter marks for all students in a class simultaneously using tab navigation.</p>
+                        <h2 class="text-lg sm:text-xl font-bold text-slate-800">Batch Grid Entry</h2>
+                        <p class="text-xs sm:text-sm text-slate-500">Enter marks for all students in a class simultaneously.</p>
                     </div>
-                    <button onclick="saveBatchGridScores()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2 shadow-sm">
+                    <button onclick="saveBatchGridScores()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-2 shadow-sm">
                         <i class="fas fa-check-circle"></i> Save All Batch Scores
                     </button>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 bg-slate-50 p-3 sm:p-4 rounded-xl border border-slate-200">
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Select Class</label>
-                        <select id="batchClassSelect" onchange="renderBatchGridTable()" class="w-full rounded-lg border-slate-300 p-2 border text-sm font-semibold">
+                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Select Class</label>
+                        <select id="batchClassSelect" onchange="renderBatchGridTable()" class="w-full rounded-lg border-slate-300 p-2 border text-xs font-semibold">
                             <!-- Populated dynamically -->
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Select Subject</label>
-                        <select id="batchSubjectSelect" onchange="renderBatchGridTable()" class="w-full rounded-lg border-slate-300 p-2 border text-sm font-semibold">
+                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Select Subject</label>
+                        <select id="batchSubjectSelect" onchange="renderBatchGridTable()" class="w-full rounded-lg border-slate-300 p-2 border text-xs font-semibold">
                             <!-- Populated dynamically -->
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Academic Term</label>
-                        <select id="batchTermSelect" onchange="renderBatchGridTable()" class="w-full rounded-lg border-slate-300 p-2 border text-sm font-semibold">
+                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Academic Term</label>
+                        <select id="batchTermSelect" onchange="renderBatchGridTable()" class="w-full rounded-lg border-slate-300 p-2 border text-xs font-semibold">
                             <!-- Populated dynamically -->
                         </select>
                     </div>
                 </div>
 
                 <div class="overflow-x-auto border border-slate-200 rounded-lg max-h-[500px] custom-scrollbar">
-                    <table class="w-full text-xs text-left text-slate-700 border-collapse">
-                        <thead class="uppercase bg-slate-100 text-slate-800 sticky top-0 border-b font-bold">
+                    <table class="w-full text-xs text-left text-slate-700 border-collapse min-w-[700px]">
+                        <thead class="uppercase bg-slate-100 text-slate-800 sticky top-0 border-b font-bold z-10">
                             <tr>
-                                <th class="px-3 py-3">Student Name</th>
-                                <th class="px-2 py-3 text-center w-24">Test (20)</th>
-                                <th class="px-2 py-3 text-center w-24">HW (10)</th>
-                                <th class="px-2 py-3 text-center w-24">CW (20)</th>
-                                <th class="px-2 py-3 text-center w-24 bg-brand-50 text-brand-900">Class (50)</th>
-                                <th class="px-2 py-3 text-center w-24">Exam (50)</th>
-                                <th class="px-2 py-3 text-center w-24 font-black">Total (100)</th>
-                                <th class="px-3 py-3 text-center">Remark</th>
+                                <th class="px-3 py-2.5">Student Name</th>
+                                <th class="px-2 py-2.5 text-center w-20 sm:w-24">Test (20)</th>
+                                <th class="px-2 py-2.5 text-center w-20 sm:w-24">HW (10)</th>
+                                <th class="px-2 py-2.5 text-center w-20 sm:w-24">CW (20)</th>
+                                <th class="px-2 py-2.5 text-center w-20 sm:w-24 bg-brand-50 text-brand-900">Class (50)</th>
+                                <th class="px-2 py-2.5 text-center w-20 sm:w-24">Exam (50)</th>
+                                <th class="px-2 py-2.5 text-center w-20 sm:w-24 font-black">Total (100)</th>
+                                <th class="px-3 py-2.5 text-center">Remark</th>
                             </tr>
                         </thead>
                         <tbody id="batchGridTableBody">
@@ -286,28 +291,29 @@
                 </div>
             </section>
 
+            <!-- Tab: Student Directory -->
             <section id="tab-students" class="tab-content hidden">
-                <div class="flex justify-between items-center border-b border-slate-200 pb-4 mb-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 pb-3 mb-4 sm:mb-6 gap-2">
                     <div>
-                        <h2 class="text-xl font-bold text-slate-800">Student Directory & Profiles</h2>
-                        <p class="text-sm text-slate-500">Manage enrolled students, attendance counts, conduct, remarks, and passport photos.</p>
+                        <h2 class="text-lg sm:text-xl font-bold text-slate-800">Student Directory & Profiles</h2>
+                        <p class="text-xs sm:text-sm text-slate-500">Manage enrolled students, attendance counts, conduct, and remarks.</p>
                     </div>
-                    <button onclick="openAddStudentModal()" class="bg-brand-700 hover:bg-brand-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-2">
+                    <button onclick="openAddStudentModal()" class="w-full sm:w-auto bg-brand-700 hover:bg-brand-800 text-white px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition flex items-center justify-center space-x-2">
                         <i class="fas fa-plus"></i>
                         <span>Add New Student</span>
                     </button>
                 </div>
 
-                <div class="overflow-x-auto border border-slate-200 rounded-lg">
-                    <table class="w-full text-sm text-left text-slate-600">
-                        <thead class="text-xs uppercase bg-slate-100 text-slate-700">
+                <div class="overflow-x-auto border border-slate-200 rounded-lg custom-scrollbar">
+                    <table class="w-full text-xs sm:text-sm text-left text-slate-600 min-w-[650px]">
+                        <thead class="text-[11px] uppercase bg-slate-100 text-slate-700 font-bold">
                             <tr>
-                                <th class="px-4 py-3">Photo</th>
-                                <th class="px-4 py-3">ID & Name</th>
-                                <th class="px-4 py-3">Class Level</th>
-                                <th class="px-4 py-3">Attendance</th>
-                                <th class="px-4 py-3">Conduct & Remarks</th>
-                                <th class="px-4 py-3 text-right">Actions</th>
+                                <th class="px-3 py-2.5">Photo</th>
+                                <th class="px-3 py-2.5">ID & Name</th>
+                                <th class="px-3 py-2.5">Class Level</th>
+                                <th class="px-3 py-2.5">Attendance</th>
+                                <th class="px-3 py-2.5">Conduct & Remarks</th>
+                                <th class="px-3 py-2.5 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="studentsTableBody">
@@ -317,29 +323,30 @@
                 </div>
             </section>
 
+            <!-- Tab: Class Summary & Ranks -->
             <section id="tab-classTotals" class="tab-content hidden">
-                <div class="flex justify-between items-center border-b border-slate-200 pb-4 mb-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 pb-3 mb-4 sm:mb-6 gap-2">
                     <div>
-                        <h2 class="text-xl font-bold text-slate-800">Class Summary & Rankings</h2>
-                        <p class="text-sm text-slate-500">Automatically computed grand totals and class positions by selected grade level.</p>
+                        <h2 class="text-lg sm:text-xl font-bold text-slate-800">Class Summary & Rankings</h2>
+                        <p class="text-xs sm:text-sm text-slate-500">Computed grand totals and class positions by selected grade level.</p>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <select id="filterClassSelect" onchange="renderClassTotals()" class="rounded-lg border-slate-300 shadow-sm p-2 border text-sm font-medium">
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <select id="filterClassSelect" onchange="renderClassTotals()" class="w-full sm:w-auto rounded-lg border-slate-300 shadow-sm p-2 border text-xs sm:text-sm font-medium">
                             <option value="ALL">All Classes</option>
                         </select>
                     </div>
                 </div>
 
-                <div class="overflow-x-auto border border-slate-200 rounded-lg">
-                    <table class="w-full text-sm text-left text-slate-600">
-                        <thead class="text-xs uppercase bg-slate-100 text-slate-700">
+                <div class="overflow-x-auto border border-slate-200 rounded-lg custom-scrollbar">
+                    <table class="w-full text-xs sm:text-sm text-left text-slate-600 min-w-[600px]">
+                        <thead class="text-[11px] uppercase bg-slate-100 text-slate-700 font-bold">
                             <tr>
-                                <th class="px-4 py-3">Class Rank</th>
-                                <th class="px-4 py-3">Student Name</th>
-                                <th class="px-4 py-3">Class</th>
-                                <th class="px-4 py-3">Grand Total Score</th>
-                                <th class="px-4 py-3">Average (%)</th>
-                                <th class="px-4 py-3">Promoted To</th>
+                                <th class="px-3 py-2.5">Rank</th>
+                                <th class="px-4 py-2.5">Student Name</th>
+                                <th class="px-3 py-2.5">Class</th>
+                                <th class="px-3 py-2.5">Grand Total Score</th>
+                                <th class="px-3 py-2.5">Average (%)</th>
+                                <th class="px-3 py-2.5">Promoted To</th>
                             </tr>
                         </thead>
                         <tbody id="classTotalsTableBody">
@@ -349,53 +356,55 @@
                 </div>
             </section>
 
+            <!-- Tab: Terminal Reports -->
             <section id="tab-reportView" class="tab-content hidden">
-                <div class="flex justify-between items-center border-b border-slate-200 pb-4 mb-6 no-print flex-wrap gap-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 pb-3 mb-4 sm:mb-6 no-print gap-3">
                     <div>
-                        <h2 class="text-xl font-bold text-slate-800">Terminal Report Cards</h2>
-                        <p class="text-sm text-slate-500">Generate individual student reports or print full class rosters in batch.</p>
+                        <h2 class="text-lg sm:text-xl font-bold text-slate-800">Terminal Report Cards</h2>
+                        <p class="text-xs sm:text-sm text-slate-500">Generate individual student reports or print full class rosters in batch.</p>
                     </div>
-                    <div class="flex items-center gap-3 flex-wrap">
-                        <select id="reportModeSelect" onchange="toggleReportPrintMode()" class="rounded-lg border-slate-300 shadow-sm p-2 border text-sm font-bold bg-slate-50">
+                    <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                        <select id="reportModeSelect" onchange="toggleReportPrintMode()" class="rounded-lg border-slate-300 shadow-sm p-2 border text-xs font-bold bg-slate-50 flex-grow sm:flex-grow-0">
                             <option value="single">Single Student Mode</option>
                             <option value="batch">Batch Entire Class Mode</option>
                         </select>
 
-                        <div id="singleStudentSelectContainer" class="flex items-center gap-2">
-                            <select id="reportStudentSelect" onchange="generateReportCard()" class="rounded-lg border-slate-300 shadow-sm p-2 border text-sm font-medium">
+                        <div id="singleStudentSelectContainer" class="flex items-center gap-2 flex-grow sm:flex-grow-0">
+                            <select id="reportStudentSelect" onchange="generateReportCard()" class="w-full sm:w-auto rounded-lg border-slate-300 shadow-sm p-2 border text-xs font-medium">
                                 <!-- Populated dynamically -->
                             </select>
                         </div>
 
-                        <div id="batchClassSelectContainer" class="hidden flex items-center gap-2">
-                            <select id="reportClassBatchSelect" onchange="generateBatchReportCards()" class="rounded-lg border-slate-300 shadow-sm p-2 border text-sm font-medium">
+                        <div id="batchClassSelectContainer" class="hidden flex items-center gap-2 flex-grow sm:flex-grow-0">
+                            <select id="reportClassBatchSelect" onchange="generateBatchReportCards()" class="w-full sm:w-auto rounded-lg border-slate-300 shadow-sm p-2 border text-xs font-medium">
                                 <!-- Populated dynamically -->
                             </select>
                         </div>
 
-                        <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center space-x-2 shadow-sm">
+                        <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-900 text-white px-3.5 py-2 rounded-lg text-xs font-medium transition flex items-center space-x-1.5 shadow-sm ml-auto sm:ml-0">
                             <i class="fas fa-print"></i>
-                            <span id="btnPrintText">Print Report</span>
+                            <span id="btnPrintText">Print</span>
                         </button>
                     </div>
                 </div>
 
-                <div id="printableReport" class="space-y-8">
+                <div id="printableReport" class="space-y-6 sm:space-y-8 overflow-x-auto">
                     <!-- Dynamic Printable Content -->
                 </div>
             </section>
 
+            <!-- Tab: System Controls (Admin Only) -->
             <section id="tab-settings" class="tab-content hidden">
-                <div class="border-b border-slate-200 pb-4 mb-6">
-                    <h2 class="text-xl font-bold text-slate-800">System Controls & Administrative Configuration</h2>
-                    <p class="text-sm text-slate-500">Manage real-time cloud sync, term dates, fee bills, required items, teacher accounts, and security controls.</p>
+                <div class="border-b border-slate-200 pb-3 mb-4">
+                    <h2 class="text-lg sm:text-xl font-bold text-slate-800">System Controls & Administrative Configuration</h2>
+                    <p class="text-xs sm:text-sm text-slate-500">Manage real-time cloud sync, term dates, fee bills, required items, teacher accounts, and security controls.</p>
                 </div>
 
                 <!-- Admin Security Password Change Card -->
-                <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 mb-6">
-                    <h3 class="font-bold text-md text-slate-800 mb-2"><i class="fas fa-user-shield text-brand-700 mr-2"></i>Admin Security & Password Control</h3>
-                    <p class="text-xs text-slate-500 mb-4">Change the system administrator master password. This controls access to all admin tools.</p>
-                    <form onsubmit="handleAdminPasswordChange(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs items-end">
+                <div class="bg-slate-50 p-4 sm:p-5 rounded-xl border border-slate-200 mb-4 sm:mb-6">
+                    <h3 class="font-bold text-sm sm:text-md text-slate-800 mb-2"><i class="fas fa-user-shield text-brand-700 mr-2"></i>Admin Security & Password Control</h3>
+                    <p class="text-xs text-slate-500 mb-3">Change the system administrator master password. This controls access to all admin tools.</p>
+                    <form onsubmit="handleAdminPasswordChange(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs items-end">
                         <div>
                             <label class="block font-semibold text-slate-700 mb-1">New Master Password</label>
                             <div class="relative">
@@ -414,7 +423,7 @@
                                 </button>
                             </div>
                         </div>
-                        <div>
+                        <div class="sm:col-span-2 lg:col-span-1">
                             <button type="submit" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-bold text-xs shadow-sm transition flex items-center justify-center gap-2">
                                 <i class="fas fa-key"></i> Update Admin Password
                             </button>
@@ -423,9 +432,9 @@
                 </div>
 
                 <!-- Term Dates, Bills & Items Config -->
-                <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 mb-6">
-                    <h3 class="font-bold text-md text-slate-800 mb-3"><i class="fas fa-calendar-alt text-brand-700 mr-2"></i>Academic Term Dates, Bills & Requirement Config</h3>
-                    <form onsubmit="handleSaveTermConfig(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                <div class="bg-slate-50 p-4 sm:p-5 rounded-xl border border-slate-200 mb-4 sm:mb-6">
+                    <h3 class="font-bold text-sm sm:text-md text-slate-800 mb-3"><i class="fas fa-calendar-alt text-brand-700 mr-2"></i>Academic Term Dates & Requirements Config</h3>
+                    <form onsubmit="handleSaveTermConfig(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
                         <div>
                             <label class="block font-semibold text-slate-700 mb-1">Academic Year</label>
                             <input type="text" id="cfgAcademicYear" required placeholder="e.g. 2025/2026" class="w-full rounded border-slate-300 p-2 border font-medium">
@@ -439,40 +448,40 @@
                             <input type="text" id="cfgVacationDate" required placeholder="e.g. 25th July, 2026" class="w-full rounded border-slate-300 p-2 border font-medium">
                         </div>
                         <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Creche/KG Required Supply Items</label>
+                            <label class="block font-semibold text-slate-700 mb-1">Creche/KG Required Items</label>
                             <input type="text" id="cfgItemsKG" required placeholder="e.g. 2 Toilet Roll | 2 Geisha Soap" class="w-full rounded border-slate-300 p-2 border font-medium">
                         </div>
                         <div>
-                            <label class="block font-semibold text-slate-700 mb-1">Primary Required Supply Items</label>
+                            <label class="block font-semibold text-slate-700 mb-1">Primary Required Items</label>
                             <input type="text" id="cfgItemsPrimary" required placeholder="e.g. 2 Toilet Roll | 1 Ream A4 Paper" class="w-full rounded border-slate-300 p-2 border font-medium">
                         </div>
                         <div>
-                            <label class="block font-semibold text-slate-700 mb-1">JHS Required Supply Items</label>
+                            <label class="block font-semibold text-slate-700 mb-1">JHS Required Items</label>
                             <input type="text" id="cfgItemsJHS" required placeholder="e.g. Math Set | Drawing Board" class="w-full rounded border-slate-300 p-2 border font-medium">
                         </div>
-                        <div class="md:col-span-3 flex justify-end">
-                            <button type="submit" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded font-bold text-xs shadow-sm transition">
+                        <div class="sm:col-span-2 lg:col-span-3 flex justify-end pt-2">
+                            <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded font-bold text-xs shadow-sm transition">
                                 <i class="fas fa-save mr-1"></i> Save Term Configuration
                             </button>
                         </div>
                     </form>
                 </div>
 
-                <!-- Teacher Account Management Section with Password Visibility Toggle -->
-                <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 mb-6">
-                    <div class="flex justify-between items-center mb-4">
+                <!-- Teacher Accounts Section -->
+                <div class="bg-slate-50 p-4 sm:p-5 rounded-xl border border-slate-200 mb-4 sm:mb-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 gap-2">
                         <div>
-                            <h3 class="font-bold text-md text-slate-800">Teacher Class Assignments & Passwords</h3>
-                            <p class="text-xs text-slate-500">Assign specific classes (Creche to JHS 3) and manage teacher login credentials.</p>
+                            <h3 class="font-bold text-sm sm:text-md text-slate-800">Teacher Class Assignments & Passwords</h3>
+                            <p class="text-xs text-slate-500">Assign specific classes and manage teacher login credentials.</p>
                         </div>
-                        <button onclick="openAddTeacherModal()" class="px-3 py-1.5 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-xs font-semibold transition flex items-center space-x-1">
+                        <button onclick="openAddTeacherModal()" class="w-full sm:w-auto px-3 py-1.5 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-xs font-semibold transition flex items-center justify-center space-x-1">
                             <i class="fas fa-user-plus"></i>
                             <span>Add New Teacher</span>
                         </button>
                     </div>
 
-                    <div class="overflow-x-auto border border-slate-200 rounded-lg bg-white">
-                        <table class="w-full text-xs text-left text-slate-600">
+                    <div class="overflow-x-auto border border-slate-200 rounded-lg bg-white custom-scrollbar">
+                        <table class="w-full text-xs text-left text-slate-600 min-w-[500px]">
                             <thead class="uppercase bg-slate-100 text-slate-700 font-semibold">
                                 <tr>
                                     <th class="px-3 py-2">Teacher Name</th>
@@ -488,33 +497,33 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     <!-- Term Lock -->
-                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
-                        <h3 class="font-bold text-md text-slate-800 mb-2">Term Lock System</h3>
-                        <p class="text-sm text-slate-600 mb-4">Locking the term prevents teachers from making accidental score modifications.</p>
-                        <button onclick="toggleTermLock()" id="btnTermLock" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-sm font-medium transition">
+                    <div class="bg-slate-50 p-4 sm:p-5 rounded-xl border border-slate-200">
+                        <h3 class="font-bold text-sm sm:text-md text-slate-800 mb-2">Term Lock System</h3>
+                        <p class="text-xs sm:text-sm text-slate-600 mb-4">Locking the term prevents teachers from making accidental score modifications.</p>
+                        <button onclick="toggleTermLock()" id="btnTermLock" class="w-full sm:w-auto px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs sm:text-sm font-medium transition">
                             <i class="fas fa-lock"></i> Lock Active Term
                         </button>
                     </div>
 
                     <!-- Cloud Database Control -->
-                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
-                        <h3 class="font-bold text-md text-slate-800 mb-2">Cloud Backend Synchronization</h3>
-                        <p class="text-sm text-slate-600 mb-3">Sync local state directly with Firebase Firestore cloud database.</p>
-                        <div class="text-xs space-y-1 mb-4 bg-white p-3 rounded border border-slate-200 font-mono">
+                    <div class="bg-slate-50 p-4 sm:p-5 rounded-xl border border-slate-200">
+                        <h3 class="font-bold text-sm sm:text-md text-slate-800 mb-2">Cloud Database Synchronization</h3>
+                        <p class="text-xs sm:text-sm text-slate-600 mb-3">Sync local state directly with Firebase Firestore cloud database.</p>
+                        <div class="text-xs space-y-1 mb-4 bg-white p-2.5 rounded border border-slate-200 font-mono">
                             <div><span class="text-slate-500">Backend Status:</span> <strong id="backendStatusDetail" class="text-emerald-600">Connected</strong></div>
                             <div><span class="text-slate-500">Cloud Students:</span> <strong id="cloudStudentCount">0</strong></div>
                             <div><span class="text-slate-500">Cloud Score Entries:</span> <strong id="cloudScoreCount">0</strong></div>
                         </div>
                         <div class="flex flex-wrap gap-2">
-                            <button onclick="exportDatabaseJSON()" class="px-3 py-1.5 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-xs font-semibold transition flex items-center space-x-1.5">
+                            <button onclick="exportDatabaseJSON()" class="flex-1 px-3 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-xs font-semibold transition flex items-center justify-center space-x-1.5">
                                 <i class="fas fa-download"></i>
-                                <span>Export Backup (JSON)</span>
+                                <span>Export Backup</span>
                             </button>
-                            <label class="px-3 py-1.5 bg-slate-700 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold transition cursor-pointer flex items-center space-x-1.5">
+                            <label class="flex-1 px-3 py-2 bg-slate-700 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold transition cursor-pointer flex items-center justify-center space-x-1.5">
                                 <i class="fas fa-upload"></i>
-                                <span>Import JSON</span>
+                                <span>Import Backup</span>
                                 <input type="file" id="importFileInput" accept=".json" onchange="importDatabaseJSON(event)" class="hidden">
                             </label>
                         </div>
@@ -522,11 +531,12 @@
                 </div>
             </section>
 
+            <!-- Tab: Audit Logs (Admin Only) -->
             <section id="tab-auditLogs" class="tab-content hidden">
-                <div class="border-b border-slate-200 pb-4 mb-6 flex justify-between items-center">
+                <div class="border-b border-slate-200 pb-3 mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                     <div>
-                        <h2 class="text-xl font-bold text-slate-800">Cloud Activity & Audit Trail</h2>
-                        <p class="text-sm text-slate-500">Real-time log of score updates, student registrations, and administrative changes.</p>
+                        <h2 class="text-lg sm:text-xl font-bold text-slate-800">Cloud Activity & Audit Trail</h2>
+                        <p class="text-xs sm:text-sm text-slate-500">Real-time log of score updates, student registrations, and administrative changes.</p>
                     </div>
                     <button onclick="clearCloudLogs()" class="text-xs text-red-600 hover:text-red-800 font-semibold border border-red-200 bg-red-50 px-3 py-1.5 rounded-lg transition">
                         Clear Audit Trail
@@ -534,13 +544,13 @@
                 </div>
 
                 <div class="overflow-x-auto border border-slate-200 rounded-lg max-h-[500px] custom-scrollbar">
-                    <table class="w-full text-sm text-left text-slate-600">
-                        <thead class="text-xs uppercase bg-slate-100 text-slate-700 sticky top-0 border-b">
+                    <table class="w-full text-xs text-left text-slate-600 min-w-[600px]">
+                        <thead class="text-[11px] uppercase bg-slate-100 text-slate-700 sticky top-0 border-b z-10 font-bold">
                             <tr>
-                                <th class="px-4 py-3">Timestamp</th>
-                                <th class="px-4 py-3">Role</th>
-                                <th class="px-4 py-3">Action</th>
-                                <th class="px-4 py-3">Details</th>
+                                <th class="px-3 py-2.5">Timestamp</th>
+                                <th class="px-3 py-2.5">Role</th>
+                                <th class="px-3 py-2.5">Action</th>
+                                <th class="px-3 py-2.5">Details</th>
                             </tr>
                         </thead>
                         <tbody id="auditLogsTableBody">
@@ -552,16 +562,17 @@
         </main>
     </div>
 
-    <div id="addStudentModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 border border-slate-200 max-h-[90vh] overflow-y-auto custom-scrollbar">
-            <h3 id="studentModalTitle" class="text-lg font-bold text-slate-800 mb-4">Add / Edit Student Profile</h3>
+    <!-- Modal: Add / Edit Student -->
+    <div id="addStudentModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-3 sm:p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-4 sm:p-6 border border-slate-200 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <h3 id="studentModalTitle" class="text-base sm:text-lg font-bold text-slate-800 mb-3">Add / Edit Student Profile</h3>
             <form onsubmit="handleAddStudent(event)" class="space-y-3">
                 <input type="hidden" id="editStudentId">
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">Full Student Name</label>
                     <input type="text" id="newStudentName" required placeholder="e.g. ABUDU BLESS" class="w-full rounded-lg border-slate-300 p-2 border text-xs">
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 mb-1">Class Level</label>
                         <select id="newStudentClass" required class="w-full rounded-lg border-slate-300 p-2 border text-xs">
@@ -574,7 +585,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 mb-1">Attendance Days (out of 60)</label>
                         <input type="number" id="newStudentAttendance" min="0" max="100" value="60" required class="w-full rounded-lg border-slate-300 p-2 border text-xs font-bold">
@@ -600,53 +611,55 @@
                     <textarea id="newTeacherRemark" rows="2" placeholder="e.g. Good performance. Keep it up!!" class="w-full rounded-lg border-slate-300 p-2 border text-xs font-medium">Good performance. Keep it up!!</textarea>
                 </div>
 
-                <div class="flex justify-end space-x-3 pt-2">
-                    <button type="button" onclick="closeAddStudentModal()" class="px-4 py-2 border rounded-lg text-xs font-medium text-slate-600">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-brand-700 text-white rounded-lg text-xs font-medium">Save Student Record</button>
+                <div class="flex justify-end space-x-2 sm:space-x-3 pt-2">
+                    <button type="button" onclick="closeAddStudentModal()" class="px-3.5 py-2 border rounded-lg text-xs font-medium text-slate-600">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-brand-700 text-white rounded-lg text-xs font-medium">Save Record</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div id="addTeacherModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 border border-slate-200">
-            <h3 id="teacherModalTitle" class="text-lg font-bold text-slate-800 mb-4">Add / Edit Teacher Account</h3>
-            <form onsubmit="handleSaveTeacher(event)" class="space-y-4">
+    <!-- Modal: Add / Edit Teacher -->
+    <div id="addTeacherModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-3 sm:p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-4 sm:p-6 border border-slate-200">
+            <h3 id="teacherModalTitle" class="text-base sm:text-lg font-bold text-slate-800 mb-3">Add / Edit Teacher Account</h3>
+            <form onsubmit="handleSaveTeacher(event)" class="space-y-3 sm:space-y-4">
                 <input type="hidden" id="editTeacherId">
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Teacher Full Name</label>
-                    <input type="text" id="teacherNameInput" required placeholder="e.g. Mr. Kwami Mensah" class="w-full rounded-lg border-slate-300 p-2.5 border text-sm">
+                    <label class="block text-xs sm:text-sm font-medium text-slate-700 mb-1">Teacher Full Name</label>
+                    <input type="text" id="teacherNameInput" required placeholder="e.g. Mr. Kwami Mensah" class="w-full rounded-lg border-slate-300 p-2 sm:p-2.5 border text-xs sm:text-sm">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Assigned Class Only</label>
-                    <select id="teacherClassInput" required class="w-full rounded-lg border-slate-300 p-2.5 border text-sm">
+                    <label class="block text-xs sm:text-sm font-medium text-slate-700 mb-1">Assigned Class Only</label>
+                    <select id="teacherClassInput" required class="w-full rounded-lg border-slate-300 p-2 sm:p-2.5 border text-xs sm:text-sm">
                         <!-- Populated dynamically -->
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Login Password</label>
+                    <label class="block text-xs sm:text-sm font-medium text-slate-700 mb-1">Login Password</label>
                     <div class="relative">
-                        <input type="password" id="teacherPasswordInput" required placeholder="Enter login password" class="w-full rounded-lg border-slate-300 p-2.5 border pr-10 text-sm font-mono">
+                        <input type="password" id="teacherPasswordInput" required placeholder="Enter login password" class="w-full rounded-lg border-slate-300 p-2 sm:p-2.5 border pr-10 text-xs sm:text-sm font-mono">
                         <button type="button" onclick="toggleInputVisibility('teacherPasswordInput', 'teacherPwdToggleIcon')" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 focus:outline-none">
                             <i id="teacherPwdToggleIcon" class="fas fa-eye"></i>
                         </button>
                     </div>
                 </div>
-                <div class="flex justify-end space-x-3 pt-3">
-                    <button type="button" onclick="closeAddTeacherModal()" class="px-4 py-2 border rounded-lg text-sm font-medium text-slate-600">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-brand-700 text-white rounded-lg text-sm font-medium">Save Account</button>
+                <div class="flex justify-end space-x-2 sm:space-x-3 pt-2">
+                    <button type="button" onclick="closeAddTeacherModal()" class="px-3.5 py-2 border rounded-lg text-xs sm:text-sm font-medium text-slate-600">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-brand-700 text-white rounded-lg text-xs sm:text-sm font-medium">Save Account</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- Modal: Confirmation -->
     <div id="confirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4 no-print">
-        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 border border-slate-200 text-center">
-            <div id="confirmIcon" class="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-3 text-xl font-bold">
+        <div class="bg-white rounded-xl shadow-2xl max-w-sm sm:max-w-md w-full p-5 sm:p-6 border border-slate-200 text-center">
+            <div id="confirmIcon" class="w-10 h-10 sm:w-12 sm:h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-3 text-lg sm:text-xl font-bold">
                 <i class="fas fa-exclamation-triangle"></i>
             </div>
-            <h3 id="confirmTitle" class="text-lg font-bold text-slate-800 mb-2">Confirm Action</h3>
-            <p id="confirmMessage" class="text-xs text-slate-600 mb-6">Are you sure you want to proceed with this operation?</p>
+            <h3 id="confirmTitle" class="text-base sm:text-lg font-bold text-slate-800 mb-2">Confirm Action</h3>
+            <p id="confirmMessage" class="text-xs text-slate-600 mb-5 sm:mb-6">Are you sure you want to proceed with this operation?</p>
             <div class="flex justify-center space-x-3">
                 <button type="button" onclick="closeConfirmModal(false)" class="px-4 py-2 border rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
                 <button type="button" id="btnConfirmAction" onclick="closeConfirmModal(true)" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold shadow-sm">Proceed</button>
@@ -654,15 +667,16 @@
         </div>
     </div>
 
+    <!-- Modal: Authentication Portal -->
     <div id="loginModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 border border-slate-100 text-left">
-            <div class="w-16 h-16 bg-brand-700 text-white rounded-2xl mx-auto flex items-center justify-center font-bold text-2xl shadow-lg mb-3">VM</div>
-            <h2 class="text-2xl font-black text-slate-800 text-center">VEHEM MAWUNYO INT.</h2>
-            <p class="text-xs text-slate-500 mb-6 uppercase tracking-wider font-semibold text-center">Terminal Report Authentication Portal</p>
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 border border-slate-100 text-left">
+            <div class="w-12 h-12 sm:w-16 sm:h-16 bg-brand-700 text-white rounded-2xl mx-auto flex items-center justify-center font-bold text-xl sm:text-2xl shadow-lg mb-2 sm:mb-3">VM</div>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-800 text-center">VEHEM MAWUNYO INT.</h2>
+            <p class="text-[10px] sm:text-xs text-slate-500 mb-5 sm:mb-6 uppercase tracking-wider font-semibold text-center">Terminal Report Authentication Portal</p>
 
             <div class="mb-4">
-                <label class="block text-xs font-bold uppercase text-slate-600 mb-2">Select Login Role</label>
-                <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-lg text-sm font-semibold">
+                <label class="block text-[11px] font-bold uppercase text-slate-600 mb-2">Select Login Role</label>
+                <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-lg text-xs sm:text-sm font-semibold">
                     <button type="button" id="roleBtnTeacher" onclick="toggleRoleTab('Teacher')" class="py-2 text-center rounded-md bg-white text-brand-800 shadow-sm transition">
                         <i class="fas fa-chalkboard-teacher mr-1"></i> Teacher
                     </button>
@@ -673,42 +687,42 @@
             </div>
 
             <div id="authErrorAlert" class="hidden mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg font-medium">
-                <i class="fas fa-exclamation-circle mr-1"></i> <span id="authErrorMsg">Invalid password or login parameters.</span>
+                <i class="fas fa-exclamation-circle mr-1"></i> <span id="authErrorMsg">Invalid password or parameters.</span>
             </div>
 
-            <form id="teacherLoginForm" onsubmit="handleTeacherLogin(event)" class="space-y-4">
+            <form id="teacherLoginForm" onsubmit="handleTeacherLogin(event)" class="space-y-3 sm:space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Select Your Name</label>
-                    <select id="loginTeacherSelect" required class="w-full rounded-lg border-slate-300 p-2.5 border text-sm font-medium">
+                    <label class="block text-xs sm:text-sm font-medium text-slate-700 mb-1">Select Your Name</label>
+                    <select id="loginTeacherSelect" required class="w-full rounded-lg border-slate-300 p-2 sm:p-2.5 border text-xs sm:text-sm font-medium">
                         <option value="">-- Choose Teacher Profile --</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Teacher Password</label>
+                    <label class="block text-xs sm:text-sm font-medium text-slate-700 mb-1">Teacher Password</label>
                     <div class="relative">
-                        <input type="password" id="loginTeacherPassword" required placeholder="••••••••" class="w-full rounded-lg border-slate-300 p-2.5 border text-sm pr-10">
+                        <input type="password" id="loginTeacherPassword" required placeholder="••••••••" class="w-full rounded-lg border-slate-300 p-2 sm:p-2.5 border text-xs sm:text-sm pr-10">
                         <button type="button" onclick="toggleInputVisibility('loginTeacherPassword', 'loginTeacherPwdIcon')" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600">
                             <i id="loginTeacherPwdIcon" class="fas fa-eye"></i>
                         </button>
                     </div>
                 </div>
-                <button type="submit" class="w-full py-3 bg-brand-700 hover:bg-brand-800 text-white rounded-xl font-bold transition shadow-md flex items-center justify-center space-x-2">
+                <button type="submit" class="w-full py-2.5 sm:py-3 bg-brand-700 hover:bg-brand-800 text-white rounded-xl font-bold text-xs sm:text-sm transition shadow-md flex items-center justify-center space-x-2">
                     <i class="fas fa-sign-in-alt"></i>
                     <span>Log In as Class Teacher</span>
                 </button>
             </form>
 
-            <form id="adminLoginForm" onsubmit="handleAdminLogin(event)" class="space-y-4 hidden">
+            <form id="adminLoginForm" onsubmit="handleAdminLogin(event)" class="space-y-3 sm:space-y-4 hidden">
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Admin Master Password</label>
+                    <label class="block text-xs sm:text-sm font-medium text-slate-700 mb-1">Admin Master Password</label>
                     <div class="relative">
-                        <input type="password" id="loginAdminPassword" required placeholder="Default: admin123" class="w-full rounded-lg border-slate-300 p-2.5 border text-sm pr-10">
+                        <input type="password" id="loginAdminPassword" required placeholder="Default: admin123" class="w-full rounded-lg border-slate-300 p-2 sm:p-2.5 border text-xs sm:text-sm pr-10">
                         <button type="button" onclick="toggleInputVisibility('loginAdminPassword', 'loginAdminPwdIcon')" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600">
                             <i id="loginAdminPwdIcon" class="fas fa-eye"></i>
                         </button>
                     </div>
                 </div>
-                <button type="submit" class="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold transition shadow-md flex items-center justify-center space-x-2">
+                <button type="submit" class="w-full py-2.5 sm:py-3 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold text-xs sm:text-sm transition shadow-md flex items-center justify-center space-x-2">
                     <i class="fas fa-user-shield"></i>
                     <span>Log In as Administrator</span>
                 </button>
@@ -720,7 +734,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, deleteDoc, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBJmBJmyFkxORG9ZtehYOSoAVBQaNCl1og",
@@ -762,18 +776,12 @@
             "RELIGIOUS & MORAL EDUC.", "COMPUTING / NUMERACY", "CAREER TECHNOLOGY", "MENTAL"
         ];
 
-        // Cleared predefined students array per request so system starts clean
-        const INITIAL_STUDENTS = [];
-
-        // Initial default teachers list
-        const INITIAL_TEACHERS = [];
-
         let state = {
-            students: INITIAL_STUDENTS,
+            students: [],
             scores: {},
-            teachers: INITIAL_TEACHERS,
+            teachers: [],
             termLocked: false,
-            adminPassword: "",
+            adminPassword: "admin123",
             auditLogs: [],
             termConfig: {
                 academicYear: '2025/2026',
@@ -791,7 +799,6 @@
         let activeTerm = "2025-2026_Term3";
         let confirmCallback = null;
         
-        // Track password visibility state per teacher ID in system controls
         const teacherPasswordVisibilityMap = {};
 
         function toggleInputVisibility(inputId, iconId) {
@@ -942,7 +949,7 @@
             const detail = document.getElementById('backendStatusDetail');
             if (badge) {
                 badge.className = `${colorClass} font-medium flex items-center gap-1`;
-                badge.innerHTML = `<i class="fas ${icon} text-[11px]"></i> ${msg}`;
+                badge.innerHTML = `<i class="fas ${icon} text-[10px]"></i> ${msg}`;
             }
             if (detail) {
                 detail.innerText = msg;
@@ -1101,10 +1108,10 @@
 
             tbody.innerHTML = state.auditLogs.map(log => `
                 <tr class="border-b hover:bg-slate-50 font-mono text-xs">
-                    <td class="px-4 py-2 text-slate-500">${log.timestamp}</td>
-                    <td class="px-4 py-2"><span class="px-2 py-0.5 rounded font-bold ${log.role === 'Admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}">${log.role} (${log.actorName || 'User'})</span></td>
-                    <td class="px-4 py-2 font-bold text-slate-800">${log.action}</td>
-                    <td class="px-4 py-2 text-slate-600">${log.details}</td>
+                    <td class="px-3 py-2 text-slate-500">${log.timestamp}</td>
+                    <td class="px-3 py-2"><span class="px-2 py-0.5 rounded font-bold ${log.role === 'Admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}">${log.role} (${log.actorName || 'User'})</span></td>
+                    <td class="px-3 py-2 font-bold text-slate-800">${log.action}</td>
+                    <td class="px-3 py-2 text-slate-600">${log.details}</td>
                 </tr>
             `).join('');
         }
@@ -1266,11 +1273,10 @@
             currentRole = 'Teacher';
             currentTeacher = teacher;
 
-            document.getElementById('currentUserDisplay').innerText = `Logged in as: ${teacher.name}`;
-            document.getElementById('teacherClassBadge').innerText = `Class: ${teacher.assignedClass} Teacher`;
+            document.getElementById('currentUserDisplay').innerText = `Logged in: ${teacher.name}`;
+            document.getElementById('teacherClassBadge').innerText = `${teacher.assignedClass} Class Teacher`;
             
-            document.getElementById('nav-settings').classList.add('hidden');
-            document.getElementById('nav-auditLogs').classList.add('hidden');
+            document.querySelectorAll('.admin-nav-item').forEach(el => el.classList.add('hidden'));
 
             document.getElementById('loginModal').classList.add('hidden');
             document.getElementById('loginModal').classList.remove('flex');
@@ -1281,7 +1287,7 @@
             renderClassTotals();
             switchTab('scoreEntry');
 
-            logActivity("Teacher Login", `Log in successful for ${teacher.name} (${teacher.assignedClass})`);
+            logActivity("Teacher Login", `Logged in: ${teacher.name} (${teacher.assignedClass})`);
             showToast(`Welcome back, ${teacher.name}!`, 'success');
         }
         window.handleTeacherLogin = handleTeacherLogin;
@@ -1298,11 +1304,10 @@
             currentRole = 'Admin';
             currentTeacher = null;
 
-            document.getElementById('currentUserDisplay').innerText = `Logged in as: System Administrator`;
+            document.getElementById('currentUserDisplay').innerText = `Logged in: Administrator`;
             document.getElementById('teacherClassBadge').innerText = `All Classes Access (Creche - JHS 3)`;
 
-            document.getElementById('nav-settings').classList.remove('hidden');
-            document.getElementById('nav-auditLogs').classList.remove('hidden');
+            document.querySelectorAll('.admin-nav-item').forEach(el => el.classList.remove('hidden'));
 
             const modal = document.getElementById('loginModal');
             if (modal) {
@@ -1449,7 +1454,7 @@
             const remark = calculateRemark(grandTotal);
             const badge = document.getElementById('liveRemarkDisplay');
             badge.innerText = remark;
-            badge.className = `text-sm font-semibold px-3 py-1 rounded-full ${grandTotal >= 70 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`;
+            badge.className = `text-xs sm:text-sm font-semibold px-2.5 sm:px-3 py-1 rounded-full ${grandTotal >= 70 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`;
         }
         window.calculateLiveTotal = calculateLiveTotal;
 
@@ -1518,7 +1523,7 @@
             }
 
             renderStudentSubjectOverview(stuId);
-            showToast("Score saved & synced to cloud database!", "success");
+            showToast("Score saved & synced successfully!", "success");
         }
         window.handleScoreSubmit = handleScoreSubmit;
 
@@ -1547,13 +1552,13 @@
                 html += `
                     <tr class="border-b hover:bg-slate-50 text-xs">
                         <td class="px-3 py-2 font-semibold text-slate-800">${sub}</td>
-                        <td class="px-3 py-2 text-center">${test}</td>
-                        <td class="px-3 py-2 text-center">${hw}</td>
-                        <td class="px-3 py-2 text-center">${cw}</td>
-                        <td class="px-3 py-2 text-center font-bold bg-slate-50">${c}</td>
-                        <td class="px-3 py-2 text-center">${ex}</td>
-                        <td class="px-3 py-2 text-center font-black text-brand-800">${tot}</td>
-                        <td class="px-3 py-2 text-center font-bold">${rank}</td>
+                        <td class="px-2 py-2 text-center">${test}</td>
+                        <td class="px-2 py-2 text-center">${hw}</td>
+                        <td class="px-2 py-2 text-center">${cw}</td>
+                        <td class="px-2 py-2 text-center font-bold bg-slate-50">${c}</td>
+                        <td class="px-2 py-2 text-center">${ex}</td>
+                        <td class="px-2 py-2 text-center font-black text-brand-800">${tot}</td>
+                        <td class="px-2 py-2 text-center font-bold">${rank}</td>
                         <td class="px-3 py-2"><span class="px-2 py-0.5 rounded bg-slate-100 font-semibold text-[11px]">${rem}</span></td>
                     </tr>
                 `;
@@ -1701,12 +1706,12 @@
 
             tbody.innerHTML = summaryList.map((stu, idx) => `
                 <tr class="border-b hover:bg-slate-50">
-                    <td class="px-4 py-3 font-bold text-brand-800">#${idx + 1}</td>
+                    <td class="px-3 py-3 font-bold text-brand-800">#${idx + 1}</td>
                     <td class="px-4 py-3 font-semibold">${stu.name}</td>
-                    <td class="px-4 py-3"><span class="px-2 py-0.5 rounded bg-slate-100 text-slate-800 font-medium text-xs">${stu.class}</span></td>
-                    <td class="px-4 py-3 font-black text-slate-800">${stu.grandTotal}</td>
-                    <td class="px-4 py-3">${stu.avg}%</td>
-                    <td class="px-4 py-3">${stu.promotedTo || '--'}</td>
+                    <td class="px-3 py-3"><span class="px-2 py-0.5 rounded bg-slate-100 text-slate-800 font-medium text-xs">${stu.class}</span></td>
+                    <td class="px-3 py-3 font-black text-slate-800">${stu.grandTotal}</td>
+                    <td class="px-3 py-3">${stu.avg}%</td>
+                    <td class="px-3 py-3">${stu.promotedTo || '--'}</td>
                 </tr>
             `).join('');
         }
@@ -1721,12 +1726,12 @@
             if (mode === 'single') {
                 singleContainer.classList.remove('hidden');
                 batchContainer.classList.add('hidden');
-                btnText.innerText = "Print Report";
+                btnText.innerText = "Print";
                 generateReportCard();
             } else {
                 singleContainer.classList.add('hidden');
                 batchContainer.classList.remove('hidden');
-                btnText.innerText = "Print Entire Class Roster";
+                btnText.innerText = "Print Class Roster";
                 generateBatchReportCards();
             }
         }
@@ -1775,63 +1780,65 @@
             if (student.class.includes('JHS')) supplyItem = cfg.itemsJHS;
 
             return `
-                <div class="bg-white p-6 border-2 border-slate-800 rounded-lg max-w-4xl mx-auto shadow-sm text-slate-900 print-page-break">
-                    <div class="text-center border-b-2 border-slate-800 pb-3 mb-4 flex justify-between items-center">
-                        <div class="w-16 h-16 border-2 border-brand-800 flex items-center justify-center font-bold text-brand-800 text-[10px] text-center p-1 uppercase overflow-hidden">
+                <div class="bg-white p-4 sm:p-6 border-2 border-slate-800 rounded-lg max-w-4xl mx-auto shadow-sm text-slate-900 print-page-break text-xs sm:text-sm">
+                    <div class="text-center border-b-2 border-slate-800 pb-3 mb-4 flex justify-between items-center flex-wrap sm:flex-nowrap gap-2">
+                        <div class="w-12 h-12 sm:w-16 sm:h-16 border-2 border-brand-800 flex items-center justify-center font-bold text-brand-800 text-[9px] sm:text-[10px] text-center p-1 uppercase overflow-hidden flex-shrink-0">
                             ${student.photo ? `<img src="${student.photo}" class="w-full h-full object-cover rounded">` : 'VMIS LOGO'}
                         </div>
-                        <div>
-                            <h1 class="text-2xl font-black uppercase tracking-wide text-brand-900">VEHEM MAWUNYO INT. SCHOOL</h1>
-                            <p class="text-xs font-semibold">Firm Foundation For Excellence</p>
-                            <p class="text-xs">P.O. Box DJ 138, Dzodze-Penyi | Tel: 0249 271 535 / 0245 001 183</p>
+                        <div class="text-center flex-grow">
+                            <h1 class="text-lg sm:text-2xl font-black uppercase tracking-wide text-brand-900">VEHEM MAWUNYO INT. SCHOOL</h1>
+                            <p class="text-[10px] sm:text-xs font-semibold">Firm Foundation For Excellence</p>
+                            <p class="text-[10px] sm:text-xs">P.O. Box DJ 138, Dzodze-Penyi | Tel: 0249 271 535 / 0245 001 183</p>
                         </div>
-                        <div class="text-right">
-                            <div class="text-xs font-bold text-slate-500">NO. <span class="text-red-600 font-mono text-sm">${student.id}</span></div>
-                            <div class="text-md font-black uppercase mt-1 border border-slate-800 px-2 py-0.5">TERMINAL REPORT</div>
+                        <div class="text-right flex-shrink-0">
+                            <div class="text-[10px] sm:text-xs font-bold text-slate-500">NO. <span class="text-red-600 font-mono text-xs sm:text-sm">${student.id}</span></div>
+                            <div class="text-xs sm:text-sm font-black uppercase mt-1 border border-slate-800 px-2 py-0.5">TERMINAL REPORT</div>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-x-6 gap-y-2 text-xs font-semibold mb-4 bg-pink-50/50 p-3 rounded border border-pink-100">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 text-xs font-semibold mb-4 bg-pink-50/50 p-2.5 sm:p-3 rounded border border-pink-100">
                         <div>Name: <span class="font-bold underline text-slate-900">${student.name}</span></div>
                         <div>VACATION: <span class="font-bold">${cfg.vacationDate}</span></div>
-                        <div>Class: <span class="font-bold">${student.class}</span> | Academic Year: <span class="font-bold">${cfg.academicYear}</span></div>
+                        <div>Class: <span class="font-bold">${student.class}</span> | Year: <span class="font-bold">${cfg.academicYear}</span></div>
                         <div>NEXT TERM BEGINS: <span class="font-bold">${cfg.nextTermDate}</span></div>
-                        <div>No. in Class: <span class="font-bold">${classCount}</span> | Overall Position: <span class="font-bold text-brand-800">${overallPosition}</span></div>
+                        <div>No. in Class: <span class="font-bold">${classCount}</span> | Position: <span class="font-bold text-brand-800">${overallPosition}</span></div>
                         <div>Promoted To: <span class="font-bold">${student.promotedTo || '--'}</span></div>
                     </div>
 
-                    <table class="w-full text-xs text-left border-collapse border-2 border-slate-800 mb-4">
-                        <thead>
-                            <tr class="bg-pink-100 text-slate-900 border-b-2 border-slate-800 text-center font-bold">
-                                <th class="border border-slate-800 px-2 py-1.5 text-left">SUBJECT</th>
-                                <th class="border border-slate-800 px-2 py-1.5 w-16">CLASS<br>50%</th>
-                                <th class="border border-slate-800 px-2 py-1.5 w-16">EXAMS<br>50%</th>
-                                <th class="border border-slate-800 px-2 py-1.5 w-20">TOTAL<br>100%</th>
-                                <th class="border border-slate-800 px-2 py-1.5 w-24">POSITION IN SUBJECTS</th>
-                                <th class="border border-slate-800 px-2 py-1.5 w-28">REMARK</th>
-                            </tr>
-                        </thead>
-                        <tbody>${rowsHtml}</tbody>
-                        <tfoot>
-                            <tr class="font-bold bg-slate-100 border-t-2 border-slate-800">
-                                <td class="border border-slate-800 px-2 py-1.5">OVERALL GRAND TOTAL</td>
-                                <td colspan="2" class="border border-slate-800 px-2 py-1.5 text-center">--</td>
-                                <td class="border border-slate-800 px-2 py-1.5 text-center text-sm font-black text-brand-900">${grandTotal}</td>
-                                <td colspan="2" class="border border-slate-800 px-2 py-1.5"></td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                    <div class="overflow-x-auto mb-4">
+                        <table class="w-full text-xs text-left border-collapse border-2 border-slate-800 min-w-[500px]">
+                            <thead>
+                                <tr class="bg-pink-100 text-slate-900 border-b-2 border-slate-800 text-center font-bold">
+                                    <th class="border border-slate-800 px-2 py-1.5 text-left">SUBJECT</th>
+                                    <th class="border border-slate-800 px-2 py-1.5 w-14 sm:w-16">CLASS<br>50%</th>
+                                    <th class="border border-slate-800 px-2 py-1.5 w-14 sm:w-16">EXAMS<br>50%</th>
+                                    <th class="border border-slate-800 px-2 py-1.5 w-16 sm:w-20">TOTAL<br>100%</th>
+                                    <th class="border border-slate-800 px-2 py-1.5 w-20 sm:w-24">POSITION</th>
+                                    <th class="border border-slate-800 px-2 py-1.5 w-24 sm:w-28">REMARK</th>
+                                </tr>
+                            </thead>
+                            <tbody>${rowsHtml}</tbody>
+                            <tfoot>
+                                <tr class="font-bold bg-slate-100 border-t-2 border-slate-800">
+                                    <td class="border border-slate-800 px-2 py-1.5">OVERALL GRAND TOTAL</td>
+                                    <td colspan="2" class="border border-slate-800 px-2 py-1.5 text-center">--</td>
+                                    <td class="border border-slate-800 px-2 py-1.5 text-center text-xs sm:text-sm font-black text-brand-900">${grandTotal}</td>
+                                    <td colspan="2" class="border border-slate-800 px-2 py-1.5"></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
 
-                    <div class="grid grid-cols-2 gap-4 text-xs border-t-2 border-slate-800 pt-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs border-t-2 border-slate-800 pt-3">
                         <div class="space-y-1.5">
                             <div>Attendance: <span class="font-bold">${student.attendance || 60}</span> Out of <span class="font-bold">60</span></div>
                             <div>Conduct / Character: <span class="font-bold">${student.conduct || 'Satisfactory'}</span></div>
                             <div>Interest: <span class="font-bold">${student.interests || 'Integrated Science and Ewe'}</span></div>
                             <div>Class Teacher's Remark: <span class="font-bold italic">${student.teacherRemark || 'Good performance. Keep it up!!'}</span></div>
                         </div>
-                        <div class="space-y-1 text-right flex flex-col justify-between">
-                            <div>Class Teacher's Signature: <span class="font-bold underline">_________________</span></div>
-                            <div class="text-left bg-slate-50 p-2 border border-slate-300 rounded text-[11px]">
+                        <div class="space-y-1 sm:text-right flex flex-col justify-between">
+                            <div>Teacher's Signature: <span class="font-bold underline">_________________</span></div>
+                            <div class="text-left bg-slate-50 p-2 border border-slate-300 rounded text-[11px] mt-2 sm:mt-0">
                                 <div class="font-bold text-slate-800">Please submit next term:</div>
                                 <div class="font-semibold text-slate-600">${supplyItem}</div>
                             </div>
@@ -1885,17 +1892,17 @@
 
             tbody.innerHTML = displayStudents.map(s => `
                 <tr class="border-b hover:bg-slate-50">
-                    <td class="px-4 py-3">
-                        ${s.photo ? `<img src="${s.photo}" class="w-8 h-8 rounded-full object-cover border">` : `<div class="w-8 h-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs">${s.name.charAt(0)}</div>`}
+                    <td class="px-3 py-2.5">
+                        ${s.photo ? `<img src="${s.photo}" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border">` : `<div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs">${s.name.charAt(0)}</div>`}
                     </td>
-                    <td class="px-4 py-3 font-bold text-slate-800">${s.name} <div class="text-[10px] font-mono font-normal text-slate-400">${s.id}</div></td>
-                    <td class="px-4 py-3"><span class="px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 font-semibold text-xs">${s.class}</span></td>
-                    <td class="px-4 py-3 font-bold">${s.attendance || 60} / 60 days</td>
-                    <td class="px-4 py-3 text-xs">
+                    <td class="px-3 py-2.5 font-bold text-slate-800">${s.name} <div class="text-[10px] font-mono font-normal text-slate-400">${s.id}</div></td>
+                    <td class="px-3 py-2.5"><span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-semibold text-xs">${s.class}</span></td>
+                    <td class="px-3 py-2.5 font-bold">${s.attendance || 60} / 60</td>
+                    <td class="px-3 py-2.5 text-xs">
                         <div class="font-semibold text-slate-700">${s.conduct || 'Satisfactory'}</div>
                         <div class="text-slate-500 italic text-[11px] max-w-xs truncate">${s.teacherRemark || 'Keep it up!'}</div>
                     </td>
-                    <td class="px-4 py-3 text-right space-x-2">
+                    <td class="px-3 py-2.5 text-right space-x-2">
                         <button onclick="editStudent('${s.id}')" class="text-indigo-600 hover:text-indigo-800 font-semibold text-xs">Edit</button>
                         ${currentRole === 'Admin' ? `<button onclick="deleteStudent('${s.id}')" class="text-red-600 hover:text-red-800 font-semibold text-xs">Delete</button>` : ''}
                     </td>
@@ -1918,8 +1925,9 @@
             if (currentRole === 'Teacher' && currentTeacher) {
                 document.getElementById('newStudentClass').value = currentTeacher.assignedClass;
             }
-            document.getElementById('addStudentModal').classList.remove('hidden');
-            document.getElementById('addStudentModal').classList.add('flex');
+            const modal = document.getElementById('addStudentModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
         }
         window.openAddStudentModal = openAddStudentModal;
 
@@ -1938,101 +1946,172 @@
             document.getElementById('newStudentInterests').value = student.interests || "Integrated Science and Ewe";
             document.getElementById('newTeacherRemark').value = student.teacherRemark || "Good performance. Keep it up!!";
 
-            document.getElementById('addStudentModal').classList.remove('hidden');
-            document.getElementById('addStudentModal').classList.add('flex');
+            const modal = document.getElementById('addStudentModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
         }
         window.editStudent = editStudent;
 
         function closeAddStudentModal() {
-            document.getElementById('addStudentModal').classList.add('hidden');
-            document.getElementById('addStudentModal').classList.remove('flex');
+            const modal = document.getElementById('addStudentModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
         }
         window.closeAddStudentModal = closeAddStudentModal;
 
         async function handleAddStudent(e) {
             e.preventDefault();
             const editId = document.getElementById('editStudentId').value;
-            const name = document.getElementById('newStudentName').value.toUpperCase();
+            const name = document.getElementById('newStudentName').value.trim();
             const cls = document.getElementById('newStudentClass').value;
-            const prom = document.getElementById('newStudentPromoted').value;
-            const att = parseInt(document.getElementById('newStudentAttendance').value) || 60;
-            const photo = document.getElementById('newStudentPhoto').value;
-            const conduct = document.getElementById('newStudentConduct').value;
-            const interests = document.getElementById('newStudentInterests').value;
-            const teacherRemark = document.getElementById('newTeacherRemark').value;
+            const promotedTo = document.getElementById('newStudentPromoted').value.trim();
+            const attendance = parseInt(document.getElementById('newStudentAttendance').value) || 60;
+            const photo = document.getElementById('newStudentPhoto').value.trim();
+            const conduct = document.getElementById('newStudentConduct').value.trim();
+            const interests = document.getElementById('newStudentInterests').value.trim();
+            const teacherRemark = document.getElementById('newTeacherRemark').value.trim();
 
-            const newStu = {
-                id: editId || ('STU-' + (Math.floor(Math.random() * 900) + 100)),
+            const studentId = editId || ('VM-' + Math.floor(1000 + Math.random() * 9000));
+
+            const studentObj = {
+                id: studentId,
                 name: name,
                 class: cls,
-                promotedTo: prom,
-                attendance: att,
+                promotedTo: promotedTo,
+                attendance: attendance,
                 photo: photo,
                 conduct: conduct,
                 interests: interests,
                 teacherRemark: teacherRemark
             };
 
-            const existingIdx = state.students.findIndex(s => s.id === newStu.id);
-            if (existingIdx !== -1) state.students[existingIdx] = newStu;
-            else state.students.push(newStu);
-
-            if (currentUser) {
-                await setDoc(doc(STUDENTS_COLL, newStu.id), newStu, { merge: true });
-                await logActivity("Save Student Profile", `Saved details for ${newStu.name} (${newStu.id})`);
+            const existingIdx = state.students.findIndex(s => s.id === studentId);
+            if (existingIdx !== -1) {
+                state.students[existingIdx] = studentObj;
+            } else {
+                state.students.push(studentObj);
             }
 
+            if (currentUser) {
+                await setDoc(doc(STUDENTS_COLL, studentId), studentObj, { merge: true });
+                await logActivity("Save Student", `Saved student ${name} (${cls})`);
+            }
+
+            closeAddStudentModal();
             populateDropdowns();
             renderStudentsTable();
-            closeAddStudentModal();
-            showToast("Student profile saved!", "success");
+            renderClassTotals();
+            showToast("Student profile saved successfully!", "success");
         }
         window.handleAddStudent = handleAddStudent;
 
         function deleteStudent(id) {
-            showConfirmModal("Delete Student Record", `Are you sure you want to permanently delete student ${id} and all associated marks?`, async () => {
+            const student = state.students.find(s => s.id === id);
+            const name = student ? student.name : id;
+            showConfirmModal("Delete Student Profile", `Are you sure you want to permanently delete student ${name}?`, async () => {
                 state.students = state.students.filter(s => s.id !== id);
                 if (currentUser) {
                     await deleteDoc(doc(STUDENTS_COLL, id));
-                    await deleteDoc(doc(SCORES_COLL, id));
-                    await logActivity("Delete Student", `Deleted student record ${id}`);
+                    await logActivity("Delete Student", `Removed student ${name} (${id})`);
                 }
                 populateDropdowns();
                 renderStudentsTable();
-                showToast("Student record deleted successfully.", "info");
+                renderClassTotals();
+                showToast("Student profile deleted.", "info");
             });
         }
         window.deleteStudent = deleteStudent;
 
+        async function toggleTermLock() {
+            if (currentRole !== 'Admin') {
+                showToast("Only Admin can lock or unlock academic term.", "error");
+                return;
+            }
+
+            state.termLocked = !state.termLocked;
+            if (currentUser) {
+                await setDoc(SETTINGS_DOC, { termLocked: state.termLocked }, { merge: true });
+                await logActivity("Term Lock Status", `Term status changed to ${state.termLocked ? 'Locked' : 'Unlocked'}`);
+            }
+            updateTermLockUI();
+            showToast(`Term is now ${state.termLocked ? 'Locked' : 'Unlocked'}.`, "info");
+        }
+        window.toggleTermLock = toggleTermLock;
+
+        function updateTermLockUI() {
+            const statusBadge = document.getElementById('termStatusBadge');
+            const btnLock = document.getElementById('btnTermLock');
+
+            if (state.termLocked) {
+                if (statusBadge) {
+                    statusBadge.className = 'text-red-400 font-semibold';
+                    statusBadge.innerHTML = '<i class="fas fa-lock"></i> Term Locked';
+                }
+                if (btnLock) {
+                    btnLock.className = 'w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs sm:text-sm font-medium transition';
+                    btnLock.innerHTML = '<i class="fas fa-unlock"></i> Unlock Active Term';
+                }
+            } else {
+                if (statusBadge) {
+                    statusBadge.className = 'text-emerald-400 font-semibold';
+                    statusBadge.innerHTML = '<i class="fas fa-unlock"></i> Term Unlocked';
+                }
+                if (btnLock) {
+                    btnLock.className = 'w-full sm:w-auto px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs sm:text-sm font-medium transition';
+                    btnLock.innerHTML = '<i class="fas fa-lock"></i> Lock Active Term';
+                }
+            }
+        }
+
         function exportDatabaseJSON() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
-            const dlAnchor = document.createElement('a');
-            dlAnchor.setAttribute("href", dataStr);
-            dlAnchor.setAttribute("download", `VMIS_Terminal_Report_Backup_${new Date().toISOString().slice(0,10)}.json`);
-            document.body.appendChild(dlAnchor);
-            dlAnchor.click();
-            dlAnchor.remove();
-            showToast("Database exported as JSON file", "success");
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `vehem_mawunyo_backup_${new Date().toISOString().slice(0, 10)}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            showToast("Database exported successfully!", "success");
         }
         window.exportDatabaseJSON = exportDatabaseJSON;
 
-        function importDatabaseJSON(e) {
-            const file = e.target.files[0];
+        function importDatabaseJSON(event) {
+            const file = event.target.files[0];
             if (!file) return;
+
             const reader = new FileReader();
-            reader.onload = async (event) => {
+            reader.onload = async function(e) {
                 try {
-                    const importedState = JSON.parse(event.target.result);
-                    if (importedState.students) state.students = importedState.students;
-                    if (importedState.scores) state.scores = importedState.scores;
-                    if (importedState.teachers) state.teachers = importedState.teachers;
-                    if (importedState.termConfig) state.termConfig = importedState.termConfig;
+                    const importedData = JSON.parse(e.target.result);
+                    if (importedData.students && Array.isArray(importedData.students)) {
+                        state.students = importedData.students;
+                        for (const s of state.students) {
+                            if (currentUser) await setDoc(doc(STUDENTS_COLL, s.id), s, { merge: true });
+                        }
+                    }
+                    if (importedData.scores) {
+                        state.scores = importedData.scores;
+                        for (const stuId in state.scores) {
+                            if (currentUser) await setDoc(doc(SCORES_COLL, stuId), state.scores[stuId], { merge: true });
+                        }
+                    }
+                    if (importedData.teachers) {
+                        state.teachers = importedData.teachers;
+                        for (const t of state.teachers) {
+                            if (currentUser) await setDoc(doc(TEACHERS_COLL, t.id), t, { merge: true });
+                        }
+                    }
+                    if (importedData.termConfig) {
+                        state.termConfig = importedData.termConfig;
+                        if (currentUser) await setDoc(SETTINGS_DOC, { termConfig: state.termConfig }, { merge: true });
+                    }
 
                     populateDropdowns();
                     renderStudentsTable();
                     renderTeacherTable();
                     renderClassTotals();
-                    showToast("Database imported successfully!", "success");
+                    populateTermConfigFields();
+                    showToast("Database imported & synced successfully!", "success");
                 } catch (err) {
                     showToast("Failed to parse JSON backup file.", "error");
                 }
@@ -2041,49 +2120,18 @@
         }
         window.importDatabaseJSON = importDatabaseJSON;
 
-        async function toggleTermLock() {
-            state.termLocked = !state.termLocked;
-            if (currentUser) {
-                await setDoc(SETTINGS_DOC, { termLocked: state.termLocked }, { merge: true });
-                await logActivity("Term Lock Toggle", `Term lock set to: ${state.termLocked}`);
-            }
-            updateTermLockUI();
-            showToast(state.termLocked ? "Term is now LOCKED." : "Term is UNLOCKED.", state.termLocked ? "error" : "success");
-        }
-        window.toggleTermLock = toggleTermLock;
-
-        function updateTermLockUI() {
-            const badge = document.getElementById('termStatusBadge');
-            const btn = document.getElementById('btnTermLock');
-            if (badge) {
-                badge.className = state.termLocked ? "text-red-400 font-bold" : "text-emerald-400";
-                badge.innerHTML = state.termLocked ? `<i class="fas fa-lock"></i> Term Locked` : `<i class="fas fa-unlock"></i> Term Unlocked`;
-            }
-            if (btn) {
-                btn.className = state.termLocked ? "px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition" : "px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-sm font-medium transition";
-                btn.innerHTML = state.termLocked ? `<i class="fas fa-unlock"></i> Unlock Term` : `<i class="fas fa-lock"></i> Lock Active Term`;
-            }
-        }
-
         async function clearCloudLogs() {
-            showConfirmModal("Clear Audit Logs", "Are you sure you want to clear all recorded activity logs?", async () => {
-                if (currentUser) {
-                    const snapshot = await getDocs(AUDIT_COLL);
-                    snapshot.forEach(async (docSnap) => {
-                        await deleteDoc(docSnap.ref);
-                    });
-                }
+            showConfirmModal("Clear Audit Trail", "Are you sure you want to clear all cloud activity logs?", async () => {
                 state.auditLogs = [];
                 renderAuditLogsTable();
-                showToast("Audit logs cleared.", "info");
+                showToast("Audit logs cleared locally.", "info");
             });
         }
         window.clearCloudLogs = clearCloudLogs;
 
-        // Start initialization on window load
-        window.onload = function() {
+        window.addEventListener('DOMContentLoaded', () => {
             initBackendAuth();
-        };
+        });
     </script>
 </body>
 </html>
