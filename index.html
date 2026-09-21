@@ -33,22 +33,41 @@
     <style>
         @media print {
             body {
-                visibility: hidden !important;
-                background: white !important;
+                background: #ffffff !important;
+                color: #000000 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
-            #printableReport, #printableReport * {
-                visibility: visible !important;
+            .no-print, header, aside, #toastContainer, #addStudentModal, #addTeacherModal, #confirmModal, #loginModal {
+                display: none !important;
+            }
+            #app {
+                display: block !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+            .tab-content {
+                display: none !important;
+            }
+            #tab-reportView {
+                display: block !important;
+                border: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
             }
             #printableReport {
-                position: absolute !important;
-                left: 0 !important;
-                top: 0 !important;
+                display: block !important;
+                visibility: visible !important;
                 width: 100% !important;
                 margin: 0 !important;
                 padding: 0 !important;
             }
-            .no-print {
-                display: none !important;
+            #printableReport * {
+                visibility: visible !important;
             }
             .print-page-break {
                 page-break-after: always;
@@ -70,7 +89,7 @@
                 <div class="bg-brand-700 text-white p-1.5 sm:p-2 rounded-lg font-bold text-lg sm:text-xl shadow-sm flex-shrink-0">VM</div>
                 <div class="min-w-0">
                     <h1 class="font-bold text-sm sm:text-lg leading-tight truncate">VEHEM MAWUNYO INT. SCHOOL</h1>
-                    <p class="text-[10px] sm:text-xs text-slate-400 truncate">Terminal Report System v2.5 (Creche - JHS 3)</p>
+                    <p class="text-[10px] sm:text-xs text-slate-400 truncate">Terminal Report System v2.6 (Creche - JHS 3)</p>
                 </div>
             </div>
             
@@ -79,7 +98,7 @@
                     <div id="currentUserDisplay" class="text-xs sm:text-sm font-semibold truncate">Logged in as: Teacher</div>
                     <div id="teacherClassBadge" class="text-[11px] text-brand-300 font-medium truncate"></div>
                     <div class="flex items-center justify-end space-x-2 text-[11px]">
-                        <span id="termStatusBadge" class="text-emerald-400"><i class="fas fa-unlock"></i> Term Unlocked</span>
+                        <span id="activeTermBadge" class="text-emerald-300 font-bold"><i class="fas fa-calendar-check"></i> Term 3</span>
                         <span class="text-slate-600">|</span>
                         <span id="cloudStatusBadge" class="text-amber-400 font-medium flex items-center gap-1">
                             <i class="fas fa-spinner fa-spin text-[10px]"></i> Connecting...
@@ -98,7 +117,6 @@
 
     <div id="app" class="flex-grow flex flex-col lg:flex-row max-w-7xl w-full mx-auto p-3 sm:p-6 lg:p-8 gap-4 sm:gap-6 no-print">
         
-        <!-- Responsive Navigation Sidebar / Top Tab-Bar on Mobile -->
         <aside class="w-full lg:w-64 flex-shrink-0 bg-white rounded-xl shadow-sm p-2 sm:p-4 border border-slate-200 h-fit">
             <nav class="flex lg:flex-col overflow-x-auto no-scrollbar sm:custom-scrollbar gap-1.5 pb-1 lg:pb-0 whitespace-nowrap">
                 <button onclick="switchTab('scoreEntry')" id="nav-scoreEntry" class="flex-shrink-0 lg:flex-shrink w-auto lg:w-full flex items-center space-x-2 sm:space-x-3 px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition bg-brand-50 text-brand-700">
@@ -145,7 +163,7 @@
                 <div class="border-b border-slate-200 pb-3 mb-4 sm:mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                     <div>
                         <h2 class="text-lg sm:text-xl font-bold text-slate-800">Single Student Score Entry</h2>
-                        <p class="text-xs sm:text-sm text-slate-500">Enter detailed continuous assessment sub-scores and exam marks.</p>
+                        <p class="text-xs sm:text-sm text-slate-500">Enter continuous assessment marks with automatic boundary checks.</p>
                     </div>
                     <div class="flex items-center gap-2 w-full sm:w-auto">
                         <label class="text-xs font-semibold text-slate-600 whitespace-nowrap">Active Term:</label>
@@ -181,16 +199,16 @@
                         
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4">
                             <div>
-                                <label class="block text-[11px] sm:text-xs font-semibold text-slate-700 mb-1">Class Test (20%)</label>
-                                <input type="number" id="inputTestScore" min="0" max="20" step="0.5" required oninput="calculateLiveTotal()" placeholder="0-20" class="w-full rounded-lg border-slate-300 p-2 border font-bold text-center text-xs sm:text-sm">
+                                <label class="block text-[11px] sm:text-xs font-semibold text-slate-700 mb-1">Class Test (0-20)</label>
+                                <input type="number" id="inputTestScore" min="0" max="20" step="0.5" required oninput="validateInputRange(this, 0, 20, 'Class Test'); calculateLiveTotal();" placeholder="0-20" class="w-full rounded-lg border-slate-300 p-2 border font-bold text-center text-xs sm:text-sm">
                             </div>
                             <div>
-                                <label class="block text-[11px] sm:text-xs font-semibold text-slate-700 mb-1">Homework (10%)</label>
-                                <input type="number" id="inputHwScore" min="0" max="10" step="0.5" required oninput="calculateLiveTotal()" placeholder="0-10" class="w-full rounded-lg border-slate-300 p-2 border font-bold text-center text-xs sm:text-sm">
+                                <label class="block text-[11px] sm:text-xs font-semibold text-slate-700 mb-1">Homework (0-10)</label>
+                                <input type="number" id="inputHwScore" min="0" max="10" step="0.5" required oninput="validateInputRange(this, 0, 10, 'Homework'); calculateLiveTotal();" placeholder="0-10" class="w-full rounded-lg border-slate-300 p-2 border font-bold text-center text-xs sm:text-sm">
                             </div>
                             <div>
-                                <label class="block text-[11px] sm:text-xs font-semibold text-slate-700 mb-1">ClassWork (20%)</label>
-                                <input type="number" id="inputCWScore" min="0" max="20" step="0.5" required oninput="calculateLiveTotal()" placeholder="0-20" class="w-full rounded-lg border-slate-300 p-2 border font-bold text-center text-xs sm:text-sm">
+                                <label class="block text-[11px] sm:text-xs font-semibold text-slate-700 mb-1">ClassWork (0-20)</label>
+                                <input type="number" id="inputCWScore" min="0" max="20" step="0.5" required oninput="validateInputRange(this, 0, 20, 'Classwork'); calculateLiveTotal();" placeholder="0-20" class="w-full rounded-lg border-slate-300 p-2 border font-bold text-center text-xs sm:text-sm">
                             </div>
                             <div>
                                 <label class="block text-[11px] sm:text-xs font-semibold text-brand-800 mb-1">Class Score (50%)</label>
@@ -200,8 +218,8 @@
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-4 pt-4 border-t border-slate-200">
                             <div>
-                                <label class="block text-[11px] sm:text-xs font-semibold text-slate-700 mb-1">Exam Mark (50%)</label>
-                                <input type="number" id="inputExamScore" min="0" max="50" step="0.5" required oninput="calculateLiveTotal()" placeholder="0 - 50" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-brand-500 p-2 sm:p-2.5 border font-bold text-sm sm:text-lg text-center">
+                                <label class="block text-[11px] sm:text-xs font-semibold text-slate-700 mb-1">Exam Mark (0-50)</label>
+                                <input type="number" id="inputExamScore" min="0" max="50" step="0.5" required oninput="validateInputRange(this, 0, 50, 'Exam Mark'); calculateLiveTotal();" placeholder="0 - 50" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-brand-500 p-2 sm:p-2.5 border font-bold text-sm sm:text-lg text-center">
                             </div>
                             <div>
                                 <label class="block text-[11px] sm:text-xs font-semibold text-slate-700 mb-1">Total Score (100%) & Remark</label>
@@ -407,13 +425,36 @@
             <section id="tab-settings" class="tab-content hidden">
                 <div class="border-b border-slate-200 pb-3 mb-4">
                     <h2 class="text-lg sm:text-xl font-bold text-slate-800">System Controls & Administrative Configuration</h2>
-                    <p class="text-xs sm:text-sm text-slate-500">Manage real-time cloud sync, term dates, fee bills, required items, teacher accounts, and security controls.</p>
+                    <p class="text-xs sm:text-sm text-slate-500">Manage active academic term, security passwords, term dates, fee requirements, teacher accounts with checkbox assignments, and cloud sync.</p>
+                </div>
+
+                <!-- Active Academic Term Control -->
+                <div class="bg-slate-50 p-4 sm:p-5 rounded-xl border border-slate-200 mb-4 sm:mb-6">
+                    <h3 class="font-bold text-sm sm:text-md text-slate-800 mb-2"><i class="fas fa-calendar-check text-brand-700 mr-2"></i>Active Academic Term Control</h3>
+                    <p class="text-xs text-slate-500 mb-3">Set or edit the active academic term for the entire school system.</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs items-end">
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Select / Set Active Term</label>
+                            <select id="cfgActiveTermSelect" class="w-full rounded-lg border-slate-300 p-2.5 border font-semibold text-xs">
+                                <!-- Populated dynamically -->
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Custom Term Name (Optional)</label>
+                            <input type="text" id="cfgCustomTermInput" placeholder="e.g. 2026-2027_Term1" class="w-full rounded-lg border-slate-300 p-2.5 border font-mono text-xs">
+                        </div>
+                        <div>
+                            <button type="button" onclick="handleSaveActiveTerm()" class="w-full py-2.5 bg-brand-700 hover:bg-brand-800 text-white rounded-lg font-bold text-xs shadow-sm transition flex items-center justify-center gap-2">
+                                <i class="fas fa-save"></i> Save Active Term
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Admin Security Password Change Card -->
                 <div class="bg-slate-50 p-4 sm:p-5 rounded-xl border border-slate-200 mb-4 sm:mb-6">
                     <h3 class="font-bold text-sm sm:text-md text-slate-800 mb-2"><i class="fas fa-user-shield text-brand-700 mr-2"></i>Admin Security & Password Control</h3>
-                    <p class="text-xs text-slate-500 mb-3">Change the system administrator master password. This controls access to all admin tools.</p>
+                    <p class="text-xs text-slate-500 mb-3">Change the system administrator master password.</p>
                     <form onsubmit="handleAdminPasswordChange(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs items-end">
                         <div>
                             <label class="block font-semibold text-slate-700 mb-1">New Master Password</label>
@@ -481,8 +522,8 @@
                 <div class="bg-slate-50 p-4 sm:p-5 rounded-xl border border-slate-200 mb-4 sm:mb-6">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 gap-2">
                         <div>
-                            <h3 class="font-bold text-sm sm:text-md text-slate-800">Teacher Class Assignments & Passwords</h3>
-                            <p class="text-xs text-slate-500">Assign specific classes and manage teacher login credentials.</p>
+                            <h3 class="font-bold text-sm sm:text-md text-slate-800">Teacher Class & Subject Assignments</h3>
+                            <p class="text-xs text-slate-500">Assign multiple classes and subjects with checkbox controls.</p>
                         </div>
                         <button onclick="openAddTeacherModal()" class="w-full sm:w-auto px-3 py-1.5 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-xs font-semibold transition flex items-center justify-center space-x-1">
                             <i class="fas fa-user-plus"></i>
@@ -491,17 +532,18 @@
                     </div>
 
                     <div class="overflow-x-auto border border-slate-200 rounded-lg bg-white custom-scrollbar">
-                        <table class="w-full text-xs text-left text-slate-600 min-w-[500px]">
+                        <table class="w-full text-xs text-left text-slate-600 min-w-[600px]">
                             <thead class="uppercase bg-slate-100 text-slate-700 font-semibold">
                                 <tr>
                                     <th class="px-3 py-2">Teacher Name</th>
-                                    <th class="px-3 py-2">Assigned Class</th>
+                                    <th class="px-3 py-2">Assigned Classes</th>
+                                    <th class="px-3 py-2">Assigned Subjects</th>
                                     <th class="px-3 py-2">Password</th>
                                     <th class="px-3 py-2 text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="teacherTableBody">
-                                <tr><td colspan="4" class="px-3 py-3 text-center text-slate-400">Loading teachers...</td></tr>
+                                <tr><td colspan="5" class="px-3 py-3 text-center text-slate-400">Loading teachers...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -629,24 +671,47 @@
         </div>
     </div>
 
-    <!-- Modal: Add / Edit Teacher -->
+    <!-- Modal: Add / Edit Teacher (With Checkbox Grids) -->
     <div id="addTeacherModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-3 sm:p-4">
-        <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-4 sm:p-6 border border-slate-200">
+        <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-4 sm:p-6 border border-slate-200 max-h-[90vh] overflow-y-auto custom-scrollbar">
             <h3 id="teacherModalTitle" class="text-base sm:text-lg font-bold text-slate-800 mb-3">Add / Edit Teacher Account</h3>
-            <form onsubmit="handleSaveTeacher(event)" class="space-y-3 sm:space-y-4">
+            <form onsubmit="handleSaveTeacher(event)" class="space-y-4">
                 <input type="hidden" id="editTeacherId">
                 <div>
-                    <label class="block text-xs sm:text-sm font-medium text-slate-700 mb-1">Teacher Full Name</label>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Teacher Full Name</label>
                     <input type="text" id="teacherNameInput" required placeholder="e.g. Mr. Kwami Mensah" class="w-full rounded-lg border-slate-300 p-2 sm:p-2.5 border text-xs sm:text-sm">
                 </div>
+
+                <!-- Checkbox Grid: Assigned Classes -->
                 <div>
-                    <label class="block text-xs sm:text-sm font-medium text-slate-700 mb-1">Assigned Class Only</label>
-                    <select id="teacherClassInput" required class="w-full rounded-lg border-slate-300 p-2 sm:p-2.5 border text-xs sm:text-sm">
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-xs font-bold text-slate-700">Select Assigned Classes</label>
+                        <div class="space-x-2">
+                            <button type="button" onclick="toggleAllTeacherCheckboxes('teacherClassesCheckboxes', true)" class="text-[10px] text-brand-700 hover:underline font-semibold">Select All</button>
+                            <button type="button" onclick="toggleAllTeacherCheckboxes('teacherClassesCheckboxes', false)" class="text-[10px] text-slate-500 hover:underline">Clear</button>
+                        </div>
+                    </div>
+                    <div id="teacherClassesCheckboxes" class="grid grid-cols-2 sm:grid-cols-3 gap-2 bg-slate-50 p-3 rounded-lg border border-slate-200 max-h-36 overflow-y-auto custom-scrollbar text-xs">
                         <!-- Populated dynamically -->
-                    </select>
+                    </div>
                 </div>
+
+                <!-- Checkbox Grid: Assigned Subjects -->
                 <div>
-                    <label class="block text-xs sm:text-sm font-medium text-slate-700 mb-1">Login Password</label>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-xs font-bold text-slate-700">Select Assigned Subjects (Check none to assign All Subjects)</label>
+                        <div class="space-x-2">
+                            <button type="button" onclick="toggleAllTeacherCheckboxes('teacherSubjectsCheckboxes', true)" class="text-[10px] text-brand-700 hover:underline font-semibold">Select All</button>
+                            <button type="button" onclick="toggleAllTeacherCheckboxes('teacherSubjectsCheckboxes', false)" class="text-[10px] text-slate-500 hover:underline">Clear</button>
+                        </div>
+                    </div>
+                    <div id="teacherSubjectsCheckboxes" class="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-slate-50 p-3 rounded-lg border border-slate-200 max-h-40 overflow-y-auto custom-scrollbar text-xs">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Login Password</label>
                     <div class="relative">
                         <input type="password" id="teacherPasswordInput" required placeholder="Enter login password" class="w-full rounded-lg border-slate-300 p-2 sm:p-2.5 border pr-10 text-xs sm:text-sm font-mono">
                         <button type="button" onclick="toggleInputVisibility('teacherPasswordInput', 'teacherPwdToggleIcon')" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 focus:outline-none">
@@ -792,6 +857,7 @@
             teachers: [],
             termLocked: false,
             adminPassword: "admin123",
+            activeTerm: "2025-2026_Term3",
             auditLogs: [],
             termConfig: {
                 academicYear: '2025/2026',
@@ -810,6 +876,23 @@
         let confirmCallback = null;
         
         const teacherPasswordVisibilityMap = {};
+
+        function validateInputRange(inputElement, min, max, label) {
+            if (!inputElement || inputElement.value === '') {
+                inputElement.classList.remove('border-red-500', 'bg-red-50');
+                return true;
+            }
+            const val = parseFloat(inputElement.value);
+            if (isNaN(val) || val < min || val > max) {
+                inputElement.classList.add('border-red-500', 'bg-red-50');
+                showToast(`⚠️ Out of Range! ${label} mark must be between ${min} and ${max}. Please enter a number in this range.`, 'error');
+                return false;
+            } else {
+                inputElement.classList.remove('border-red-500', 'bg-red-50');
+                return true;
+            }
+        }
+        window.validateInputRange = validateInputRange;
 
         function toggleInputVisibility(inputId, iconId) {
             const input = document.getElementById(inputId);
@@ -850,7 +933,7 @@
             setTimeout(() => {
                 toast.classList.add('opacity-0');
                 setTimeout(() => toast.remove(), 300);
-            }, 3500);
+            }, 3800);
         }
         window.showToast = showToast;
 
@@ -875,6 +958,26 @@
         }
         window.closeConfirmModal = closeConfirmModal;
 
+        function updateActiveTermDisplays() {
+            const badge = document.getElementById('activeTermBadge');
+            if (badge) {
+                const readable = activeTerm.replace('_', ' - ');
+                badge.innerHTML = `<i class="fas fa-calendar-check mr-1"></i> ${readable}`;
+            }
+
+            const termSelect = document.getElementById('cfgActiveTermSelect');
+            if (termSelect) {
+                termSelect.innerHTML = '';
+                const availableTerms = [...new Set([...MASTER_TERMS, activeTerm])];
+                availableTerms.forEach(t => {
+                    const readable = t.replace('_', ' - ');
+                    termSelect.innerHTML += `<option value="${t}" ${t === activeTerm ? 'selected' : ''}>${readable}</option>`;
+                });
+            }
+
+            renderMasterClassDropdowns();
+        }
+
         function renderMasterClassDropdowns() {
             const filterSelect = document.getElementById('filterClassSelect');
             if (filterSelect) {
@@ -894,21 +997,15 @@
                 });
             }
 
-            const teacherClassSelect = document.getElementById('teacherClassInput');
-            if (teacherClassSelect) {
-                teacherClassSelect.innerHTML = '';
-                MASTER_CLASSES.forEach(cls => {
-                    teacherClassSelect.innerHTML += `<option value="${cls}">${cls}</option>`;
-                });
-            }
-
             ['singleScoreTermSelect', 'batchTermSelect'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
+                    const curr = el.value || activeTerm;
                     el.innerHTML = '';
-                    MASTER_TERMS.forEach(t => {
+                    const availableTerms = [...new Set([...MASTER_TERMS, activeTerm])];
+                    availableTerms.forEach(t => {
                         const readable = t.replace('_', ' - ');
-                        el.innerHTML += `<option value="${t}" ${t === activeTerm ? 'selected' : ''}>${readable}</option>`;
+                        el.innerHTML += `<option value="${t}" ${t === curr ? 'selected' : ''}>${readable}</option>`;
                     });
                 }
             });
@@ -1016,6 +1113,11 @@
                     const data = docSnap.data();
                     state.termLocked = data.termLocked || false;
                     state.adminPassword = data.adminPassword || 'admin123';
+                    if (data.activeTerm) {
+                        state.activeTerm = data.activeTerm;
+                        activeTerm = data.activeTerm;
+                        updateActiveTermDisplays();
+                    }
                     if (data.termConfig) {
                         state.termConfig = { ...state.termConfig, ...data.termConfig };
                         populateTermConfigFields();
@@ -1032,6 +1134,30 @@
                 renderAuditLogsTable();
             });
         }
+
+        async function handleSaveActiveTerm() {
+            const selVal = document.getElementById('cfgActiveTermSelect').value;
+            const customVal = document.getElementById('cfgCustomTermInput').value.trim();
+            const targetTerm = customVal || selVal;
+
+            if (!targetTerm) {
+                showToast("Please select or specify a term name.", "error");
+                return;
+            }
+
+            activeTerm = targetTerm;
+            state.activeTerm = targetTerm;
+            updateActiveTermDisplays();
+
+            if (currentUser) {
+                await setDoc(SETTINGS_DOC, { activeTerm: targetTerm }, { merge: true });
+                await logActivity("Update Active Term", `Active term changed to ${targetTerm}`);
+            }
+
+            document.getElementById('cfgCustomTermInput').value = '';
+            showToast(`Active term updated to ${targetTerm.replace('_', ' - ')}!`, "success");
+        }
+        window.handleSaveActiveTerm = handleSaveActiveTerm;
 
         async function handleAdminPasswordChange(e) {
             e.preventDefault();
@@ -1130,17 +1256,21 @@
             const tbody = document.getElementById('teacherTableBody');
             if (!tbody) return;
             if (state.teachers.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="px-3 py-3 text-center text-slate-400">No teachers registered yet. Click "Add New Teacher" to create accounts.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="px-3 py-3 text-center text-slate-400">No teachers registered yet. Click "Add New Teacher" to create accounts.</td></tr>';
                 return;
             }
 
             tbody.innerHTML = state.teachers.map(t => {
                 const isVisible = !!teacherPasswordVisibilityMap[t.id];
                 const displayPwd = isVisible ? t.password : '••••••••';
+                const classListStr = (t.assignedClasses && t.assignedClasses.length > 0) ? t.assignedClasses.join(', ') : (t.assignedClass || 'None');
+                const subjectListStr = (t.assignedSubjects && t.assignedSubjects.length > 0) ? t.assignedSubjects.join(', ') : 'All Subjects';
+
                 return `
-                    <tr class="border-b hover:bg-slate-50">
+                    <tr class="border-b hover:bg-slate-50 text-xs">
                         <td class="px-3 py-2 font-semibold text-slate-800">${t.name}</td>
-                        <td class="px-3 py-2"><span class="px-2 py-0.5 rounded bg-brand-50 text-brand-800 font-bold text-[11px]">${t.assignedClass}</span></td>
+                        <td class="px-3 py-2"><span class="px-2 py-0.5 rounded bg-brand-50 text-brand-800 font-bold text-[11px]">${classListStr}</span></td>
+                        <td class="px-3 py-2"><span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium text-[11px]">${subjectListStr}</span></td>
                         <td class="px-3 py-2 font-mono">
                             <div class="flex items-center space-x-2">
                                 <span class="bg-slate-100 px-2 py-0.5 rounded text-slate-700 min-w-[70px] inline-block text-center font-bold">${displayPwd}</span>
@@ -1159,11 +1289,50 @@
         }
         window.renderTeacherTable = renderTeacherTable;
 
+        function renderTeacherCheckboxGrids(selectedClasses = [], selectedSubjects = []) {
+            const classContainer = document.getElementById('teacherClassesCheckboxes');
+            const subContainer = document.getElementById('teacherSubjectsCheckboxes');
+
+            if (classContainer) {
+                classContainer.innerHTML = MASTER_CLASSES.map(cls => {
+                    const isChecked = selectedClasses.includes(cls);
+                    return `
+                        <label class="flex items-center space-x-2 cursor-pointer p-1 hover:bg-white rounded">
+                            <input type="checkbox" name="teacherClassCheck" value="${cls}" ${isChecked ? 'checked' : ''} class="rounded border-slate-300 text-brand-700 focus:ring-brand-500">
+                            <span class="font-medium text-slate-700">${cls}</span>
+                        </label>
+                    `;
+                }).join('');
+            }
+
+            if (subContainer) {
+                subContainer.innerHTML = MASTER_SUBJECTS.map(sub => {
+                    const isChecked = selectedSubjects.includes(sub);
+                    return `
+                        <label class="flex items-center space-x-2 cursor-pointer p-1 hover:bg-white rounded">
+                            <input type="checkbox" name="teacherSubjectCheck" value="${sub}" ${isChecked ? 'checked' : ''} class="rounded border-slate-300 text-brand-700 focus:ring-brand-500">
+                            <span class="font-medium text-slate-700 text-[11px]">${sub}</span>
+                        </label>
+                    `;
+                }).join('');
+            }
+        }
+
+        function toggleAllTeacherCheckboxes(containerId, checkState) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(cb => cb.checked = checkState);
+        }
+        window.toggleAllTeacherCheckboxes = toggleAllTeacherCheckboxes;
+
         function openAddTeacherModal() {
             document.getElementById('teacherModalTitle').innerText = "Add New Teacher";
             document.getElementById('editTeacherId').value = "";
             document.getElementById('teacherNameInput').value = "";
             document.getElementById('teacherPasswordInput').value = "";
+            renderTeacherCheckboxGrids([], []);
+            
             const modal = document.getElementById('addTeacherModal');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
@@ -1176,8 +1345,12 @@
             document.getElementById('teacherModalTitle').innerText = "Edit Teacher Account";
             document.getElementById('editTeacherId').value = teacher.id;
             document.getElementById('teacherNameInput').value = teacher.name;
-            document.getElementById('teacherClassInput').value = teacher.assignedClass;
             document.getElementById('teacherPasswordInput').value = teacher.password;
+
+            const classes = teacher.assignedClasses || (teacher.assignedClass ? [teacher.assignedClass] : []);
+            const subjects = teacher.assignedSubjects || [];
+
+            renderTeacherCheckboxGrids(classes, subjects);
 
             const modal = document.getElementById('addTeacherModal');
             modal.classList.remove('hidden');
@@ -1195,14 +1368,23 @@
         async function handleSaveTeacher(e) {
             e.preventDefault();
             const editId = document.getElementById('editTeacherId').value;
-            const name = document.getElementById('teacherNameInput').value;
-            const cls = document.getElementById('teacherClassInput').value;
-            const pwd = document.getElementById('teacherPasswordInput').value;
+            const name = document.getElementById('teacherNameInput').value.trim();
+            const pwd = document.getElementById('teacherPasswordInput').value.trim();
+
+            const selectedClasses = Array.from(document.querySelectorAll('input[name="teacherClassCheck"]:checked')).map(cb => cb.value);
+            const selectedSubjects = Array.from(document.querySelectorAll('input[name="teacherSubjectCheck"]:checked')).map(cb => cb.value);
+
+            if (selectedClasses.length === 0) {
+                showToast("Please check at least one assigned class for the teacher.", "error");
+                return;
+            }
 
             const teacherObj = {
                 id: editId || ('TCH-' + (Math.floor(Math.random() * 900) + 100)),
                 name: name,
-                assignedClass: cls,
+                assignedClasses: selectedClasses,
+                assignedClass: selectedClasses.join(', '),
+                assignedSubjects: selectedSubjects,
                 password: pwd
             };
 
@@ -1212,7 +1394,7 @@
 
             if (currentUser) {
                 await setDoc(doc(TEACHERS_COLL, teacherObj.id), teacherObj, { merge: true });
-                await logActivity("Save Teacher", `Saved account for ${name} (${cls})`);
+                await logActivity("Save Teacher", `Saved account for ${name} (${teacherObj.assignedClass})`);
             }
 
             populateTeacherLoginDropdown();
@@ -1242,7 +1424,8 @@
             const currVal = sel.value;
             sel.innerHTML = '<option value="">-- Choose Teacher Profile --</option>';
             state.teachers.forEach(t => {
-                sel.innerHTML += `<option value="${t.id}">${t.name} (${t.assignedClass})</option>`;
+                const classLabel = (t.assignedClasses && t.assignedClasses.length > 0) ? t.assignedClasses.join(', ') : (t.assignedClass || 'Class');
+                sel.innerHTML += `<option value="${t.id}">${t.name} (${classLabel})</option>`;
             });
             if (currVal) sel.value = currVal;
         }
@@ -1283,8 +1466,9 @@
             currentRole = 'Teacher';
             currentTeacher = teacher;
 
+            const classLabel = (teacher.assignedClasses && teacher.assignedClasses.length > 0) ? teacher.assignedClasses.join(', ') : (teacher.assignedClass || '');
             document.getElementById('currentUserDisplay').innerText = `Logged in: ${teacher.name}`;
-            document.getElementById('teacherClassBadge').innerText = `${teacher.assignedClass} Class Teacher`;
+            document.getElementById('teacherClassBadge').innerText = `${classLabel} Teacher`;
             
             document.querySelectorAll('.admin-nav-item').forEach(el => el.classList.add('hidden'));
 
@@ -1297,7 +1481,7 @@
             renderClassTotals();
             switchTab('scoreEntry');
 
-            logActivity("Teacher Login", `Logged in: ${teacher.name} (${teacher.assignedClass})`);
+            logActivity("Teacher Login", `Logged in: ${teacher.name} (${classLabel})`);
             showToast(`Welcome back, ${teacher.name}!`, 'success');
         }
         window.handleTeacherLogin = handleTeacherLogin;
@@ -1415,11 +1599,21 @@
 
             studentSelect.innerHTML = '<option value="">-- Choose Student --</option>';
             reportSelect.innerHTML = '';
-            subjectSelect.innerHTML = '<option value="">-- Choose Student First --</option>';
+            subjectSelect.innerHTML = '<option value="">-- Choose Subject --</option>';
 
             let filteredStudents = state.students;
+            let availableClasses = MASTER_CLASSES;
+            let availableSubjects = MASTER_SUBJECTS;
+
             if (currentRole === 'Teacher' && currentTeacher) {
-                filteredStudents = state.students.filter(s => s.class === currentTeacher.assignedClass);
+                const assignedClasses = currentTeacher.assignedClasses || (currentTeacher.assignedClass ? [currentTeacher.assignedClass] : []);
+                if (assignedClasses.length > 0) {
+                    filteredStudents = state.students.filter(s => assignedClasses.includes(s.class));
+                    availableClasses = assignedClasses;
+                }
+                if (currentTeacher.assignedSubjects && currentTeacher.assignedSubjects.length > 0) {
+                    availableSubjects = currentTeacher.assignedSubjects;
+                }
             }
 
             if (filteredStudents.length === 0) {
@@ -1433,9 +1627,27 @@
             }
 
             subjectSelect.innerHTML = '<option value="">-- Choose Subject --</option>';
-            MASTER_SUBJECTS.forEach(sub => {
+            availableSubjects.forEach(sub => {
                 subjectSelect.innerHTML += `<option value="${sub}">${sub}</option>`;
             });
+
+            // Update batch selectors to respect assigned teacher classes/subjects
+            const batchClass = document.getElementById('batchClassSelect');
+            const batchSub = document.getElementById('batchSubjectSelect');
+            const batchRptClass = document.getElementById('reportClassBatchSelect');
+
+            if (batchClass) {
+                batchClass.innerHTML = '';
+                availableClasses.forEach(cls => batchClass.innerHTML += `<option value="${cls}">${cls}</option>`);
+            }
+            if (batchRptClass) {
+                batchRptClass.innerHTML = '';
+                availableClasses.forEach(cls => batchRptClass.innerHTML += `<option value="${cls}">${cls}</option>`);
+            }
+            if (batchSub) {
+                batchSub.innerHTML = '';
+                availableSubjects.forEach(s => batchSub.innerHTML += `<option value="${s}">${s}</option>`);
+            }
 
             if (currentStuVal) studentSelect.value = currentStuVal;
             if (currentRptVal) reportSelect.value = currentRptVal;
@@ -1505,9 +1717,12 @@
                 return;
             }
 
-            if (currentRole === 'Teacher' && currentTeacher && student.class !== currentTeacher.assignedClass) {
-                showToast(`Access Denied: You are assigned to ${currentTeacher.assignedClass} only.`, "error");
-                return;
+            if (currentRole === 'Teacher' && currentTeacher) {
+                const assignedClasses = currentTeacher.assignedClasses || (currentTeacher.assignedClass ? [currentTeacher.assignedClass] : []);
+                if (assignedClasses.length > 0 && !assignedClasses.includes(student.class)) {
+                    showToast(`Access Denied: You are assigned to ${assignedClasses.join(', ')} only.`, "error");
+                    return;
+                }
             }
 
             const termKey = document.getElementById('singleScoreTermSelect').value || activeTerm;
@@ -1516,8 +1731,14 @@
             const t = parseFloat(document.getElementById('inputTestScore').value) || 0;
             const hw = parseFloat(document.getElementById('inputHwScore').value) || 0;
             const cw = parseFloat(document.getElementById('inputCWScore').value) || 0;
-            const cTotal = t + hw + cw;
             const ex = parseFloat(document.getElementById('inputExamScore').value) || 0;
+
+            if (t < 0 || t > 20 || hw < 0 || hw > 10 || cw < 0 || cw > 20 || ex < 0 || ex > 50) {
+                showToast("Please ensure all score inputs are within valid ranges before saving.", "error");
+                return;
+            }
+
+            const cTotal = t + hw + cw;
 
             if (!state.scores[termKey]) state.scores[termKey] = {};
             if (!state.scores[termKey][stuId]) state.scores[termKey][stuId] = {};
@@ -1585,9 +1806,12 @@
             const termKey = document.getElementById('batchTermSelect').value || activeTerm;
 
             let classStudents = state.students.filter(s => s.class === selectedClass);
-            if (currentRole === 'Teacher' && currentTeacher && selectedClass !== currentTeacher.assignedClass) {
-                tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-red-500 font-semibold">Access Restricted: You are assigned to ${currentTeacher.assignedClass} only.</td></tr>`;
-                return;
+            if (currentRole === 'Teacher' && currentTeacher) {
+                const assignedClasses = currentTeacher.assignedClasses || (currentTeacher.assignedClass ? [currentTeacher.assignedClass] : []);
+                if (assignedClasses.length > 0 && !assignedClasses.includes(selectedClass)) {
+                    tbody.innerHTML = `<tr><td colspan="8" class="px-4 py-8 text-center text-red-500 font-semibold">Access Restricted: You are assigned to ${assignedClasses.join(', ')} only.</td></tr>`;
+                    return;
+                }
             }
 
             if (classStudents.length === 0) {
@@ -1607,11 +1831,11 @@
                 return `
                     <tr class="border-b hover:bg-slate-50 text-xs">
                         <td class="px-3 py-2 font-bold text-slate-800">${idx + 1}. ${stu.name}</td>
-                        <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.5" value="${t}" data-stuid="${stu.id}" data-type="test" oninput="updateGridRowTotal(this)" class="w-full rounded border-slate-300 p-1 text-center font-semibold text-xs border"></td>
-                        <td class="px-2 py-2"><input type="number" min="0" max="10" step="0.5" value="${hw}" data-stuid="${stu.id}" data-type="hw" oninput="updateGridRowTotal(this)" class="w-full rounded border-slate-300 p-1 text-center font-semibold text-xs border"></td>
-                        <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.5" value="${cw}" data-stuid="${stu.id}" data-type="cw" oninput="updateGridRowTotal(this)" class="w-full rounded border-slate-300 p-1 text-center font-semibold text-xs border"></td>
+                        <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.5" value="${t}" data-stuid="${stu.id}" data-type="test" oninput="validateInputRange(this,0,20,'Class Test'); updateGridRowTotal(this);" class="w-full rounded border-slate-300 p-1 text-center font-semibold text-xs border"></td>
+                        <td class="px-2 py-2"><input type="number" min="0" max="10" step="0.5" value="${hw}" data-stuid="${stu.id}" data-type="hw" oninput="validateInputRange(this,0,10,'Homework'); updateGridRowTotal(this);" class="w-full rounded border-slate-300 p-1 text-center font-semibold text-xs border"></td>
+                        <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.5" value="${cw}" data-stuid="${stu.id}" data-type="cw" oninput="validateInputRange(this,0,20,'Classwork'); updateGridRowTotal(this);" class="w-full rounded border-slate-300 p-1 text-center font-semibold text-xs border"></td>
                         <td class="px-2 py-2 bg-brand-50/50 text-center font-bold text-brand-900" id="gridClassTotal-${stu.id}">${c}</td>
-                        <td class="px-2 py-2"><input type="number" min="0" max="50" step="0.5" value="${ex}" data-stuid="${stu.id}" data-type="exam" oninput="updateGridRowTotal(this)" class="w-full rounded border-slate-300 p-1 text-center font-bold text-xs border"></td>
+                        <td class="px-2 py-2"><input type="number" min="0" max="50" step="0.5" value="${ex}" data-stuid="${stu.id}" data-type="exam" oninput="validateInputRange(this,0,50,'Exam Mark'); updateGridRowTotal(this);" class="w-full rounded border-slate-300 p-1 text-center font-bold text-xs border"></td>
                         <td class="px-2 py-2 text-center font-black text-sm text-slate-800" id="gridGrandTotal-${stu.id}">${tot}</td>
                         <td class="px-3 py-2 text-center" id="gridRemark-${stu.id}"><span class="px-2 py-0.5 rounded bg-slate-100 font-semibold text-[11px]">${calculateRemark(tot)}</span></td>
                     </tr>
@@ -1679,14 +1903,154 @@
         }
         window.saveBatchGridScores = saveBatchGridScores;
 
+        function renderStudentsTable() {
+            const tbody = document.getElementById('studentsTableBody');
+            if (!tbody) return;
+
+            let filtered = state.students;
+            if (currentRole === 'Teacher' && currentTeacher) {
+                const assignedClasses = currentTeacher.assignedClasses || (currentTeacher.assignedClass ? [currentTeacher.assignedClass] : []);
+                if (assignedClasses.length > 0) {
+                    filtered = state.students.filter(s => assignedClasses.includes(s.class));
+                }
+            }
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-slate-400">No student records found. Click "Add New Student" to enroll.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(stu => `
+                <tr class="border-b hover:bg-slate-50 text-xs">
+                    <td class="px-3 py-2.5">
+                        <img src="${stu.photo || 'https://placehold.co/40x40/9d174d/ffffff?text=' + stu.name.charAt(0)}" onerror="this.src='https://placehold.co/40x40/9d174d/ffffff?text=${stu.name.charAt(0)}'" class="w-8 h-8 rounded-full object-cover border border-slate-200">
+                    </td>
+                    <td class="px-3 py-2.5">
+                        <div class="font-bold text-slate-800">${stu.name}</div>
+                        <div class="text-[10px] text-slate-400 font-mono">${stu.id}</div>
+                    </td>
+                    <td class="px-3 py-2.5 font-semibold text-slate-700">${stu.class}</td>
+                    <td class="px-3 py-2.5 font-bold">${stu.attendance || 60} / 60 days</td>
+                    <td class="px-3 py-2.5">
+                        <div class="truncate max-w-[180px] font-medium text-slate-700">${stu.conduct || 'Satisfactory'}</div>
+                        <div class="text-[10px] text-slate-400 truncate max-w-[180px]">${stu.teacherRemark || 'Good performance.'}</div>
+                    </td>
+                    <td class="px-3 py-2.5 text-right space-x-2">
+                        <button onclick="openEditStudentModal('${stu.id}')" class="text-indigo-600 hover:text-indigo-800 font-bold">Edit</button>
+                        <button onclick="deleteStudent('${stu.id}')" class="text-red-600 hover:text-red-800 font-bold">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openAddStudentModal() {
+            document.getElementById('studentModalTitle').innerText = "Add New Student Profile";
+            document.getElementById('editStudentId').value = "";
+            document.getElementById('newStudentName').value = "";
+            document.getElementById('newStudentPromoted').value = "";
+            document.getElementById('newStudentAttendance').value = "60";
+            document.getElementById('newStudentPhoto').value = "";
+            document.getElementById('newStudentConduct').value = "Satisfactory";
+            document.getElementById('newStudentInterests').value = "Integrated Science & Mathematics";
+            document.getElementById('newTeacherRemark').value = "Good performance. Keep it up!!";
+
+            const modal = document.getElementById('addStudentModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+        window.openAddStudentModal = openAddStudentModal;
+
+        function openEditStudentModal(id) {
+            const stu = state.students.find(s => s.id === id);
+            if (!stu) return;
+
+            document.getElementById('studentModalTitle').innerText = "Edit Student Profile";
+            document.getElementById('editStudentId').value = stu.id;
+            document.getElementById('newStudentName').value = stu.name;
+            document.getElementById('newStudentClass').value = stu.class;
+            document.getElementById('newStudentPromoted').value = stu.promotedTo || '';
+            document.getElementById('newStudentAttendance').value = stu.attendance || 60;
+            document.getElementById('newStudentPhoto').value = stu.photo || '';
+            document.getElementById('newStudentConduct').value = stu.conduct || '';
+            document.getElementById('newStudentInterests').value = stu.interests || '';
+            document.getElementById('newTeacherRemark').value = stu.teacherRemark || '';
+
+            const modal = document.getElementById('addStudentModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+        window.openEditStudentModal = openEditStudentModal;
+
+        function closeAddStudentModal() {
+            const modal = document.getElementById('addStudentModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+        window.closeAddStudentModal = closeAddStudentModal;
+
+        async function handleAddStudent(e) {
+            e.preventDefault();
+            const editId = document.getElementById('editStudentId').value;
+            const stuName = document.getElementById('newStudentName').value.trim();
+            const stuClass = document.getElementById('newStudentClass').value;
+
+            const stuObj = {
+                id: editId || ('STU-' + (Math.floor(Math.random() * 9000) + 1000)),
+                name: stuName,
+                class: stuClass,
+                promotedTo: document.getElementById('newStudentPromoted').value.trim(),
+                attendance: parseInt(document.getElementById('newStudentAttendance').value) || 60,
+                photo: document.getElementById('newStudentPhoto').value.trim(),
+                conduct: document.getElementById('newStudentConduct').value.trim(),
+                interests: document.getElementById('newStudentInterests').value.trim(),
+                teacherRemark: document.getElementById('newTeacherRemark').value.trim()
+            };
+
+            const existingIdx = state.students.findIndex(s => s.id === stuObj.id);
+            if (existingIdx !== -1) state.students[existingIdx] = stuObj;
+            else state.students.push(stuObj);
+
+            if (currentUser) {
+                await setDoc(doc(STUDENTS_COLL, stuObj.id), stuObj, { merge: true });
+                await logActivity("Save Student", `Saved profile for ${stuName} (${stuClass})`);
+            }
+
+            populateDropdowns();
+            renderStudentsTable();
+            renderClassTotals();
+            closeAddStudentModal();
+            showToast("Student profile saved successfully!", "success");
+        }
+        window.handleAddStudent = handleAddStudent;
+
+        function deleteStudent(id) {
+            showConfirmModal("Delete Student Record", `Are you sure you want to remove student ID ${id}?`, async () => {
+                state.students = state.students.filter(s => s.id !== id);
+                if (currentUser) {
+                    await deleteDoc(doc(STUDENTS_COLL, id));
+                    await logActivity("Delete Student", `Removed student ID ${id}`);
+                }
+                populateDropdowns();
+                renderStudentsTable();
+                renderClassTotals();
+                showToast("Student record deleted.", "info");
+            });
+        }
+        window.deleteStudent = deleteStudent;
+
         function renderClassTotals() {
             const tbody = document.getElementById('classTotalsTableBody');
             if (!tbody) return;
             const filterSelect = document.getElementById('filterClassSelect');
 
             if (currentRole === 'Teacher' && currentTeacher) {
-                filterSelect.value = currentTeacher.assignedClass;
-                filterSelect.disabled = true;
+                const assignedClasses = currentTeacher.assignedClasses || (currentTeacher.assignedClass ? [currentTeacher.assignedClass] : []);
+                if (assignedClasses.length === 1) {
+                    filterSelect.value = assignedClasses[0];
+                    filterSelect.disabled = true;
+                } else {
+                    filterSelect.disabled = false;
+                }
             } else {
                 filterSelect.disabled = false;
             }
@@ -1725,7 +2089,152 @@
                 </tr>
             `).join('');
         }
-        window.renderClassTotals = renderClassTotals;
+
+        function generateReportCardHtml(student, termKey = activeTerm) {
+            const stuScores = (state.scores[termKey] && state.scores[termKey][student.id]) ? state.scores[termKey][student.id] : {};
+            const cfg = state.termConfig;
+
+            // Calculate Grand Total & Average
+            let grandTotal = 0;
+            let subjectCount = 0;
+            MASTER_SUBJECTS.forEach(sub => {
+                const sc = stuScores[sub];
+                if (sc) {
+                    grandTotal += ((sc.classScore || 0) + (sc.examScore || 0));
+                    subjectCount++;
+                }
+            });
+            const averageScore = subjectCount > 0 ? (grandTotal / subjectCount).toFixed(1) : 0;
+
+            // Calculate Class Position / Rank
+            let classStudents = state.students.filter(s => s.class === student.class);
+            let classTotals = classStudents.map(s => {
+                let tot = 0;
+                const scs = (state.scores[termKey] && state.scores[termKey][s.id]) ? state.scores[termKey][s.id] : {};
+                Object.values(scs).forEach(sc => tot += ((sc.classScore || 0) + (sc.examScore || 0)));
+                return { id: s.id, total: tot };
+            });
+            classTotals.sort((a, b) => b.total - a.total);
+            const rankIdx = classTotals.findIndex(item => item.id === student.id);
+            const positionStr = rankIdx !== -1 ? getOrdinalSuffix(rankIdx + 1) : '-';
+
+            // Items required text selection
+            let requiredItems = cfg.itemsPrimary;
+            if (student.class.includes('Creche') || student.class.includes('Nursery') || student.class.includes('KG')) {
+                requiredItems = cfg.itemsKG;
+            } else if (student.class.includes('JHS')) {
+                requiredItems = cfg.itemsJHS;
+            }
+
+            const readableTerm = termKey.replace('_', ' ');
+
+            let subjectRows = MASTER_SUBJECTS.map(sub => {
+                const sc = stuScores[sub];
+                const c = sc ? sc.classScore : '-';
+                const ex = sc ? sc.examScore : '-';
+                const tot = sc ? (sc.classScore + sc.examScore) : '-';
+                const rank = sc ? getSubjectRank(sub, student.id, student.class, termKey) : '-';
+                const rem = sc ? calculateRemark(tot) : '-';
+
+                return `
+                    <tr class="border-b border-slate-300 text-xs">
+                        <td class="p-2 font-bold text-slate-900 border-r border-slate-300 uppercase">${sub}</td>
+                        <td class="p-2 text-center font-medium border-r border-slate-300">${c}</td>
+                        <td class="p-2 text-center font-medium border-r border-slate-300">${ex}</td>
+                        <td class="p-2 text-center font-black text-slate-900 border-r border-slate-300 bg-slate-50">${tot}</td>
+                        <td class="p-2 text-center font-bold border-r border-slate-300 text-brand-800">${rank}</td>
+                        <td class="p-2 font-semibold text-slate-800">${rem}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            return `
+                <div class="print-page-break bg-white p-6 sm:p-8 rounded-xl shadow-lg border-2 border-slate-800 max-w-4xl mx-auto text-slate-900 font-sans">
+                    <!-- School Header -->
+                    <div class="flex items-center justify-between border-b-2 border-slate-800 pb-4 mb-4">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-16 h-16 sm:w-20 sm:h-20 bg-brand-800 text-white font-black text-2xl sm:text-3xl rounded-2xl flex items-center justify-center border-2 border-slate-900 shadow">VM</div>
+                            <div>
+                                <h1 class="font-black text-lg sm:text-2xl text-slate-900 tracking-tight leading-none uppercase">VEHEM MAWUNYO INT. SCHOOL</h1>
+                                <p class="text-xs sm:text-sm font-semibold text-slate-700 mt-1">P.O. BOX 124, HO, VOLTA REGION, GHANA</p>
+                                <p class="text-[11px] font-bold text-brand-800 mt-0.5">MOTTO: KNOWLEDGE IS POWER & LIGHT</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="border-2 border-slate-900 px-3 py-1 bg-slate-900 text-white font-black text-xs uppercase tracking-wider rounded">TERMINAL REPORT SHEET</div>
+                            <div class="text-xs font-bold text-slate-700 mt-1">${readableTerm}</div>
+                            <div class="text-[11px] font-semibold text-slate-500">Year: ${cfg.academicYear}</div>
+                        </div>
+                    </div>
+
+                    <!-- Student Personal Details Grid -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-3 rounded-lg border border-slate-300 text-xs mb-4">
+                        <div><span class="text-slate-500 block text-[10px] uppercase font-bold">Student Name</span><strong class="font-black text-slate-900 uppercase text-sm">${student.name}</strong></div>
+                        <div><span class="text-slate-500 block text-[10px] uppercase font-bold">Class Level</span><strong class="font-bold text-slate-800">${student.class}</strong></div>
+                        <div><span class="text-slate-500 block text-[10px] uppercase font-bold">Class Enrollment</span><strong class="font-bold text-slate-800">${classStudents.length} Students</strong></div>
+                        <div><span class="text-slate-500 block text-[10px] uppercase font-bold">Overall Position</span><strong class="font-black text-brand-800 text-sm">${positionStr}</strong></div>
+                        
+                        <div><span class="text-slate-500 block text-[10px] uppercase font-bold">Grand Total Score</span><strong class="font-black text-slate-900 text-sm">${grandTotal}</strong></div>
+                        <div><span class="text-slate-500 block text-[10px] uppercase font-bold">Average Percentage</span><strong class="font-black text-slate-900 text-sm">${averageScore}%</strong></div>
+                        <div><span class="text-slate-500 block text-[10px] uppercase font-bold">Attendance</span><strong class="font-bold text-slate-800">${student.attendance || 60} / 60 Days</strong></div>
+                        <div><span class="text-slate-500 block text-[10px] uppercase font-bold">Promoted To</span><strong class="font-bold text-slate-800">${student.promotedTo || 'N/A'}</strong></div>
+                    </div>
+
+                    <!-- Academic Scores Table -->
+                    <div class="overflow-hidden border-2 border-slate-800 rounded-lg mb-4">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-slate-900 text-white uppercase text-[11px] font-bold">
+                                <tr>
+                                    <th class="p-2 border-r border-slate-700">Subject</th>
+                                    <th class="p-2 text-center border-r border-slate-700 w-20">Class (50)</th>
+                                    <th class="p-2 text-center border-r border-slate-700 w-20">Exam (50)</th>
+                                    <th class="p-2 text-center border-r border-slate-700 w-24">Total (100)</th>
+                                    <th class="p-2 text-center border-r border-slate-700 w-20">Rank</th>
+                                    <th class="p-2 w-28">Remark</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${subjectRows}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Grading Key Scale -->
+                    <div class="flex flex-wrap items-center justify-between text-[10px] bg-slate-100 p-2 rounded border border-slate-300 font-bold mb-4 text-slate-700">
+                        <span>GRADING KEY:</span>
+                        <span>80-100%: Excellent (A)</span>
+                        <span>70-79%: Very Good (B)</span>
+                        <span>60-69%: Good (C)</span>
+                        <span>50-59%: Credit (D)</span>
+                        <span>40-49%: Pass (E)</span>
+                        <span>0-39%: Fail (F)</span>
+                    </div>
+
+                    <!-- Conduct, Remarks & Signatures Box -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs border border-slate-300 p-3 rounded-lg bg-slate-50 mb-4">
+                        <div>
+                            <span class="font-bold text-slate-700 block mb-0.5">Conduct / Character:</span>
+                            <div class="font-medium text-slate-900 border-b border-slate-300 pb-1 mb-2">${student.conduct || 'Satisfactory'}</div>
+                            <span class="font-bold text-slate-700 block mb-0.5">Special Interests / Aptitude:</span>
+                            <div class="font-medium text-slate-900">${student.interests || 'Integrated Science & Art'}</div>
+                        </div>
+                        <div>
+                            <span class="font-bold text-slate-700 block mb-0.5">Class Teacher's Remarks:</span>
+                            <div class="font-medium text-slate-900 border-b border-slate-300 pb-1 mb-2">${student.teacherRemark || 'Good performance. Keep up the hard work.'}</div>
+                            <span class="font-bold text-slate-700 block mb-0.5">Headmaster's Signature & Stamp:</span>
+                            <div class="font-black text-brand-800 italic pt-1">M. Kwami (Headmaster) - [STAMPED]</div>
+                        </div>
+                    </div>
+
+                    <!-- Term Requirements & Dates -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px] font-semibold bg-brand-50 p-3 rounded-lg border border-brand-200 text-brand-900">
+                        <div><span class="text-slate-500 block text-[10px]">VACATION DATE</span>${cfg.vacationDate}</div>
+                        <div><span class="text-slate-500 block text-[10px]">NEXT TERM BEGINS</span>${cfg.nextTermDate}</div>
+                        <div><span class="text-slate-500 block text-[10px]">REQUIRED ITEMS NEXT TERM</span>${requiredItems}</div>
+                    </div>
+                </div>
+            `;
+        }
 
         function toggleReportPrintMode() {
             const mode = document.getElementById('reportModeSelect').value;
@@ -1736,127 +2245,16 @@
             if (mode === 'single') {
                 singleContainer.classList.remove('hidden');
                 batchContainer.classList.add('hidden');
-                btnText.innerText = "Print";
+                btnText.innerText = 'Print Student Report';
                 generateReportCard();
             } else {
                 singleContainer.classList.add('hidden');
                 batchContainer.classList.remove('hidden');
-                btnText.innerText = "Print Class Roster";
+                btnText.innerText = 'Print Entire Class Batch';
                 generateBatchReportCards();
             }
         }
         window.toggleReportPrintMode = toggleReportPrintMode;
-
-        function buildSingleReportCardHTML(student, termKey = activeTerm) {
-            const classCount = state.students.filter(s => s.class === student.class).length;
-
-            let summaryList = state.students.filter(s => s.class === student.class).map(s => {
-                let tot = 0;
-                const scs = (state.scores[termKey] && state.scores[termKey][s.id]) ? state.scores[termKey][s.id] : {};
-                Object.values(scs).forEach(sc => tot += ((sc.classScore || 0) + (sc.examScore || 0)));
-                return { id: s.id, tot };
-            }).sort((a, b) => b.tot - a.tot);
-
-            const rankIdx = summaryList.findIndex(item => item.id === student.id) + 1;
-            const overallPosition = rankIdx > 0 ? getOrdinalSuffix(rankIdx) : '--';
-
-            let grandTotal = 0;
-            let rowsHtml = '';
-
-            MASTER_SUBJECTS.forEach(sub => {
-                const sc = (state.scores[termKey] && state.scores[termKey][student.id] && state.scores[termKey][student.id][sub]) ? state.scores[termKey][student.id][sub] : null;
-                const c = sc ? sc.classScore : '';
-                const ex = sc ? sc.examScore : '';
-                const tot = sc ? (sc.classScore + sc.examScore) : '';
-                if (sc) grandTotal += tot;
-                const rank = sc ? getSubjectRank(sub, student.id, student.class, termKey) : '';
-                const rem = sc ? calculateRemark(tot) : '';
-
-                rowsHtml += `
-                    <tr class="border-b border-slate-800 text-center font-semibold">
-                        <td class="border border-slate-800 px-2 py-1 text-left font-bold">${sub}</td>
-                        <td class="border border-slate-800 px-2 py-1">${c}</td>
-                        <td class="border border-slate-800 px-2 py-1">${ex}</td>
-                        <td class="border border-slate-800 px-2 py-1 font-bold">${tot}</td>
-                        <td class="border border-slate-800 px-2 py-1">${rank}</td>
-                        <td class="border border-slate-800 px-2 py-1">${rem}</td>
-                    </tr>
-                `;
-            });
-
-            const cfg = state.termConfig;
-            let supplyItem = cfg.itemsPrimary;
-            if (student.class.includes('Creche') || student.class.includes('KG') || student.class.includes('Nursery')) supplyItem = cfg.itemsKG;
-            if (student.class.includes('JHS')) supplyItem = cfg.itemsJHS;
-
-            return `
-                <div class="bg-white p-4 sm:p-6 border-2 border-slate-800 rounded-lg max-w-4xl mx-auto shadow-sm text-slate-900 print-page-break text-xs sm:text-sm">
-                    <div class="text-center border-b-2 border-slate-800 pb-3 mb-4 flex justify-between items-center flex-wrap sm:flex-nowrap gap-2">
-                        <div class="w-12 h-12 sm:w-16 sm:h-16 border-2 border-brand-800 flex items-center justify-center font-bold text-brand-800 text-[9px] sm:text-[10px] text-center p-1 uppercase overflow-hidden flex-shrink-0">
-                            ${student.photo ? `<img src="${student.photo}" class="w-full h-full object-cover rounded">` : 'VMIS LOGO'}
-                        </div>
-                        <div class="text-center flex-grow">
-                            <h1 class="text-lg sm:text-2xl font-black uppercase tracking-wide text-brand-900">VEHEM MAWUNYO INT. SCHOOL</h1>
-                            <p class="text-[10px] sm:text-xs font-semibold">Firm Foundation For Excellence</p>
-                            <p class="text-[10px] sm:text-xs">P.O. Box DJ 138, Dzodze-Penyi | Tel: 0249 271 535 / 0245 001 183</p>
-                        </div>
-                        <div class="text-right flex-shrink-0">
-                            <div class="text-[10px] sm:text-xs font-bold text-slate-500">NO. <span class="text-red-600 font-mono text-xs sm:text-sm">${student.id}</span></div>
-                            <div class="text-xs sm:text-sm font-black uppercase mt-1 border border-slate-800 px-2 py-0.5">TERMINAL REPORT</div>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 text-xs font-semibold mb-4 bg-pink-50/50 p-2.5 sm:p-3 rounded border border-pink-100">
-                        <div>Name: <span class="font-bold underline text-slate-900">${student.name}</span></div>
-                        <div>VACATION: <span class="font-bold">${cfg.vacationDate}</span></div>
-                        <div>Class: <span class="font-bold">${student.class}</span> | Year: <span class="font-bold">${cfg.academicYear}</span></div>
-                        <div>NEXT TERM BEGINS: <span class="font-bold">${cfg.nextTermDate}</span></div>
-                        <div>No. in Class: <span class="font-bold">${classCount}</span> | Position: <span class="font-bold text-brand-800">${overallPosition}</span></div>
-                        <div>Promoted To: <span class="font-bold">${student.promotedTo || '--'}</span></div>
-                    </div>
-
-                    <div class="overflow-x-auto mb-4">
-                        <table class="w-full text-xs text-left border-collapse border-2 border-slate-800 min-w-[500px]">
-                            <thead>
-                                <tr class="bg-pink-100 text-slate-900 border-b-2 border-slate-800 text-center font-bold">
-                                    <th class="border border-slate-800 px-2 py-1.5 text-left">SUBJECT</th>
-                                    <th class="border border-slate-800 px-2 py-1.5 w-14 sm:w-16">CLASS<br>50%</th>
-                                    <th class="border border-slate-800 px-2 py-1.5 w-14 sm:w-16">EXAMS<br>50%</th>
-                                    <th class="border border-slate-800 px-2 py-1.5 w-16 sm:w-20">TOTAL<br>100%</th>
-                                    <th class="border border-slate-800 px-2 py-1.5 w-20 sm:w-24">POSITION</th>
-                                    <th class="border border-slate-800 px-2 py-1.5 w-24 sm:w-28">REMARK</th>
-                                </tr>
-                            </thead>
-                            <tbody>${rowsHtml}</tbody>
-                            <tfoot>
-                                <tr class="font-bold bg-slate-100 border-t-2 border-slate-800">
-                                    <td class="border border-slate-800 px-2 py-1.5">OVERALL GRAND TOTAL</td>
-                                    <td colspan="2" class="border border-slate-800 px-2 py-1.5 text-center">--</td>
-                                    <td class="border border-slate-800 px-2 py-1.5 text-center text-xs sm:text-sm font-black text-brand-900">${grandTotal}</td>
-                                    <td colspan="2" class="border border-slate-800 px-2 py-1.5"></td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs border-t-2 border-slate-800 pt-3">
-                        <div class="space-y-1.5">
-                            <div>Attendance: <span class="font-bold">${student.attendance || 60}</span> Out of <span class="font-bold">60</span></div>
-                            <div>Conduct / Character: <span class="font-bold">${student.conduct || 'Satisfactory'}</span></div>
-                            <div>Interest: <span class="font-bold">${student.interests || 'Integrated Science and Ewe'}</span></div>
-                            <div>Class Teacher's Remark: <span class="font-bold italic">${student.teacherRemark || 'Good performance. Keep it up!!'}</span></div>
-                        </div>
-                        <div class="space-y-1 sm:text-right flex flex-col justify-between">
-                            <div>Teacher's Signature: <span class="font-bold underline">_________________</span></div>
-                            <div class="text-left bg-slate-50 p-2 border border-slate-300 rounded text-[11px] mt-2 sm:mt-0">
-                                <div class="font-bold text-slate-800">Please submit next term:</div>
-                                <div class="font-semibold text-slate-600">${supplyItem}</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
 
         function generateReportCard() {
             const stuId = document.getElementById('reportStudentSelect').value;
@@ -1864,11 +2262,11 @@
             const container = document.getElementById('printableReport');
 
             if (!student) {
-                container.innerHTML = '<div class="text-center p-8 text-slate-400">Please select a student above to view terminal report card.</div>';
+                container.innerHTML = '<div class="p-8 text-center text-slate-400">Please select a student from the dropdown menu above.</div>';
                 return;
             }
 
-            container.innerHTML = buildSingleReportCardHTML(student);
+            container.innerHTML = generateReportCardHtml(student, activeTerm);
         }
         window.generateReportCard = generateReportCard;
 
@@ -1878,250 +2276,79 @@
             const container = document.getElementById('printableReport');
 
             if (classStudents.length === 0) {
-                container.innerHTML = `<div class="text-center p-8 text-slate-400">No students found in ${selectedClass}.</div>`;
+                container.innerHTML = `<div class="p-8 text-center text-slate-400">No students found in ${selectedClass}.</div>`;
                 return;
             }
 
-            container.innerHTML = classStudents.map(s => buildSingleReportCardHTML(s)).join('');
+            container.innerHTML = classStudents.map(stu => generateReportCardHtml(stu, activeTerm)).join('<div class="my-6"></div>');
         }
         window.generateBatchReportCards = generateBatchReportCards;
 
-        function renderStudentsTable() {
-            const tbody = document.getElementById('studentsTableBody');
-            if (!tbody) return;
+        function updateTermLockUI() {
+            const btn = document.getElementById('btnTermLock');
+            const badge = document.getElementById('termStatusBadge');
 
-            let displayStudents = state.students;
-            if (currentRole === 'Teacher' && currentTeacher) {
-                displayStudents = state.students.filter(s => s.class === currentTeacher.assignedClass);
-            }
-
-            if (displayStudents.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-slate-400">No students registered in roster. Click "Add New Student" to enroll.</td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = displayStudents.map(s => `
-                <tr class="border-b hover:bg-slate-50">
-                    <td class="px-3 py-2.5">
-                        ${s.photo ? `<img src="${s.photo}" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border">` : `<div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs">${s.name.charAt(0)}</div>`}
-                    </td>
-                    <td class="px-3 py-2.5 font-bold text-slate-800">${s.name} <div class="text-[10px] font-mono font-normal text-slate-400">${s.id}</div></td>
-                    <td class="px-3 py-2.5"><span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-semibold text-xs">${s.class}</span></td>
-                    <td class="px-3 py-2.5 font-bold">${s.attendance || 60} / 60</td>
-                    <td class="px-3 py-2.5 text-xs">
-                        <div class="font-semibold text-slate-700">${s.conduct || 'Satisfactory'}</div>
-                        <div class="text-slate-500 italic text-[11px] max-w-xs truncate">${s.teacherRemark || 'Keep it up!'}</div>
-                    </td>
-                    <td class="px-3 py-2.5 text-right space-x-2">
-                        <button onclick="editStudent('${s.id}')" class="text-indigo-600 hover:text-indigo-800 font-semibold text-xs">Edit</button>
-                        ${currentRole === 'Admin' ? `<button onclick="deleteStudent('${s.id}')" class="text-red-600 hover:text-red-800 font-semibold text-xs">Delete</button>` : ''}
-                    </td>
-                </tr>
-            `).join('');
-        }
-        window.renderStudentsTable = renderStudentsTable;
-
-        function openAddStudentModal() {
-            document.getElementById('studentModalTitle').innerText = "Add New Student Record";
-            document.getElementById('editStudentId').value = "";
-            document.getElementById('newStudentName').value = "";
-            document.getElementById('newStudentPromoted').value = "";
-            document.getElementById('newStudentAttendance').value = "60";
-            document.getElementById('newStudentPhoto').value = "";
-            document.getElementById('newStudentConduct').value = "Satisfactory";
-            document.getElementById('newStudentInterests').value = "Integrated Science and Ewe";
-            document.getElementById('newTeacherRemark').value = "Good performance. Keep it up!!";
-
-            if (currentRole === 'Teacher' && currentTeacher) {
-                document.getElementById('newStudentClass').value = currentTeacher.assignedClass;
-            }
-            const modal = document.getElementById('addStudentModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        }
-        window.openAddStudentModal = openAddStudentModal;
-
-        function editStudent(id) {
-            const student = state.students.find(s => s.id === id);
-            if (!student) return;
-
-            document.getElementById('studentModalTitle').innerText = "Edit Student Profile & Remarks";
-            document.getElementById('editStudentId').value = student.id;
-            document.getElementById('newStudentName').value = student.name;
-            document.getElementById('newStudentClass').value = student.class;
-            document.getElementById('newStudentPromoted').value = student.promotedTo || "";
-            document.getElementById('newStudentAttendance').value = student.attendance || 60;
-            document.getElementById('newStudentPhoto').value = student.photo || "";
-            document.getElementById('newStudentConduct').value = student.conduct || "Satisfactory";
-            document.getElementById('newStudentInterests').value = student.interests || "Integrated Science and Ewe";
-            document.getElementById('newTeacherRemark').value = student.teacherRemark || "Good performance. Keep it up!!";
-
-            const modal = document.getElementById('addStudentModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        }
-        window.editStudent = editStudent;
-
-        function closeAddStudentModal() {
-            const modal = document.getElementById('addStudentModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        }
-        window.closeAddStudentModal = closeAddStudentModal;
-
-        async function handleAddStudent(e) {
-            e.preventDefault();
-            const editId = document.getElementById('editStudentId').value;
-            const name = document.getElementById('newStudentName').value.trim();
-            const cls = document.getElementById('newStudentClass').value;
-            const promotedTo = document.getElementById('newStudentPromoted').value.trim();
-            const attendance = parseInt(document.getElementById('newStudentAttendance').value) || 60;
-            const photo = document.getElementById('newStudentPhoto').value.trim();
-            const conduct = document.getElementById('newStudentConduct').value.trim();
-            const interests = document.getElementById('newStudentInterests').value.trim();
-            const teacherRemark = document.getElementById('newTeacherRemark').value.trim();
-
-            const studentId = editId || ('VM-' + Math.floor(1000 + Math.random() * 9000));
-
-            const studentObj = {
-                id: studentId,
-                name: name,
-                class: cls,
-                promotedTo: promotedTo,
-                attendance: attendance,
-                photo: photo,
-                conduct: conduct,
-                interests: interests,
-                teacherRemark: teacherRemark
-            };
-
-            const existingIdx = state.students.findIndex(s => s.id === studentId);
-            if (existingIdx !== -1) {
-                state.students[existingIdx] = studentObj;
-            } else {
-                state.students.push(studentObj);
-            }
-
-            if (currentUser) {
-                await setDoc(doc(STUDENTS_COLL, studentId), studentObj, { merge: true });
-                await logActivity("Save Student", `Saved student ${name} (${cls})`);
-            }
-
-            closeAddStudentModal();
-            populateDropdowns();
-            renderStudentsTable();
-            renderClassTotals();
-            showToast("Student profile saved successfully!", "success");
-        }
-        window.handleAddStudent = handleAddStudent;
-
-        function deleteStudent(id) {
-            const student = state.students.find(s => s.id === id);
-            const name = student ? student.name : id;
-            showConfirmModal("Delete Student Profile", `Are you sure you want to permanently delete student ${name}?`, async () => {
-                state.students = state.students.filter(s => s.id !== id);
-                if (currentUser) {
-                    await deleteDoc(doc(STUDENTS_COLL, id));
-                    await logActivity("Delete Student", `Removed student ${name} (${id})`);
+            if (state.termLocked) {
+                if (btn) btn.innerHTML = '<i class="fas fa-unlock"></i> Unlock Term Scores';
+                if (badge) {
+                    badge.className = 'text-red-400 font-bold';
+                    badge.innerHTML = '<i class="fas fa-lock"></i> Term Locked';
                 }
-                populateDropdowns();
-                renderStudentsTable();
-                renderClassTotals();
-                showToast("Student profile deleted.", "info");
-            });
+            } else {
+                if (btn) btn.innerHTML = '<i class="fas fa-lock"></i> Lock Active Term';
+                if (badge) {
+                    badge.className = 'text-emerald-400 font-bold';
+                    badge.innerHTML = '<i class="fas fa-unlock"></i> Term Unlocked';
+                }
+            }
         }
-        window.deleteStudent = deleteStudent;
 
         async function toggleTermLock() {
-            if (currentRole !== 'Admin') {
-                showToast("Only Admin can lock or unlock academic term.", "error");
-                return;
-            }
-
             state.termLocked = !state.termLocked;
+            updateTermLockUI();
+
             if (currentUser) {
                 await setDoc(SETTINGS_DOC, { termLocked: state.termLocked }, { merge: true });
-                await logActivity("Term Lock Status", `Term status changed to ${state.termLocked ? 'Locked' : 'Unlocked'}`);
+                await logActivity("Term Lock", `Term lock state set to: ${state.termLocked}`);
             }
-            updateTermLockUI();
-            showToast(`Term is now ${state.termLocked ? 'Locked' : 'Unlocked'}.`, "info");
+
+            showToast(state.termLocked ? "Active term is now LOCKED." : "Active term is now UNLOCKED.", "info");
         }
         window.toggleTermLock = toggleTermLock;
 
-        function updateTermLockUI() {
-            const statusBadge = document.getElementById('termStatusBadge');
-            const btnLock = document.getElementById('btnTermLock');
-
-            if (state.termLocked) {
-                if (statusBadge) {
-                    statusBadge.className = 'text-red-400 font-semibold';
-                    statusBadge.innerHTML = '<i class="fas fa-lock"></i> Term Locked';
-                }
-                if (btnLock) {
-                    btnLock.className = 'w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs sm:text-sm font-medium transition';
-                    btnLock.innerHTML = '<i class="fas fa-unlock"></i> Unlock Active Term';
-                }
-            } else {
-                if (statusBadge) {
-                    statusBadge.className = 'text-emerald-400 font-semibold';
-                    statusBadge.innerHTML = '<i class="fas fa-unlock"></i> Term Unlocked';
-                }
-                if (btnLock) {
-                    btnLock.className = 'w-full sm:w-auto px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs sm:text-sm font-medium transition';
-                    btnLock.innerHTML = '<i class="fas fa-lock"></i> Lock Active Term';
-                }
-            }
-        }
-
         function exportDatabaseJSON() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `vehem_mawunyo_backup_${new Date().toISOString().slice(0, 10)}.json`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-            showToast("Database exported successfully!", "success");
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", `vehem_mawunyo_backup_${Date.now()}.json`);
+            dlAnchorElem.click();
+            showToast("Database backup exported successfully!", "success");
         }
         window.exportDatabaseJSON = exportDatabaseJSON;
 
-        function importDatabaseJSON(event) {
-            const file = event.target.files[0];
+        function importDatabaseJSON(e) {
+            const file = e.target.files[0];
             if (!file) return;
 
             const reader = new FileReader();
-            reader.onload = async function(e) {
+            reader.onload = async function(event) {
                 try {
-                    const importedData = JSON.parse(e.target.result);
-                    if (importedData.students && Array.isArray(importedData.students)) {
-                        state.students = importedData.students;
-                        for (const s of state.students) {
-                            if (currentUser) await setDoc(doc(STUDENTS_COLL, s.id), s, { merge: true });
-                        }
-                    }
-                    if (importedData.scores) {
-                        state.scores = importedData.scores;
-                        for (const stuId in state.scores) {
-                            if (currentUser) await setDoc(doc(SCORES_COLL, stuId), state.scores[stuId], { merge: true });
-                        }
-                    }
-                    if (importedData.teachers) {
-                        state.teachers = importedData.teachers;
-                        for (const t of state.teachers) {
-                            if (currentUser) await setDoc(doc(TEACHERS_COLL, t.id), t, { merge: true });
-                        }
-                    }
-                    if (importedData.termConfig) {
-                        state.termConfig = importedData.termConfig;
-                        if (currentUser) await setDoc(SETTINGS_DOC, { termConfig: state.termConfig }, { merge: true });
+                    const imported = JSON.parse(event.target.result);
+                    if (imported.students) state.students = imported.students;
+                    if (imported.scores) state.scores = imported.scores;
+                    if (imported.teachers) state.teachers = imported.teachers;
+                    if (imported.termConfig) state.termConfig = imported.termConfig;
+                    if (imported.activeTerm) {
+                        state.activeTerm = imported.activeTerm;
+                        activeTerm = imported.activeTerm;
+                        updateActiveTermDisplays();
                     }
 
                     populateDropdowns();
                     renderStudentsTable();
                     renderTeacherTable();
                     renderClassTotals();
-                    populateTermConfigFields();
-                    showToast("Database imported & synced successfully!", "success");
+                    showToast("Backup imported into memory!", "success");
                 } catch (err) {
                     showToast("Failed to parse JSON backup file.", "error");
                 }
@@ -2131,17 +2358,18 @@
         window.importDatabaseJSON = importDatabaseJSON;
 
         async function clearCloudLogs() {
-            showConfirmModal("Clear Audit Trail", "Are you sure you want to clear all cloud activity logs?", async () => {
+            showConfirmModal("Clear Activity Audit Trail", "Are you sure you want to clear all cloud activity logs?", () => {
                 state.auditLogs = [];
                 renderAuditLogsTable();
-                showToast("Audit logs cleared locally.", "info");
+                showToast("Activity trail cleared.", "info");
             });
         }
         window.clearCloudLogs = clearCloudLogs;
 
-        window.addEventListener('DOMContentLoaded', () => {
+        // Initialize application on window load
+        window.onload = function() {
             initBackendAuth();
-        });
+        };
     </script>
 </body>
 </html>
