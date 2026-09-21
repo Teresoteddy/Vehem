@@ -89,7 +89,7 @@
                 <div class="bg-brand-700 text-white p-1.5 sm:p-2 rounded-lg font-bold text-lg sm:text-xl shadow-sm flex-shrink-0">VM</div>
                 <div class="min-w-0">
                     <h1 class="font-bold text-sm sm:text-lg leading-tight truncate">VEHEM MAWUNYO INT. SCHOOL</h1>
-                    <p class="text-[10px] sm:text-xs text-slate-400 truncate">Terminal Report System v2.6 (Creche - JHS 3)</p>
+                    <p class="text-[10px] sm:text-xs text-slate-400 truncate">Terminal Report System (Creche - JHS 3)</p>
                 </div>
             </div>
             
@@ -1028,6 +1028,66 @@
             }
         }
 
+        /* -------------------------------------------------------------
+         * SESSION PERSISTENCE RESTORATION
+         * ------------------------------------------------------------- */
+        function restoreSession() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            const userRole = localStorage.getItem('userRole');
+
+            if (isLoggedIn === 'true' && userRole) {
+                if (userRole === 'admin') {
+                    currentRole = 'Admin';
+                    currentTeacher = null;
+
+                    document.getElementById('currentUserDisplay').innerText = `Logged in: Administrator`;
+                    document.getElementById('teacherClassBadge').innerText = `All Classes Access (Creche - JHS 3)`;
+
+                    document.querySelectorAll('.admin-nav-item').forEach(el => el.classList.remove('hidden'));
+
+                    const modal = document.getElementById('loginModal');
+                    if (modal) {
+                        modal.classList.add('hidden');
+                        modal.classList.remove('flex');
+                    }
+
+                    populateDropdowns();
+                    renderStudentsTable();
+                    renderClassTotals();
+                } else if (userRole === 'teacher') {
+                    const teacherId = localStorage.getItem('teacherId');
+                    const teacher = state.teachers.find(t => t.id === teacherId);
+
+                    currentRole = 'Teacher';
+                    currentTeacher = teacher || null;
+
+                    const teacherName = teacher ? teacher.name : 'Teacher';
+                    const classLabel = teacher ? ((teacher.assignedClasses && teacher.assignedClasses.length > 0) ? teacher.assignedClasses.join(', ') : (teacher.assignedClass || '')) : '';
+
+                    document.getElementById('currentUserDisplay').innerText = `Logged in: ${teacherName}`;
+                    document.getElementById('teacherClassBadge').innerText = `${classLabel} Teacher`;
+
+                    document.querySelectorAll('.admin-nav-item').forEach(el => el.classList.add('hidden'));
+
+                    const modal = document.getElementById('loginModal');
+                    if (modal) {
+                        modal.classList.add('hidden');
+                        modal.classList.remove('flex');
+                    }
+
+                    populateDropdowns();
+                    renderStudentsTable();
+                    renderClassTotals();
+                }
+            } else {
+                const modal = document.getElementById('loginModal');
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                }
+            }
+        }
+
         async function initBackendAuth() {
             renderMasterClassDropdowns();
             populateTeacherLoginDropdown();
@@ -1049,6 +1109,8 @@
                 console.warn("Backend Auth Warning (Running local state):", err);
                 updateCloudStatus("Offline Mode", "text-amber-400", "fa-exclamation-triangle");
             }
+
+            restoreSession();
         }
 
         function updateCloudStatus(msg, colorClass, icon) {
@@ -1073,6 +1135,21 @@
                 if (teachersList.length > 0) state.teachers = teachersList;
                 populateTeacherLoginDropdown();
                 renderTeacherTable();
+
+                // Restore persistent teacher profile if saved
+                if (localStorage.getItem('isLoggedIn') === 'true' && localStorage.getItem('userRole') === 'teacher') {
+                    const savedTeacherId = localStorage.getItem('teacherId');
+                    if (savedTeacherId) {
+                        const tObj = state.teachers.find(t => t.id === savedTeacherId);
+                        if (tObj) {
+                            currentTeacher = tObj;
+                            const classLabel = (tObj.assignedClasses && tObj.assignedClasses.length > 0) ? tObj.assignedClasses.join(', ') : (tObj.assignedClass || '');
+                            document.getElementById('currentUserDisplay').innerText = `Logged in: ${tObj.name}`;
+                            document.getElementById('teacherClassBadge').innerText = `${classLabel} Teacher`;
+                            populateDropdowns();
+                        }
+                    }
+                }
             });
 
             onSnapshot(STUDENTS_COLL, (snapshot) => {
@@ -1447,8 +1524,11 @@
         }
         window.toggleRoleTab = toggleRoleTab;
 
+        /* -------------------------------------------------------------
+         * LOGIN & SESSION PERSISTENCE HANDLERS
+         * ------------------------------------------------------------- */
         function handleTeacherLogin(e) {
-            e.preventDefault();
+            if (e) e.preventDefault();
             const teacherId = document.getElementById('loginTeacherSelect').value;
             const pwdInput = document.getElementById('loginTeacherPassword').value;
 
@@ -1465,6 +1545,11 @@
 
             currentRole = 'Teacher';
             currentTeacher = teacher;
+
+            // Save persistent session in localStorage
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('userRole', 'teacher');
+            localStorage.setItem('teacherId', teacher.id);
 
             const classLabel = (teacher.assignedClasses && teacher.assignedClasses.length > 0) ? teacher.assignedClasses.join(', ') : (teacher.assignedClass || '');
             document.getElementById('currentUserDisplay').innerText = `Logged in: ${teacher.name}`;
@@ -1487,7 +1572,7 @@
         window.handleTeacherLogin = handleTeacherLogin;
 
         function handleAdminLogin(e) {
-            e.preventDefault();
+            if (e) e.preventDefault();
             const pwdInput = document.getElementById('loginAdminPassword').value.trim();
 
             if (pwdInput !== state.adminPassword) {
@@ -1497,6 +1582,11 @@
 
             currentRole = 'Admin';
             currentTeacher = null;
+
+            // Save persistent session in localStorage
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('userRole', 'admin');
+            localStorage.removeItem('teacherId');
 
             document.getElementById('currentUserDisplay').innerText = `Logged in: Administrator`;
             document.getElementById('teacherClassBadge').innerText = `All Classes Access (Creche - JHS 3)`;
@@ -1526,9 +1616,16 @@
         }
 
         function logout() {
+            // Clear session from localStorage
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('userRole');
+            localStorage.removeItem('teacherId');
+
             currentTeacher = null;
+            currentRole = 'Teacher';
             document.getElementById('loginModal').classList.remove('hidden');
             document.getElementById('loginModal').classList.add('flex');
+            showToast("Logged out successfully.", "info");
         }
         window.logout = logout;
 
@@ -1631,7 +1728,6 @@
                 subjectSelect.innerHTML += `<option value="${sub}">${sub}</option>`;
             });
 
-            // Update batch selectors to respect assigned teacher classes/subjects
             const batchClass = document.getElementById('batchClassSelect');
             const batchSub = document.getElementById('batchSubjectSelect');
             const batchRptClass = document.getElementById('reportClassBatchSelect');
@@ -1797,6 +1893,29 @@
             tbody.innerHTML = html;
         }
 
+        function updateGridRowTotal(input) {
+            const stuId = input.dataset.stuid;
+            const row = input.closest('tr');
+            if (!row) return;
+
+            const t = parseFloat(row.querySelector('input[data-type="test"]')?.value) || 0;
+            const hw = parseFloat(row.querySelector('input[data-type="hw"]')?.value) || 0;
+            const cw = parseFloat(row.querySelector('input[data-type="cw"]')?.value) || 0;
+            const ex = parseFloat(row.querySelector('input[data-type="exam"]')?.value) || 0;
+
+            const classTotal = t + hw + cw;
+            const grandTotal = classTotal + ex;
+
+            const classTotalEl = document.getElementById(`gridClassTotal-${stuId}`);
+            const grandTotalEl = document.getElementById(`gridGrandTotal-${stuId}`);
+            const remarkEl = document.getElementById(`gridRemark-${stuId}`);
+
+            if (classTotalEl) classTotalEl.innerText = classTotal;
+            if (grandTotalEl) grandTotalEl.innerText = grandTotal;
+            if (remarkEl) remarkEl.innerHTML = `<span class="px-2 py-0.5 rounded bg-slate-100 font-semibold text-[11px]">${calculateRemark(grandTotal)}</span>`;
+        }
+        window.updateGridRowTotal = updateGridRowTotal;
+
         function renderBatchGridTable() {
             const tbody = document.getElementById('batchGridTableBody');
             if (!tbody) return;
@@ -1844,27 +1963,9 @@
         }
         window.renderBatchGridTable = renderBatchGridTable;
 
-        function updateGridRowTotal(input) {
-            const stuId = input.dataset.stuid;
-            const row = input.closest('tr');
-            
-            const t = parseFloat(row.querySelector('[data-type="test"]').value) || 0;
-            const hw = parseFloat(row.querySelector('[data-type="hw"]').value) || 0;
-            const cw = parseFloat(row.querySelector('[data-type="cw"]').value) || 0;
-            const ex = parseFloat(row.querySelector('[data-type="exam"]').value) || 0;
-
-            const cTotal = t + hw + cw;
-            const grandTotal = cTotal + ex;
-
-            document.getElementById(`gridClassTotal-${stuId}`).innerText = cTotal;
-            document.getElementById(`gridGrandTotal-${stuId}`).innerText = grandTotal;
-            document.getElementById(`gridRemark-${stuId}`).innerHTML = `<span class="px-2 py-0.5 rounded bg-slate-100 font-semibold text-[11px]">${calculateRemark(grandTotal)}</span>`;
-        }
-        window.updateGridRowTotal = updateGridRowTotal;
-
         async function saveBatchGridScores() {
             if (state.termLocked) {
-                showToast("Term is locked. Cannot save marks.", "error");
+                showToast("Term is locked by Admin. Batch scores cannot be saved.", "error");
                 return;
             }
 
@@ -1873,33 +1974,45 @@
             const termKey = document.getElementById('batchTermSelect').value || activeTerm;
 
             const rows = document.querySelectorAll('#batchGridTableBody tr');
-            if (rows.length === 0) return;
+            let savedCount = 0;
 
             if (!state.scores[termKey]) state.scores[termKey] = {};
 
             for (const row of rows) {
-                const testEl = row.querySelector('[data-type="test"]');
-                if (!testEl) continue;
-                const stuId = testEl.dataset.stuid;
+                const testInput = row.querySelector('input[data-type="test"]');
+                if (!testInput) continue;
 
-                const t = parseFloat(row.querySelector('[data-type="test"]').value) || 0;
-                const hw = parseFloat(row.querySelector('[data-type="hw"]').value) || 0;
-                const cw = parseFloat(row.querySelector('[data-type="cw"]').value) || 0;
-                const ex = parseFloat(row.querySelector('[data-type="exam"]').value) || 0;
+                const stuId = testInput.dataset.stuid;
+                const hwInput = row.querySelector('input[data-type="hw"]');
+                const cwInput = row.querySelector('input[data-type="cw"]');
+                const examInput = row.querySelector('input[data-type="exam"]');
+
+                const t = parseFloat(testInput.value) || 0;
+                const hw = parseFloat(hwInput.value) || 0;
+                const cw = parseFloat(cwInput.value) || 0;
+                const ex = parseFloat(examInput.value) || 0;
+
+                const cTotal = t + hw + cw;
 
                 if (!state.scores[termKey][stuId]) state.scores[termKey][stuId] = {};
                 
                 state.scores[termKey][stuId][selectedSubject] = {
-                    testScore: t, hwScore: hw, cwScore: cw, classScore: t + hw + cw, examScore: ex
+                    testScore: t, hwScore: hw, cwScore: cw, classScore: cTotal, examScore: ex
                 };
 
                 if (currentUser) {
-                    await setDoc(doc(SCORES_COLL, stuId), { [termKey]: state.scores[termKey][stuId] }, { merge: true });
+                    const scoreDocRef = doc(SCORES_COLL, stuId);
+                    await setDoc(scoreDocRef, { [termKey]: state.scores[termKey][stuId] }, { merge: true });
                 }
+                savedCount++;
             }
 
-            await logActivity("Batch Score Entry", `Batch updated ${selectedSubject} for all students in ${selectedClass} [${termKey}]`);
-            showToast(`All scores saved for ${selectedClass} - ${selectedSubject}!`, "success");
+            if (currentUser && savedCount > 0) {
+                await logActivity("Batch Score Entry", `Updated ${selectedSubject} scores for ${savedCount} students in ${selectedClass} [${termKey}]`);
+            }
+
+            showToast(`Successfully saved batch scores for ${savedCount} students!`, "success");
+            renderClassTotals();
         }
         window.saveBatchGridScores = saveBatchGridScores;
 
@@ -1916,28 +2029,28 @@
             }
 
             if (filtered.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-slate-400">No student records found. Click "Add New Student" to enroll.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-slate-400">No students found. Click "Add New Student" to enroll.</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = filtered.map(stu => `
+            tbody.innerHTML = filtered.map(s => `
                 <tr class="border-b hover:bg-slate-50 text-xs">
-                    <td class="px-3 py-2.5">
-                        <img src="${stu.photo || 'https://placehold.co/40x40/9d174d/ffffff?text=' + stu.name.charAt(0)}" onerror="this.src='https://placehold.co/40x40/9d174d/ffffff?text=${stu.name.charAt(0)}'" class="w-8 h-8 rounded-full object-cover border border-slate-200">
+                    <td class="px-3 py-2">
+                        <img src="${s.photo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80'}" alt="${s.name}" class="w-8 h-8 rounded-full object-cover border border-slate-200">
                     </td>
-                    <td class="px-3 py-2.5">
-                        <div class="font-bold text-slate-800">${stu.name}</div>
-                        <div class="text-[10px] text-slate-400 font-mono">${stu.id}</div>
+                    <td class="px-3 py-2 font-bold text-slate-800">
+                        <div>${s.name}</div>
+                        <div class="text-[10px] text-slate-400 font-mono">${s.id}</div>
                     </td>
-                    <td class="px-3 py-2.5 font-semibold text-slate-700">${stu.class}</td>
-                    <td class="px-3 py-2.5 font-bold">${stu.attendance || 60} / 60 days</td>
-                    <td class="px-3 py-2.5">
-                        <div class="truncate max-w-[180px] font-medium text-slate-700">${stu.conduct || 'Satisfactory'}</div>
-                        <div class="text-[10px] text-slate-400 truncate max-w-[180px]">${stu.teacherRemark || 'Good performance.'}</div>
+                    <td class="px-3 py-2"><span class="px-2 py-0.5 rounded bg-brand-50 text-brand-800 font-semibold">${s.class}</span></td>
+                    <td class="px-3 py-2 font-medium">${s.attendance || '60'} / 60 days</td>
+                    <td class="px-3 py-2 text-slate-600">
+                        <div class="truncate max-w-xs" title="${s.conduct || 'Satisfactory'}"><span class="font-bold">Conduct:</span> ${s.conduct || 'Satisfactory'}</div>
+                        <div class="truncate max-w-xs text-[11px] text-slate-500" title="${s.teacherRemark || ''}"><span class="font-bold">Remark:</span> ${s.teacherRemark || 'N/A'}</div>
                     </td>
-                    <td class="px-3 py-2.5 text-right space-x-2">
-                        <button onclick="openEditStudentModal('${stu.id}')" class="text-indigo-600 hover:text-indigo-800 font-bold">Edit</button>
-                        <button onclick="deleteStudent('${stu.id}')" class="text-red-600 hover:text-red-800 font-bold">Delete</button>
+                    <td class="px-3 py-2 text-right space-x-2">
+                        <button onclick="openEditStudentModal('${s.id}')" class="text-indigo-600 hover:text-indigo-800 font-semibold text-xs">Edit</button>
+                        <button onclick="deleteStudent('${s.id}')" class="admin-nav-item text-red-600 hover:text-red-800 font-semibold text-xs ${currentRole === 'Admin' ? '' : 'hidden'}">Delete</button>
                     </td>
                 </tr>
             `).join('');
@@ -1947,11 +2060,12 @@
             document.getElementById('studentModalTitle').innerText = "Add New Student Profile";
             document.getElementById('editStudentId').value = "";
             document.getElementById('newStudentName').value = "";
+            document.getElementById('newStudentClass').value = MASTER_CLASSES[0];
             document.getElementById('newStudentPromoted').value = "";
             document.getElementById('newStudentAttendance').value = "60";
             document.getElementById('newStudentPhoto').value = "";
             document.getElementById('newStudentConduct').value = "Satisfactory";
-            document.getElementById('newStudentInterests').value = "Integrated Science & Mathematics";
+            document.getElementById('newStudentInterests').value = "Integrated Science & Computing";
             document.getElementById('newTeacherRemark').value = "Good performance. Keep it up!!";
 
             const modal = document.getElementById('addStudentModal');
@@ -1961,19 +2075,19 @@
         window.openAddStudentModal = openAddStudentModal;
 
         function openEditStudentModal(id) {
-            const stu = state.students.find(s => s.id === id);
-            if (!stu) return;
+            const s = state.students.find(stu => stu.id === id);
+            if (!s) return;
 
             document.getElementById('studentModalTitle').innerText = "Edit Student Profile";
-            document.getElementById('editStudentId').value = stu.id;
-            document.getElementById('newStudentName').value = stu.name;
-            document.getElementById('newStudentClass').value = stu.class;
-            document.getElementById('newStudentPromoted').value = stu.promotedTo || '';
-            document.getElementById('newStudentAttendance').value = stu.attendance || 60;
-            document.getElementById('newStudentPhoto').value = stu.photo || '';
-            document.getElementById('newStudentConduct').value = stu.conduct || '';
-            document.getElementById('newStudentInterests').value = stu.interests || '';
-            document.getElementById('newTeacherRemark').value = stu.teacherRemark || '';
+            document.getElementById('editStudentId').value = s.id;
+            document.getElementById('newStudentName').value = s.name;
+            document.getElementById('newStudentClass').value = s.class;
+            document.getElementById('newStudentPromoted').value = s.promotedTo || "";
+            document.getElementById('newStudentAttendance').value = s.attendance || "60";
+            document.getElementById('newStudentPhoto').value = s.photo || "";
+            document.getElementById('newStudentConduct').value = s.conduct || "Satisfactory";
+            document.getElementById('newStudentInterests').value = s.interests || "";
+            document.getElementById('newTeacherRemark').value = s.teacherRemark || "";
 
             const modal = document.getElementById('addStudentModal');
             modal.classList.remove('hidden');
@@ -1991,28 +2105,34 @@
         async function handleAddStudent(e) {
             e.preventDefault();
             const editId = document.getElementById('editStudentId').value;
-            const stuName = document.getElementById('newStudentName').value.trim();
-            const stuClass = document.getElementById('newStudentClass').value;
+            const name = document.getElementById('newStudentName').value.trim();
+            const cls = document.getElementById('newStudentClass').value;
+            const promotedTo = document.getElementById('newStudentPromoted').value.trim();
+            const attendance = document.getElementById('newStudentAttendance').value;
+            const photo = document.getElementById('newStudentPhoto').value.trim();
+            const conduct = document.getElementById('newStudentConduct').value.trim();
+            const interests = document.getElementById('newStudentInterests').value.trim();
+            const teacherRemark = document.getElementById('newTeacherRemark').value.trim();
 
             const stuObj = {
-                id: editId || ('STU-' + (Math.floor(Math.random() * 9000) + 1000)),
-                name: stuName,
-                class: stuClass,
-                promotedTo: document.getElementById('newStudentPromoted').value.trim(),
-                attendance: parseInt(document.getElementById('newStudentAttendance').value) || 60,
-                photo: document.getElementById('newStudentPhoto').value.trim(),
-                conduct: document.getElementById('newStudentConduct').value.trim(),
-                interests: document.getElementById('newStudentInterests').value.trim(),
-                teacherRemark: document.getElementById('newTeacherRemark').value.trim()
+                id: editId || ('VM-' + (Math.floor(Math.random() * 9000) + 1000)),
+                name: name,
+                class: cls,
+                promotedTo: promotedTo,
+                attendance: attendance,
+                photo: photo,
+                conduct: conduct,
+                interests: interests,
+                teacherRemark: teacherRemark
             };
 
-            const existingIdx = state.students.findIndex(s => s.id === stuObj.id);
-            if (existingIdx !== -1) state.students[existingIdx] = stuObj;
+            const idx = state.students.findIndex(s => s.id === stuObj.id);
+            if (idx !== -1) state.students[idx] = stuObj;
             else state.students.push(stuObj);
 
             if (currentUser) {
                 await setDoc(doc(STUDENTS_COLL, stuObj.id), stuObj, { merge: true });
-                await logActivity("Save Student", `Saved profile for ${stuName} (${stuClass})`);
+                await logActivity("Save Student", `Saved student record for ${name} (${cls})`);
             }
 
             populateDropdowns();
@@ -2024,11 +2144,11 @@
         window.handleAddStudent = handleAddStudent;
 
         function deleteStudent(id) {
-            showConfirmModal("Delete Student Record", `Are you sure you want to remove student ID ${id}?`, async () => {
+            showConfirmModal("Delete Student Profile", `Are you sure you want to delete student ${id}?`, async () => {
                 state.students = state.students.filter(s => s.id !== id);
                 if (currentUser) {
                     await deleteDoc(doc(STUDENTS_COLL, id));
-                    await logActivity("Delete Student", `Removed student ID ${id}`);
+                    await logActivity("Delete Student", `Removed student ${id}`);
                 }
                 populateDropdowns();
                 renderStudentsTable();
@@ -2041,267 +2161,255 @@
         function renderClassTotals() {
             const tbody = document.getElementById('classTotalsTableBody');
             if (!tbody) return;
-            const filterSelect = document.getElementById('filterClassSelect');
 
-            if (currentRole === 'Teacher' && currentTeacher) {
+            const filterClass = document.getElementById('filterClassSelect').value;
+            let list = state.students;
+
+            if (filterClass !== 'ALL') {
+                list = list.filter(s => s.class === filterClass);
+            } else if (currentRole === 'Teacher' && currentTeacher) {
                 const assignedClasses = currentTeacher.assignedClasses || (currentTeacher.assignedClass ? [currentTeacher.assignedClass] : []);
-                if (assignedClasses.length === 1) {
-                    filterSelect.value = assignedClasses[0];
-                    filterSelect.disabled = true;
-                } else {
-                    filterSelect.disabled = false;
+                if (assignedClasses.length > 0) {
+                    list = list.filter(s => assignedClasses.includes(s.class));
                 }
-            } else {
-                filterSelect.disabled = false;
             }
 
-            const filterClass = filterSelect.value;
-            let filteredStudents = filterClass === 'ALL' ? state.students : state.students.filter(s => s.class === filterClass);
-
-            if (filteredStudents.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-6 text-center text-slate-400">No student records found.</td></tr>';
+            if (list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-slate-400">No student totals found for the selected filter.</td></tr>';
                 return;
             }
 
-            let summaryList = filteredStudents.map(stu => {
-                let grandTotal = 0;
+            const termKey = activeTerm;
+            const computed = list.map(stu => {
+                let total = 0;
                 let count = 0;
-                const stuScores = (state.scores[activeTerm] && state.scores[activeTerm][stu.id]) ? state.scores[activeTerm][stu.id] : {};
+                const stuScores = (state.scores[termKey] && state.scores[termKey][stu.id]) ? state.scores[termKey][stu.id] : {};
                 
                 Object.values(stuScores).forEach(sc => {
-                    grandTotal += ((sc.classScore || 0) + (sc.examScore || 0));
-                    count++;
+                    if (sc && (sc.classScore !== undefined || sc.examScore !== undefined)) {
+                        total += (sc.classScore || 0) + (sc.examScore || 0);
+                        count++;
+                    }
                 });
-                const avg = count > 0 ? (grandTotal / count).toFixed(1) : 0;
-                return { ...stu, grandTotal, avg };
+
+                const avg = count > 0 ? (total / count).toFixed(1) : '0.0';
+                return { student: stu, grandTotal: total, avg: avg, subjectCount: count };
             });
 
-            summaryList.sort((a, b) => b.grandTotal - a.grandTotal);
+            computed.sort((a, b) => b.grandTotal - a.grandTotal);
 
-            tbody.innerHTML = summaryList.map((stu, idx) => `
-                <tr class="border-b hover:bg-slate-50">
-                    <td class="px-3 py-3 font-bold text-brand-800">#${idx + 1}</td>
-                    <td class="px-4 py-3 font-semibold">${stu.name}</td>
-                    <td class="px-3 py-3"><span class="px-2 py-0.5 rounded bg-slate-100 text-slate-800 font-medium text-xs">${stu.class}</span></td>
-                    <td class="px-3 py-3 font-black text-slate-800">${stu.grandTotal}</td>
-                    <td class="px-3 py-3">${stu.avg}%</td>
-                    <td class="px-3 py-3">${stu.promotedTo || '--'}</td>
+            tbody.innerHTML = computed.map((item, idx) => `
+                <tr class="border-b hover:bg-slate-50 text-xs">
+                    <td class="px-3 py-2.5 font-black text-brand-800">${getOrdinalSuffix(idx + 1)}</td>
+                    <td class="px-4 py-2.5 font-bold text-slate-800">${item.student.name}</td>
+                    <td class="px-3 py-2.5"><span class="px-2 py-0.5 rounded bg-slate-100 font-semibold">${item.student.class}</span></td>
+                    <td class="px-3 py-2.5 font-extrabold text-slate-900">${item.grandTotal} <span class="text-[10px] text-slate-400 font-normal">(${item.subjectCount} subs)</span></td>
+                    <td class="px-3 py-2.5 font-bold text-emerald-700">${item.avg}%</td>
+                    <td class="px-3 py-2.5 text-slate-600 font-medium">${item.student.promotedTo || '-'}</td>
                 </tr>
             `).join('');
-        }
-
-        function generateReportCardHtml(student, termKey = activeTerm) {
-            const stuScores = (state.scores[termKey] && state.scores[termKey][student.id]) ? state.scores[termKey][student.id] : {};
-            const cfg = state.termConfig;
-
-            // Calculate Grand Total & Average
-            let grandTotal = 0;
-            let subjectCount = 0;
-            MASTER_SUBJECTS.forEach(sub => {
-                const sc = stuScores[sub];
-                if (sc) {
-                    grandTotal += ((sc.classScore || 0) + (sc.examScore || 0));
-                    subjectCount++;
-                }
-            });
-            const averageScore = subjectCount > 0 ? (grandTotal / subjectCount).toFixed(1) : 0;
-
-            // Calculate Class Position / Rank
-            let classStudents = state.students.filter(s => s.class === student.class);
-            let classTotals = classStudents.map(s => {
-                let tot = 0;
-                const scs = (state.scores[termKey] && state.scores[termKey][s.id]) ? state.scores[termKey][s.id] : {};
-                Object.values(scs).forEach(sc => tot += ((sc.classScore || 0) + (sc.examScore || 0)));
-                return { id: s.id, total: tot };
-            });
-            classTotals.sort((a, b) => b.total - a.total);
-            const rankIdx = classTotals.findIndex(item => item.id === student.id);
-            const positionStr = rankIdx !== -1 ? getOrdinalSuffix(rankIdx + 1) : '-';
-
-            // Items required text selection
-            let requiredItems = cfg.itemsPrimary;
-            if (student.class.includes('Creche') || student.class.includes('Nursery') || student.class.includes('KG')) {
-                requiredItems = cfg.itemsKG;
-            } else if (student.class.includes('JHS')) {
-                requiredItems = cfg.itemsJHS;
-            }
-
-            const readableTerm = termKey.replace('_', ' ');
-
-            let subjectRows = MASTER_SUBJECTS.map(sub => {
-                const sc = stuScores[sub];
-                const c = sc ? sc.classScore : '-';
-                const ex = sc ? sc.examScore : '-';
-                const tot = sc ? (sc.classScore + sc.examScore) : '-';
-                const rank = sc ? getSubjectRank(sub, student.id, student.class, termKey) : '-';
-                const rem = sc ? calculateRemark(tot) : '-';
-
-                return `
-                    <tr class="border-b border-slate-300 text-xs">
-                        <td class="p-2 font-bold text-slate-900 border-r border-slate-300 uppercase">${sub}</td>
-                        <td class="p-2 text-center font-medium border-r border-slate-300">${c}</td>
-                        <td class="p-2 text-center font-medium border-r border-slate-300">${ex}</td>
-                        <td class="p-2 text-center font-black text-slate-900 border-r border-slate-300 bg-slate-50">${tot}</td>
-                        <td class="p-2 text-center font-bold border-r border-slate-300 text-brand-800">${rank}</td>
-                        <td class="p-2 font-semibold text-slate-800">${rem}</td>
-                    </tr>
-                `;
-            }).join('');
-
-            return `
-                <div class="print-page-break bg-white p-6 sm:p-8 rounded-xl shadow-lg border-2 border-slate-800 max-w-4xl mx-auto text-slate-900 font-sans">
-                    <!-- School Header -->
-                    <div class="flex items-center justify-between border-b-2 border-slate-800 pb-4 mb-4">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-16 h-16 sm:w-20 sm:h-20 bg-brand-800 text-white font-black text-2xl sm:text-3xl rounded-2xl flex items-center justify-center border-2 border-slate-900 shadow">VM</div>
-                            <div>
-                                <h1 class="font-black text-lg sm:text-2xl text-slate-900 tracking-tight leading-none uppercase">VEHEM MAWUNYO INT. SCHOOL</h1>
-                                <p class="text-xs sm:text-sm font-semibold text-slate-700 mt-1">P.O. BOX 124, HO, VOLTA REGION, GHANA</p>
-                                <p class="text-[11px] font-bold text-brand-800 mt-0.5">MOTTO: KNOWLEDGE IS POWER & LIGHT</p>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <div class="border-2 border-slate-900 px-3 py-1 bg-slate-900 text-white font-black text-xs uppercase tracking-wider rounded">TERMINAL REPORT SHEET</div>
-                            <div class="text-xs font-bold text-slate-700 mt-1">${readableTerm}</div>
-                            <div class="text-[11px] font-semibold text-slate-500">Year: ${cfg.academicYear}</div>
-                        </div>
-                    </div>
-
-                    <!-- Student Personal Details Grid -->
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-3 rounded-lg border border-slate-300 text-xs mb-4">
-                        <div><span class="text-slate-500 block text-[10px] uppercase font-bold">Student Name</span><strong class="font-black text-slate-900 uppercase text-sm">${student.name}</strong></div>
-                        <div><span class="text-slate-500 block text-[10px] uppercase font-bold">Class Level</span><strong class="font-bold text-slate-800">${student.class}</strong></div>
-                        <div><span class="text-slate-500 block text-[10px] uppercase font-bold">Class Enrollment</span><strong class="font-bold text-slate-800">${classStudents.length} Students</strong></div>
-                        <div><span class="text-slate-500 block text-[10px] uppercase font-bold">Overall Position</span><strong class="font-black text-brand-800 text-sm">${positionStr}</strong></div>
-                        
-                        <div><span class="text-slate-500 block text-[10px] uppercase font-bold">Grand Total Score</span><strong class="font-black text-slate-900 text-sm">${grandTotal}</strong></div>
-                        <div><span class="text-slate-500 block text-[10px] uppercase font-bold">Average Percentage</span><strong class="font-black text-slate-900 text-sm">${averageScore}%</strong></div>
-                        <div><span class="text-slate-500 block text-[10px] uppercase font-bold">Attendance</span><strong class="font-bold text-slate-800">${student.attendance || 60} / 60 Days</strong></div>
-                        <div><span class="text-slate-500 block text-[10px] uppercase font-bold">Promoted To</span><strong class="font-bold text-slate-800">${student.promotedTo || 'N/A'}</strong></div>
-                    </div>
-
-                    <!-- Academic Scores Table -->
-                    <div class="overflow-hidden border-2 border-slate-800 rounded-lg mb-4">
-                        <table class="w-full text-left border-collapse">
-                            <thead class="bg-slate-900 text-white uppercase text-[11px] font-bold">
-                                <tr>
-                                    <th class="p-2 border-r border-slate-700">Subject</th>
-                                    <th class="p-2 text-center border-r border-slate-700 w-20">Class (50)</th>
-                                    <th class="p-2 text-center border-r border-slate-700 w-20">Exam (50)</th>
-                                    <th class="p-2 text-center border-r border-slate-700 w-24">Total (100)</th>
-                                    <th class="p-2 text-center border-r border-slate-700 w-20">Rank</th>
-                                    <th class="p-2 w-28">Remark</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${subjectRows}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Grading Key Scale -->
-                    <div class="flex flex-wrap items-center justify-between text-[10px] bg-slate-100 p-2 rounded border border-slate-300 font-bold mb-4 text-slate-700">
-                        <span>GRADING KEY:</span>
-                        <span>80-100%: Excellent (A)</span>
-                        <span>70-79%: Very Good (B)</span>
-                        <span>60-69%: Good (C)</span>
-                        <span>50-59%: Credit (D)</span>
-                        <span>40-49%: Pass (E)</span>
-                        <span>0-39%: Fail (F)</span>
-                    </div>
-
-                    <!-- Conduct, Remarks & Signatures Box -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs border border-slate-300 p-3 rounded-lg bg-slate-50 mb-4">
-                        <div>
-                            <span class="font-bold text-slate-700 block mb-0.5">Conduct / Character:</span>
-                            <div class="font-medium text-slate-900 border-b border-slate-300 pb-1 mb-2">${student.conduct || 'Satisfactory'}</div>
-                            <span class="font-bold text-slate-700 block mb-0.5">Special Interests / Aptitude:</span>
-                            <div class="font-medium text-slate-900">${student.interests || 'Integrated Science & Art'}</div>
-                        </div>
-                        <div>
-                            <span class="font-bold text-slate-700 block mb-0.5">Class Teacher's Remarks:</span>
-                            <div class="font-medium text-slate-900 border-b border-slate-300 pb-1 mb-2">${student.teacherRemark || 'Good performance. Keep up the hard work.'}</div>
-                            <span class="font-bold text-slate-700 block mb-0.5">Headmaster's Signature & Stamp:</span>
-                            <div class="font-black text-brand-800 italic pt-1">M. Kwami (Headmaster) - [STAMPED]</div>
-                        </div>
-                    </div>
-
-                    <!-- Term Requirements & Dates -->
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px] font-semibold bg-brand-50 p-3 rounded-lg border border-brand-200 text-brand-900">
-                        <div><span class="text-slate-500 block text-[10px]">VACATION DATE</span>${cfg.vacationDate}</div>
-                        <div><span class="text-slate-500 block text-[10px]">NEXT TERM BEGINS</span>${cfg.nextTermDate}</div>
-                        <div><span class="text-slate-500 block text-[10px]">REQUIRED ITEMS NEXT TERM</span>${requiredItems}</div>
-                    </div>
-                </div>
-            `;
         }
 
         function toggleReportPrintMode() {
             const mode = document.getElementById('reportModeSelect').value;
             const singleContainer = document.getElementById('singleStudentSelectContainer');
             const batchContainer = document.getElementById('batchClassSelectContainer');
-            const btnText = document.getElementById('btnPrintText');
+            const btnPrintText = document.getElementById('btnPrintText');
 
             if (mode === 'single') {
                 singleContainer.classList.remove('hidden');
                 batchContainer.classList.add('hidden');
-                btnText.innerText = 'Print Student Report';
+                if (btnPrintText) btnPrintText.innerText = "Print Report";
                 generateReportCard();
             } else {
                 singleContainer.classList.add('hidden');
                 batchContainer.classList.remove('hidden');
-                btnText.innerText = 'Print Entire Class Batch';
+                if (btnPrintText) btnPrintText.innerText = "Batch Print Class Reports";
                 generateBatchReportCards();
             }
         }
         window.toggleReportPrintMode = toggleReportPrintMode;
 
+        function generateReportCardHTML(student, termKey = activeTerm) {
+            if (!student) return '<div class="p-8 text-center text-slate-400">No student selected for report card generation.</div>';
+
+            const stuScores = (state.scores[termKey] && state.scores[termKey][student.id]) ? state.scores[termKey][student.id] : {};
+            
+            let totalScore = 0;
+            let subjectCount = 0;
+            
+            MASTER_SUBJECTS.forEach(sub => {
+                const sc = stuScores[sub];
+                if (sc) {
+                    totalScore += (sc.classScore || 0) + (sc.examScore || 0);
+                    subjectCount++;
+                }
+            });
+
+            const averageScore = subjectCount > 0 ? (totalScore / subjectCount).toFixed(1) : "0.0";
+
+            let classStudents = state.students.filter(s => s.class === student.class);
+            let classTotals = classStudents.map(s => {
+                let sum = 0;
+                const scs = (state.scores[termKey] && state.scores[termKey][s.id]) ? state.scores[termKey][s.id] : {};
+                Object.values(scs).forEach(sc => {
+                    if (sc) sum += (sc.classScore || 0) + (sc.examScore || 0);
+                });
+                return { id: s.id, total: sum };
+            });
+            classTotals.sort((a, b) => b.total - a.total);
+            const posIdx = classTotals.findIndex(item => item.id === student.id);
+            const position = posIdx !== -1 ? getOrdinalSuffix(posIdx + 1) : "-";
+
+            const termFormatted = termKey.replace('_', ' - ');
+            const cfg = state.termConfig || {};
+
+            let requiredItems = cfg.itemsPrimary || '2 Toilet Roll | 1 Ream A4 Paper';
+            if (student.class.includes('Creche') || student.class.includes('Nursery') || student.class.includes('KG')) {
+                requiredItems = cfg.itemsKG || '2 Toilet Roll | 2 Geisha Soap';
+            } else if (student.class.includes('JHS')) {
+                requiredItems = cfg.itemsJHS || '2 Toilet Roll | Mathematical Set';
+            }
+
+            let rowsHTML = '';
+            MASTER_SUBJECTS.forEach(sub => {
+                const sc = stuScores[sub];
+                if (!sc && currentRole === 'Teacher') return;
+                
+                const test = sc ? sc.testScore : '-';
+                const hw = sc ? sc.hwScore : '-';
+                const cw = sc ? sc.cwScore : '-';
+                const cScore = sc ? sc.classScore : '-';
+                const eScore = sc ? sc.examScore : '-';
+                const tot = sc ? (sc.classScore + sc.examScore) : '-';
+                const rank = sc ? getSubjectRank(sub, student.id, student.class, termKey) : '-';
+                const remark = sc ? calculateRemark(tot) : '-';
+
+                rowsHTML += `
+                    <tr class="border-b border-slate-300 text-xs">
+                        <td class="py-1.5 px-2 font-bold text-slate-800">${sub}</td>
+                        <td class="py-1.5 px-2 text-center font-mono">${test}</td>
+                        <td class="py-1.5 px-2 text-center font-mono">${hw}</td>
+                        <td class="py-1.5 px-2 text-center font-mono">${cw}</td>
+                        <td class="py-1.5 px-2 text-center font-bold bg-slate-100 font-mono">${cScore}</td>
+                        <td class="py-1.5 px-2 text-center font-mono">${eScore}</td>
+                        <td class="py-1.5 px-2 text-center font-black text-slate-900 font-mono">${tot}</td>
+                        <td class="py-1.5 px-2 text-center font-bold">${rank}</td>
+                        <td class="py-1.5 px-2 font-semibold text-slate-700">${remark}</td>
+                    </tr>
+                `;
+            });
+
+            if (!rowsHTML) {
+                rowsHTML = `<tr><td colspan="9" class="py-4 text-center text-slate-400">No subject marks entered for this student yet.</td></tr>`;
+            }
+
+            return `
+                <div class="bg-white border-2 border-slate-800 p-6 sm:p-8 rounded-xl max-w-4xl mx-auto shadow-md print-page-break text-slate-900">
+                    <div class="text-center border-b-2 border-slate-800 pb-4 mb-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="w-12 h-12 bg-brand-700 text-white rounded-xl font-black text-2xl flex items-center justify-center">VM</div>
+                            <div>
+                                <h2 class="text-xl sm:text-2xl font-black tracking-wide uppercase text-slate-900">VEHEM MAWUNYO INT. SCHOOL</h2>
+                                <p class="text-xs font-semibold text-slate-600 uppercase tracking-widest">Quality Education & Moral Excellence</p>
+                                <p class="text-[11px] font-bold text-brand-800 mt-0.5">TERMINAL PERFORMANCE REPORT CARD</p>
+                            </div>
+                            <img src="${student.photo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80'}" class="w-14 h-14 rounded-lg object-cover border-2 border-slate-800 shadow-sm" alt="${student.name}">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs border border-slate-400 p-3 rounded-lg bg-slate-50 mb-4 font-semibold">
+                        <div><span class="text-slate-500 block text-[10px] uppercase">Student Name:</span> <strong class="text-slate-900 text-sm">${student.name}</strong></div>
+                        <div><span class="text-slate-500 block text-[10px] uppercase">Class Level:</span> <strong>${student.class}</strong></div>
+                        <div><span class="text-slate-500 block text-[10px] uppercase">Academic Term:</span> <strong>${termFormatted}</strong></div>
+                        <div><span class="text-slate-500 block text-[10px] uppercase">Academic Year:</span> <strong>${cfg.academicYear || '2025/2026'}</strong></div>
+                        <div><span class="text-slate-500 block text-[10px] uppercase">Attendance:</span> <strong>${student.attendance || '60'} / 60 Days</strong></div>
+                        <div><span class="text-slate-500 block text-[10px] uppercase">No. on Roll:</span> <strong>${classStudents.length} Students</strong></div>
+                        <div><span class="text-slate-500 block text-[10px] uppercase">Class Position:</span> <strong class="text-brand-800 text-sm">${position}</strong></div>
+                        <div><span class="text-slate-500 block text-[10px] uppercase">Promoted To:</span> <strong>${student.promotedTo || '-'}</strong></div>
+                    </div>
+
+                    <table class="w-full text-left border-collapse border border-slate-400 mb-4">
+                        <thead>
+                            <tr class="bg-slate-800 text-white text-[11px] uppercase font-bold">
+                                <th class="py-2 px-2 border border-slate-400">Subject</th>
+                                <th class="py-2 px-2 text-center border border-slate-400">Test (20)</th>
+                                <th class="py-2 px-2 text-center border border-slate-400">HW (10)</th>
+                                <th class="py-2 px-2 text-center border border-slate-400">CW (20)</th>
+                                <th class="py-2 px-2 text-center border border-slate-400 bg-slate-700">Class (50)</th>
+                                <th class="py-2 px-2 text-center border border-slate-400">Exam (50)</th>
+                                <th class="py-2 px-2 text-center border border-slate-400">Total (100)</th>
+                                <th class="py-2 px-2 text-center border border-slate-400">Pos.</th>
+                                <th class="py-2 px-2 border border-slate-400">Remark</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rowsHTML}
+                        </tbody>
+                    </table>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs mb-4">
+                        <div class="border border-slate-300 p-3 rounded-lg bg-slate-50 space-y-1.5">
+                            <div><strong class="text-slate-700">Grand Total Score:</strong> <span class="font-extrabold text-slate-900">${totalScore}</span></div>
+                            <div><strong class="text-slate-700">Overall Average:</strong> <span class="font-bold text-emerald-700">${averageScore}%</span></div>
+                            <div><strong class="text-slate-700">Conduct / Character:</strong> <span>${student.conduct || 'Satisfactory'}</span></div>
+                            <div><strong class="text-slate-700">Interests / Aptitude:</strong> <span>${student.interests || 'N/A'}</span></div>
+                        </div>
+
+                        <div class="border border-slate-300 p-3 rounded-lg bg-slate-50 space-y-1.5">
+                            <div><strong class="text-slate-700">Next Term Begins:</strong> <span>${cfg.nextTermDate || '25th August, 2026'}</span></div>
+                            <div><strong class="text-slate-700">Vacation Date:</strong> <span>${cfg.vacationDate || '25th July, 2026'}</span></div>
+                            <div><strong class="text-slate-700">Next Term Requirement:</strong> <span class="text-brand-900 font-semibold">${requiredItems}</span></div>
+                        </div>
+                    </div>
+
+                    <div class="border border-slate-300 p-3 rounded-lg bg-slate-50 text-xs mb-6">
+                        <strong class="text-slate-800 block mb-1">Class Teacher's Final Remark:</strong>
+                        <p class="text-slate-700 italic font-medium">"${student.teacherRemark || 'Good performance. Keep up the hard work!!'}"</p>
+                    </div>
+
+                    <div class="flex justify-between items-end pt-4 border-t border-slate-300 text-xs text-center font-bold">
+                        <div>
+                            <div class="border-b border-slate-400 w-36 mb-1"></div>
+                            <span>Class Teacher's Signature</span>
+                        </div>
+                        <div>
+                            <div class="border-b border-slate-400 w-36 mb-1"></div>
+                            <span>Headmaster's Stamp & Signature</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
         function generateReportCard() {
+            const container = document.getElementById('printableReport');
             const stuId = document.getElementById('reportStudentSelect').value;
             const student = state.students.find(s => s.id === stuId);
-            const container = document.getElementById('printableReport');
 
             if (!student) {
-                container.innerHTML = '<div class="p-8 text-center text-slate-400">Please select a student from the dropdown menu above.</div>';
+                container.innerHTML = '<div class="p-8 text-center text-slate-400 font-medium">Please select a student above to display their report card.</div>';
                 return;
             }
 
-            container.innerHTML = generateReportCardHtml(student, activeTerm);
+            container.innerHTML = generateReportCardHTML(student);
         }
         window.generateReportCard = generateReportCard;
 
         function generateBatchReportCards() {
-            const selectedClass = document.getElementById('reportClassBatchSelect').value;
-            const classStudents = state.students.filter(s => s.class === selectedClass);
             const container = document.getElementById('printableReport');
+            const targetClass = document.getElementById('reportClassBatchSelect').value;
+
+            let classStudents = state.students.filter(s => s.class === targetClass);
 
             if (classStudents.length === 0) {
-                container.innerHTML = `<div class="p-8 text-center text-slate-400">No students found in ${selectedClass}.</div>`;
+                container.innerHTML = `<div class="p-8 text-center text-slate-400 font-medium">No students enrolled in ${targetClass}.</div>`;
                 return;
             }
 
-            container.innerHTML = classStudents.map(stu => generateReportCardHtml(stu, activeTerm)).join('<div class="my-6"></div>');
+            container.innerHTML = classStudents.map(s => generateReportCardHTML(s)).join('<div class="h-8 no-print"></div>');
         }
         window.generateBatchReportCards = generateBatchReportCards;
-
-        function updateTermLockUI() {
-            const btn = document.getElementById('btnTermLock');
-            const badge = document.getElementById('termStatusBadge');
-
-            if (state.termLocked) {
-                if (btn) btn.innerHTML = '<i class="fas fa-unlock"></i> Unlock Term Scores';
-                if (badge) {
-                    badge.className = 'text-red-400 font-bold';
-                    badge.innerHTML = '<i class="fas fa-lock"></i> Term Locked';
-                }
-            } else {
-                if (btn) btn.innerHTML = '<i class="fas fa-lock"></i> Lock Active Term';
-                if (badge) {
-                    badge.className = 'text-emerald-400 font-bold';
-                    badge.innerHTML = '<i class="fas fa-unlock"></i> Term Unlocked';
-                }
-            }
-        }
 
         async function toggleTermLock() {
             state.termLocked = !state.termLocked;
@@ -2309,46 +2417,56 @@
 
             if (currentUser) {
                 await setDoc(SETTINGS_DOC, { termLocked: state.termLocked }, { merge: true });
-                await logActivity("Term Lock", `Term lock state set to: ${state.termLocked}`);
+                await logActivity("Term Lock Status", `Term lock set to ${state.termLocked}`);
             }
 
-            showToast(state.termLocked ? "Active term is now LOCKED." : "Active term is now UNLOCKED.", "info");
+            showToast(`Term is now ${state.termLocked ? 'LOCKED' : 'UNLOCKED'}.`, state.termLocked ? 'info' : 'success');
         }
         window.toggleTermLock = toggleTermLock;
 
+        function updateTermLockUI() {
+            const btn = document.getElementById('btnTermLock');
+            if (!btn) return;
+            if (state.termLocked) {
+                btn.innerHTML = '<i class="fas fa-unlock"></i> Unlock Active Term';
+                btn.className = 'w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs sm:text-sm font-medium transition';
+            } else {
+                btn.innerHTML = '<i class="fas fa-lock"></i> Lock Active Term';
+                btn.className = 'w-full sm:w-auto px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs sm:text-sm font-medium transition';
+            }
+        }
+
         function exportDatabaseJSON() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
-            const dlAnchorElem = document.createElement('a');
-            dlAnchorElem.setAttribute("href", dataStr);
-            dlAnchorElem.setAttribute("download", `vehem_mawunyo_backup_${Date.now()}.json`);
-            dlAnchorElem.click();
+            const backupData = JSON.stringify(state, null, 2);
+            const blob = new Blob([backupData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `VMIS_Report_Backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
             showToast("Database backup exported successfully!", "success");
         }
         window.exportDatabaseJSON = exportDatabaseJSON;
 
-        function importDatabaseJSON(e) {
-            const file = e.target.files[0];
+        function importDatabaseJSON(event) {
+            const file = event.target.files[0];
             if (!file) return;
 
             const reader = new FileReader();
-            reader.onload = async function(event) {
+            reader.onload = async function(e) {
                 try {
-                    const imported = JSON.parse(event.target.result);
-                    if (imported.students) state.students = imported.students;
-                    if (imported.scores) state.scores = imported.scores;
-                    if (imported.teachers) state.teachers = imported.teachers;
-                    if (imported.termConfig) state.termConfig = imported.termConfig;
-                    if (imported.activeTerm) {
-                        state.activeTerm = imported.activeTerm;
-                        activeTerm = imported.activeTerm;
-                        updateActiveTermDisplays();
+                    const importedState = JSON.parse(e.target.result);
+                    if (importedState.students && importedState.scores) {
+                        state = { ...state, ...importedState };
+                        populateDropdowns();
+                        renderStudentsTable();
+                        renderTeacherTable();
+                        renderClassTotals();
+                        showToast("Backup data imported into local memory successfully!", "success");
+                    } else {
+                        showToast("Invalid backup file structure.", "error");
                     }
-
-                    populateDropdowns();
-                    renderStudentsTable();
-                    renderTeacherTable();
-                    renderClassTotals();
-                    showToast("Backup imported into memory!", "success");
                 } catch (err) {
                     showToast("Failed to parse JSON backup file.", "error");
                 }
@@ -2358,18 +2476,17 @@
         window.importDatabaseJSON = importDatabaseJSON;
 
         async function clearCloudLogs() {
-            showConfirmModal("Clear Activity Audit Trail", "Are you sure you want to clear all cloud activity logs?", () => {
+            showConfirmModal("Clear Audit Trail", "Are you sure you want to delete all audit logs?", async () => {
                 state.auditLogs = [];
                 renderAuditLogsTable();
-                showToast("Activity trail cleared.", "info");
+                showToast("Audit logs cleared.", "info");
             });
         }
         window.clearCloudLogs = clearCloudLogs;
 
-        // Initialize application on window load
-        window.onload = function() {
-            initBackendAuth();
-        };
+        window.addEventListener('DOMContentLoaded', restoreSession);
+
+        initBackendAuth();
     </script>
 </body>
 </html>
