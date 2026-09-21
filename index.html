@@ -89,657 +89,787 @@
 <body class="bg-slate-100 text-slate-800 antialiased font-sans min-h-screen flex flex-col">
 
     <!-- Header / Top Bar -->
-
-
-    <div class="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
-        <div class="text-right hidden sm:block">
-            <div id="currentUserDisplay" class="text-xs sm:text-sm font-semibold truncate">Logged in as: Teacher</div>
-            <div id="teacherClassBadge" class="text-[11px] text-brand-300 font-medium truncate"></div>
-            <div class="flex items-center justify-end space-x-2 text-[11px]">
-                <span id="activeTermBadge" class="text-emerald-300 font-bold"><i class="fas fa-calendar-check"></i> Term 3</span>
-                <span class="text-slate-600">|</span>
-                <span id="cloudStatusBadge" class="text-amber-400 font-medium flex items-center gap-1">
-                    <i class="fas fa-spinner fa-spin text-[10px]"></i> Connecting...
-                </span>
+<header class="bg-slate-900 text-white shadow-md no-print sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div class="flex items-center space-x-2 sm:space-x-3 min-w-0">
+            <div id="headerLogoContainer" class="bg-brand-700 text-white p-1 rounded-lg font-bold text-lg sm:text-xl shadow-sm flex-shrink-0 w-10 h-10 flex items-center justify-center overflow-hidden">
+                <span id="headerLogoFallback">VM</span>
+                <img id="headerLogoImg" class="w-full h-full object-contain hidden" alt="School Logo">
+            </div>
+            <div class="min-w-0">
+                <h1 class="font-bold text-sm sm:text-lg leading-tight truncate">VEHEM MAWUNYO INT. SCHOOL</h1>
+                <p class="text-[10px] sm:text-xs text-slate-400 truncate">Terminal Report System (Creche - JHS 3)</p>
             </div>
         </div>
-        <button onclick="logout()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-2.5 sm:px-3 py-1.5 rounded-md text-xs sm:text-sm transition flex items-center space-x-1.5">
-            <i class="fas fa-sign-out-alt"></i>
-            <span class="hidden sm:inline">Log Out</span>
-        </button>
+        
+        <div class="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
+            <div class="text-right hidden sm:block">
+                <div id="currentUserDisplay" class="text-xs sm:text-sm font-semibold truncate">Logged in as: Teacher</div>
+                <div id="teacherClassBadge" class="text-[11px] text-brand-300 font-medium truncate"></div>
+                <div class="flex items-center justify-end space-x-2 text-[11px]">
+                    <span id="activeTermBadge" class="text-emerald-300 font-bold"><i class="fas fa-calendar-check"></i> Term 3</span>
+                    <span class="text-slate-600">|</span>
+                    <span id="cloudStatusBadge" class="text-amber-400 font-medium flex items-center gap-1">
+                        <i class="fas fa-spinner fa-spin text-[10px]"></i> Connecting...
+                    </span>
+                </div>
+            </div>
+            <button onclick="logout()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-2.5 sm:px-3 py-1.5 rounded-md text-xs sm:text-sm transition flex items-center space-x-1.5">
+                <i class="fas fa-sign-out-alt"></i>
+                <span class="hidden sm:inline">Log Out</span>
+            </button>
+        </div>
     </div>
-</div>
+</header>
 
+<div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-xs sm:max-w-sm pointer-events-none no-print"></div>
 
-<!-- Sidebar Navigation -->
-<aside class="w-full lg:w-64 flex-shrink-0 bg-white rounded-xl shadow-sm p-2 sm:p-4 border border-slate-200 h-fit">
-    <nav class="flex lg:flex-col overflow-x-auto no-scrollbar sm:custom-scrollbar gap-1.5 pb-1 lg:pb-0 whitespace-nowrap">
-        <button onclick="switchTab('scoreEntry')" id="nav-scoreEntry" class="flex-shrink-0 lg:flex-shrink w-auto lg:w-full flex items-center space-x-2 sm:space-x-3 px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition bg-brand-50 text-brand-700">
-            <i class="fas fa-edit w-4 sm:w-5 text-center"></i>
-            <span>Score Entry</span>
-        </button>
-
-        <button onclick="switchTab('batchScoreEntry')" id="nav-batchScoreEntry" class="flex-shrink-0 lg:flex-shrink w-auto lg:w-full flex items-center space-x-2 sm:space-x-3 px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition text-slate-600 hover:bg-slate-50">
-            <i class="fas fa-table-cells w-4 sm:w-5 text-center"></i>
-            <span>Batch Grid Entry</span>
-        </button>
-        
-        <button onclick="switchTab('students')" id="nav-students" class="flex-shrink-0 lg:flex-shrink w-auto lg:w-full flex items-center space-x-2 sm:space-x-3 px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition text-slate-600 hover:bg-slate-50">
-            <i class="fas fa-user-graduate w-4 sm:w-5 text-center"></i>
-            <span>Student Roster</span>
-        </button>
-        
-        <button onclick="switchTab('classTotals')" id="nav-classTotals" class="flex-shrink-0 lg:flex-shrink w-auto lg:w-full flex items-center space-x-2 sm:space-x-3 px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition text-slate-600 hover:bg-slate-50">
-            <i class="fas fa-list-ol w-4 sm:w-5 text-center"></i>
-            <span>Class Ranks</span>
-        </button>
-        
-        <button onclick="switchTab('reportView')" id="nav-reportView" class="flex-shrink-0 lg:flex-shrink w-auto lg:w-full flex items-center space-x-2 sm:space-x-3 px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition text-slate-600 hover:bg-slate-50">
-            <i class="fas fa-file-invoice w-4 sm:w-5 text-center"></i>
-            <span>Terminal Reports</span>
-        </button>
-
-        <button onclick="switchTab('auditLogs')" id="nav-auditLogs" class="admin-nav-item flex-shrink-0 lg:flex-shrink w-auto lg:w-full flex items-center space-x-2 sm:space-x-3 px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition text-slate-600 hover:bg-slate-50">
-            <i class="fas fa-history w-4 sm:w-5 text-center"></i>
-            <span>Audit Trail</span>
-        </button>
-
-        <button onclick="switchTab('settings')" id="nav-settings" class="admin-nav-item flex-shrink-0 lg:flex-shrink w-auto lg:w-full flex items-center space-x-2 sm:space-x-3 px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition text-slate-600 hover:bg-slate-50">
-            <i class="fas fa-cog w-4 sm:w-5 text-center"></i>
-            <span>System Controls</span>
-        </button>
-    </nav>
-</aside>
-
-<!-- Main Content Area -->
-<main class="flex-grow bg-white rounded-xl shadow-sm border border-slate-200 p-3 sm:p-6 overflow-hidden min-w-0">
+<div id="app" class="flex-grow flex flex-col lg:flex-row max-w-7xl w-full mx-auto p-3 sm:p-6 lg:p-8 gap-4 sm:gap-6 no-print">
     
-    <!-- Tab: Score Entry -->
-    <section id="tab-scoreEntry" class="tab-content">
-        <div class="border-b border-slate-200 pb-3 mb-4 sm:mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-            <div>
-                <h2 class="text-lg sm:text-xl font-bold text-slate-800">Single Student Score Entry</h2>
-                <p class="text-xs sm:text-sm text-slate-500">Enter marks for continuous assessment components (Scaled to 50%) and Exam (50%).</p>
-            </div>
-            <div class="flex items-center gap-2 w-full sm:w-auto">
-                <label class="text-xs font-semibold text-slate-600 whitespace-nowrap">Active Term:</label>
-                <select id="singleScoreTermSelect" onchange="loadStudentSubjects()" class="text-xs font-medium border border-slate-300 rounded-lg p-1.5 bg-slate-50 w-full sm:w-auto">
-                </select>
-            </div>
-        </div>
+    <!-- Sidebar Navigation -->
+    <aside class="w-full lg:w-64 flex-shrink-0 bg-white rounded-xl shadow-sm p-2 sm:p-4 border border-slate-200 h-fit">
+        <nav class="flex lg:flex-col overflow-x-auto no-scrollbar sm:custom-scrollbar gap-1.5 pb-1 lg:pb-0 whitespace-nowrap">
+            <button onclick="switchTab('scoreEntry')" id="nav-scoreEntry" class="flex-shrink-0 lg:flex-shrink w-auto lg:w-full flex items-center space-x-2 sm:space-x-3 px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition bg-brand-50 text-brand-700">
+                <i class="fas fa-edit w-4 sm:w-5 text-center"></i>
+                <span>Score Entry</span>
+            </button>
 
-        <form id="scoreForm" onsubmit="handleScoreSubmit(event)" class="space-y-4 sm:space-y-6">
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+            <button onclick="switchTab('batchScoreEntry')" id="nav-batchScoreEntry" class="flex-shrink-0 lg:flex-shrink w-auto lg:w-full flex items-center space-x-2 sm:space-x-3 px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition text-slate-600 hover:bg-slate-50">
+                <i class="fas fa-table-cells w-4 sm:w-5 text-center"></i>
+                <span>Batch Grid Entry</span>
+            </button>
+            
+            <button onclick="switchTab('students')" id="nav-students" class="flex-shrink-0 lg:flex-shrink w-auto lg:w-full flex items-center space-x-2 sm:space-x-3 px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition text-slate-600 hover:bg-slate-50">
+                <i class="fas fa-user-graduate w-4 sm:w-5 text-center"></i>
+                <span>Student Roster</span>
+            </button>
+            
+            <button onclick="switchTab('classTotals')" id="nav-classTotals" class="flex-shrink-0 lg:flex-shrink w-auto lg:w-full flex items-center space-x-2 sm:space-x-3 px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition text-slate-600 hover:bg-slate-50">
+                <i class="fas fa-list-ol w-4 sm:w-5 text-center"></i>
+                <span>Class Ranks</span>
+            </button>
+            
+            <button onclick="switchTab('reportView')" id="nav-reportView" class="flex-shrink-0 lg:flex-shrink w-auto lg:w-full flex items-center space-x-2 sm:space-x-3 px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition text-slate-600 hover:bg-slate-50">
+                <i class="fas fa-file-invoice w-4 sm:w-5 text-center"></i>
+                <span>Terminal Reports</span>
+            </button>
+
+            <button onclick="switchTab('auditLogs')" id="nav-auditLogs" class="admin-nav-item flex-shrink-0 lg:flex-shrink w-auto lg:w-full flex items-center space-x-2 sm:space-x-3 px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition text-slate-600 hover:bg-slate-50">
+                <i class="fas fa-history w-4 sm:w-5 text-center"></i>
+                <span>Audit Trail</span>
+            </button>
+
+            <button onclick="switchTab('settings')" id="nav-settings" class="admin-nav-item flex-shrink-0 lg:flex-shrink w-auto lg:w-full flex items-center space-x-2 sm:space-x-3 px-3 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-medium transition text-slate-600 hover:bg-slate-50">
+                <i class="fas fa-cog w-4 sm:w-5 text-center"></i>
+                <span>System Controls</span>
+            </button>
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow bg-white rounded-xl shadow-sm border border-slate-200 p-3 sm:p-6 overflow-hidden min-w-0">
+        
+        <!-- Tab: Score Entry -->
+        <section id="tab-scoreEntry" class="tab-content">
+            <div class="border-b border-slate-200 pb-3 mb-4 sm:mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                 <div>
-                    <label class="block text-xs sm:text-sm font-medium text-slate-700 mb-1">Select Student Name</label>
-                    <select id="scoreStudentSelect" onchange="loadStudentSubjects()" required class="w-full rounded-lg border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 p-2 sm:p-2.5 border text-xs sm:text-sm">
-                        <option value="">-- Select Student --</option>
+                    <h2 class="text-lg sm:text-xl font-bold text-slate-800">Single Student Score Entry</h2>
+                    <p class="text-xs sm:text-sm text-slate-500">Enter marks for continuous assessment components (Scaled to 50%) and Exam (50%).</p>
+                </div>
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <label class="text-xs font-semibold text-slate-600 whitespace-nowrap">Active Term:</label>
+                    <select id="singleScoreTermSelect" onchange="loadStudentSubjects()" class="text-xs font-medium border border-slate-300 rounded-lg p-1.5 bg-slate-50 w-full sm:w-auto">
+                    </select>
+                </div>
+            </div>
+
+            <form id="scoreForm" onsubmit="handleScoreSubmit(event)" class="space-y-4 sm:space-y-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+                    <div>
+                        <label class="block text-xs sm:text-sm font-medium text-slate-700 mb-1">Select Student Name</label>
+                        <select id="scoreStudentSelect" onchange="loadStudentSubjects()" required class="w-full rounded-lg border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 p-2 sm:p-2.5 border text-xs sm:text-sm">
+                            <option value="">-- Select Student --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs sm:text-sm font-medium text-slate-700 mb-1">Class</label>
+                        <input type="text" id="scoreClassDisplay" readonly class="w-full rounded-lg border-slate-200 bg-slate-50 text-slate-500 p-2 sm:p-2.5 border text-xs sm:text-sm font-semibold">
+                    </div>
+                    <div class="sm:col-span-2 md:col-span-1">
+                        <label class="block text-xs sm:text-sm font-medium text-slate-700 mb-1">Select Subject</label>
+                        <select id="scoreSubjectSelect" required onchange="populateCurrentScore()" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 p-2 sm:p-2.5 border text-xs sm:text-sm">
+                            <option value="">-- Choose Subject --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Continuous Assessment Breakdown Grid -->
+                <div class="bg-slate-50 p-3 sm:p-5 rounded-xl border border-slate-200">
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-3 gap-1">
+                        <h3 class="text-[11px] sm:text-xs font-bold text-slate-600 uppercase tracking-wider"><i class="fas fa-calculator mr-1"></i> Assessment Breakdown (Raw 60 → Scaled to 50%)</h3>
+                        <span class="text-[11px] text-slate-500 font-medium">CW1 (10) + CW2 (10) + HW1 (10) + HW2 (10) + Project (20) = Raw 60</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-7 gap-2.5 sm:gap-3">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700 mb-1">CW 1 (0-10)</label>
+                            <input type="number" id="inputCW1" min="0" max="10" step="0.5" required oninput="validateInputRange(this, 0, 10, 'Classwork 1'); calculateLiveTotal();" placeholder="0-10" class="w-full rounded-lg border-slate-300 p-2 border font-bold text-center text-xs sm:text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700 mb-1">CW 2 (0-10)</label>
+                            <input type="number" id="inputCW2" min="0" max="10" step="0.5" required oninput="validateInputRange(this, 0, 10, 'Classwork 2'); calculateLiveTotal();" placeholder="0-10" class="w-full rounded-lg border-slate-300 p-2 border font-bold text-center text-xs sm:text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700 mb-1">HW 1 (0-10)</label>
+                            <input type="number" id="inputHW1" min="0" max="10" step="0.5" required oninput="validateInputRange(this, 0, 10, 'Homework 1'); calculateLiveTotal();" placeholder="0-10" class="w-full rounded-lg border-slate-300 p-2 border font-bold text-center text-xs sm:text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700 mb-1">HW 2 (0-10)</label>
+                            <input type="number" id="inputHW2" min="0" max="10" step="0.5" required oninput="validateInputRange(this, 0, 10, 'Homework 2'); calculateLiveTotal();" placeholder="0-10" class="w-full rounded-lg border-slate-300 p-2 border font-bold text-center text-xs sm:text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-700 mb-1">Project (0-20)</label>
+                            <input type="number" id="inputProject" min="0" max="20" step="0.5" required oninput="validateInputRange(this, 0, 20, 'Project Work'); calculateLiveTotal();" placeholder="0-20" class="w-full rounded-lg border-slate-300 p-2 border font-bold text-center text-xs sm:text-sm">
+                        </div>
+
+                        <div class="bg-amber-50/70 p-1 rounded-lg border border-amber-200">
+                            <label class="block text-[11px] font-semibold text-amber-800 mb-1 text-center">Raw Total (60)</label>
+                            <input type="number" id="inputRawTotalDisplay" readonly placeholder="0-60" class="w-full bg-transparent font-black text-amber-900 text-center text-xs sm:text-sm border-none p-1">
+                        </div>
+
+                        <div class="bg-brand-50 p-1 rounded-lg border border-brand-200">
+                            <label class="block text-[11px] font-bold text-brand-800 mb-1 text-center">Class Score (50%)</label>
+                            <input type="number" id="inputClassScoreTotal" readonly placeholder="0-50" class="w-full bg-transparent font-black text-brand-900 text-center text-xs sm:text-sm border-none p-1">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-4 pt-4 border-t border-slate-200">
+                        <div>
+                            <label class="block text-[11px] sm:text-xs font-semibold text-slate-700 mb-1">Exam Mark (0-50)</label>
+                            <input type="number" id="inputExamScore" min="0" max="50" step="0.5" required oninput="validateInputRange(this, 0, 50, 'Exam Mark'); calculateLiveTotal();" placeholder="0 - 50" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-brand-500 p-2 sm:p-2.5 border font-bold text-sm sm:text-lg text-center">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] sm:text-xs font-semibold text-slate-700 mb-1">Total Score (100%) & Remark</label>
+                            <div class="flex items-center space-x-3">
+                                <div id="liveTotalDisplay" class="text-xl sm:text-2xl font-black text-brand-700 bg-white px-3 sm:px-4 py-1.5 rounded-lg border border-slate-300 min-w-[70px] sm:min-w-[80px] text-center">0</div>
+                                <span id="liveRemarkDisplay" class="text-xs sm:text-sm font-semibold px-2.5 sm:px-3 py-1 rounded-full bg-slate-200 text-slate-700">N/A</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-2 sm:space-x-3 pt-2">
+                    <button type="reset" class="px-3 sm:px-5 py-2 sm:py-2.5 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 font-medium text-xs sm:text-sm transition">Reset Form</button>
+                    <button type="submit" id="btnSubmitScore" class="px-4 sm:px-6 py-2 sm:py-2.5 bg-brand-700 hover:bg-brand-800 text-white rounded-lg font-medium text-xs sm:text-sm transition shadow-sm flex items-center space-x-2">
+                        <i class="fas fa-save"></i>
+                        <span>Save Score</span>
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-6 sm:mt-8">
+                <h3 class="text-sm sm:text-md font-bold text-slate-800 mb-3">All Subjects Overview for Selected Student</h3>
+                <div class="overflow-x-auto border border-slate-200 rounded-lg custom-scrollbar">
+                    <table class="w-full text-xs sm:text-sm text-left text-slate-600 min-w-[850px]">
+                        <thead class="text-[11px] uppercase bg-slate-100 text-slate-700 font-bold">
+                            <tr>
+                                <th class="px-3 py-2.5">Subject</th>
+                                <th class="px-2 py-2.5 text-center">CW1 (10)</th>
+                                <th class="px-2 py-2.5 text-center">CW2 (10)</th>
+                                <th class="px-2 py-2.5 text-center">HW1 (10)</th>
+                                <th class="px-2 py-2.5 text-center">HW2 (10)</th>
+                                <th class="px-2 py-2.5 text-center">Proj (20)</th>
+                                <th class="px-2 py-2.5 text-center text-amber-900 bg-amber-50">Raw (60)</th>
+                                <th class="px-2 py-2.5 text-center bg-brand-50 text-brand-900">Class (50)</th>
+                                <th class="px-2 py-2.5 text-center">Exams (50)</th>
+                                <th class="px-2 py-2.5 text-center font-black">Total (100)</th>
+                                <th class="px-2 py-2.5 text-center">Rank</th>
+                                <th class="px-3 py-2.5">Remark</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentSubjectOverviewTable">
+                            <tr><td colspan="12" class="px-4 py-4 text-center text-slate-400">Select a student above to view their score sheet.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab: Batch Grid Entry -->
+        <section id="tab-batchScoreEntry" class="tab-content hidden">
+            <div class="border-b border-slate-200 pb-3 mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                <div>
+                    <h2 class="text-lg sm:text-xl font-bold text-slate-800">Batch Grid Entry</h2>
+                    <p class="text-xs sm:text-sm text-slate-500">Enter marks for all students in a class simultaneously with automated scaling.</p>
+                </div>
+                <button onclick="saveBatchGridScores()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-2 shadow-sm">
+                    <i class="fas fa-check-circle"></i> Save All Batch Scores
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 bg-slate-50 p-3 sm:p-4 rounded-xl border border-slate-200">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Select Class</label>
+                    <select id="batchClassSelect" onchange="renderBatchGridTable()" class="w-full rounded-lg border-slate-300 p-2 border text-xs font-semibold">
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs sm:text-sm font-medium text-slate-700 mb-1">Class</label>
-                    <input type="text" id="scoreClassDisplay" readonly class="w-full rounded-lg border-slate-200 bg-slate-50 text-slate-500 p-2 sm:p-2.5 border text-xs sm:text-sm font-semibold">
+                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Select Subject</label>
+                    <select id="batchSubjectSelect" onchange="renderBatchGridTable()" class="w-full rounded-lg border-slate-300 p-2 border text-xs font-semibold">
+                    </select>
                 </div>
-                <div class="sm:col-span-2 md:col-span-1">
-                    <label class="block text-xs sm:text-sm font-medium text-slate-700 mb-1">Select Subject</label>
-                    <select id="scoreSubjectSelect" required onchange="populateCurrentScore()" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 p-2 sm:p-2.5 border text-xs sm:text-sm">
-                        <option value="">-- Choose Subject --</option>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-700 mb-1">Academic Term</label>
+                    <select id="batchTermSelect" onchange="renderBatchGridTable()" class="w-full rounded-lg border-slate-300 p-2 border text-xs font-semibold">
                     </select>
                 </div>
             </div>
 
-            <!-- Continuous Assessment Breakdown Grid -->
-            <div class="bg-slate-50 p-3 sm:p-5 rounded-xl border border-slate-200">
-                <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-3 gap-1">
-                    <h3 class="text-[11px] sm:text-xs font-bold text-slate-600 uppercase tracking-wider"><i class="fas fa-calculator mr-1"></i> Assessment Breakdown (Raw 60 → Scaled to 50%)</h3>
-                    <span class="text-[11px] text-slate-500 font-medium">CW1 (10) + CW2 (10) + HW1 (10) + HW2 (10) + Project (20) = Raw 60</span>
+            <div class="overflow-x-auto border border-slate-200 rounded-lg max-h-[550px] custom-scrollbar">
+                <table class="w-full text-xs text-left text-slate-700 border-collapse min-w-[950px]">
+                    <thead class="uppercase bg-slate-100 text-slate-800 sticky top-0 border-b font-bold z-10">
+                        <tr>
+                            <th class="px-3 py-2.5">Student Name</th>
+                            <th class="px-1 py-2.5 text-center w-16">CW1 (10)</th>
+                            <th class="px-1 py-2.5 text-center w-16">CW2 (10)</th>
+                            <th class="px-1 py-2.5 text-center w-16">HW1 (10)</th>
+                            <th class="px-1 py-2.5 text-center w-16">HW2 (10)</th>
+                            <th class="px-1 py-2.5 text-center w-16">Proj (20)</th>
+                            <th class="px-1 py-2.5 text-center w-20 bg-brand-50 text-brand-900 font-extrabold">Class (50)</th>
+                            <th class="px-1 py-2.5 text-center w-20">Exam (50)</th>
+                            <th class="px-1 py-2.5 text-center w-20 font-black">Total (100)</th>
+                            <th class="px-3 py-2.5 text-center">Remark</th>
+                        </tr>
+                    </thead>
+                    <tbody id="batchGridTableBody">
+                        <tr><td colspan="10" class="px-4 py-8 text-center text-slate-400">Select a Class and Subject above to begin batch score entry.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Tab: Student Directory -->
+        <section id="tab-students" class="tab-content hidden">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 pb-3 mb-4 sm:mb-6 gap-2">
+                <div>
+                    <h2 class="text-lg sm:text-xl font-bold text-slate-800">Student Directory & Profiles</h2>
+                    <p class="text-xs sm:text-sm text-slate-500">Manage enrolled students, attendance counts, conduct, and remarks.</p>
                 </div>
+                <button onclick="openAddStudentModal()" class="admin-nav-item w-full sm:w-auto bg-brand-700 hover:bg-brand-800 text-white px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition flex items-center justify-center space-x-2">
+                    <i class="fas fa-plus"></i>
+                    <span>Add New Student</span>
+                </button>
+            </div>
+
+            <div class="overflow-x-auto border border-slate-200 rounded-lg custom-scrollbar">
+                <table class="w-full text-xs sm:text-sm text-left text-slate-600 min-w-[650px]">
+                    <thead class="text-[11px] uppercase bg-slate-100 text-slate-700 font-bold">
+                        <tr>
+                            <th class="px-3 py-2.5">Photo</th>
+                            <th class="px-3 py-2.5">ID & Name</th>
+                            <th class="px-3 py-2.5">Class Level</th>
+                            <th class="px-3 py-2.5">Attendance</th>
+                            <th class="px-3 py-2.5">Conduct & Remarks</th>
+                            <th class="px-3 py-2.5 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Tab: Class Summary & Ranks -->
+        <section id="tab-classTotals" class="tab-content hidden">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 pb-3 mb-4 sm:mb-6 gap-2">
+                <div>
+                    <h2 class="text-lg sm:text-xl font-bold text-slate-800">Class Summary & Rankings</h2>
+                    <p class="text-xs sm:text-sm text-slate-500">Computed grand totals and class positions by selected grade level.</p>
+                </div>
+                <div class="flex items-center gap-2 w-full sm:w-auto">
+                    <select id="filterClassSelect" onchange="renderClassTotals()" class="w-full sm:w-auto rounded-lg border-slate-300 shadow-sm p-2 border text-xs sm:text-sm font-medium">
+                        <option value="ALL">All Classes</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto border border-slate-200 rounded-lg custom-scrollbar">
+                <table class="w-full text-xs sm:text-sm text-left text-slate-600 min-w-[600px]">
+                    <thead class="text-[11px] uppercase bg-slate-100 text-slate-700 font-bold">
+                        <tr>
+                            <th class="px-3 py-2.5">Rank</th>
+                            <th class="px-4 py-2.5">Student Name</th>
+                            <th class="px-3 py-2.5">Class</th>
+                            <th class="px-3 py-2.5">Grand Total Score</th>
+                            <th class="px-3 py-2.5">Average (%)</th>
+                            <th class="px-3 py-2.5">Promoted To</th>
+                        </tr>
+                    </thead>
+                    <tbody id="classTotalsTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Tab: Terminal Reports -->
+        <section id="tab-reportView" class="tab-content hidden">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 pb-3 mb-4 sm:mb-6 no-print gap-3">
+                <div>
+                    <h2 class="text-lg sm:text-xl font-bold text-slate-800">Terminal Report Cards</h2>
+                    <p class="text-xs sm:text-sm text-slate-500">Generate individual student reports or print full class rosters in batch.</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                    <select id="reportModeSelect" onchange="toggleReportPrintMode()" class="rounded-lg border-slate-300 shadow-sm p-2 border text-xs font-bold bg-slate-50 flex-grow sm:flex-grow-0">
+                        <option value="single">Single Student Mode</option>
+                        <option value="batch">Batch Entire Class Mode</option>
+                    </select>
+
+                    <div id="singleStudentSelectContainer" class="flex items-center gap-2 flex-grow sm:flex-grow-0">
+                        <select id="reportStudentSelect" onchange="generateReportCard()" class="w-full sm:w-auto rounded-lg border-slate-300 shadow-sm p-2 border text-xs font-medium">
+                        </select>
+                    </div>
+
+                    <div id="batchClassSelectContainer" class="hidden flex items-center gap-2 flex-grow sm:flex-grow-0">
+                        <select id="reportClassBatchSelect" onchange="generateBatchReportCards()" class="w-full sm:w-auto rounded-lg border-slate-300 shadow-sm p-2 border text-xs font-medium">
+                        </select>
+                    </div>
+
+                    <button onclick="window.print()" class="admin-nav-item bg-slate-800 hover:bg-slate-900 text-white px-3.5 py-2 rounded-lg text-xs font-medium transition flex items-center space-x-1.5 shadow-sm ml-auto sm:ml-0">
+                        <i class="fas fa-print"></i>
+                        <span id="btnPrintText">Print</span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="printableReport" class="space-y-6 sm:space-y-8">
+            </div>
+        </section>
+
+        <!-- Tab: System Controls (Admin Only) -->
+        <section id="tab-settings" class="tab-content hidden">
+            <div class="border-b border-slate-200 pb-3 mb-4">
+                <h2 class="text-lg sm:text-xl font-bold text-slate-800">System Controls & Administrative Configuration</h2>
+                <p class="text-xs sm:text-sm text-slate-500">Manage school logo, active term, security passwords, dates, fees, and cloud synchronization.</p>
+            </div>
+
+            <!-- PART 1: Admin Logo Upload Section -->
+            <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 mb-4 sm:mb-6 shadow-sm">
+                <h3 class="font-bold text-sm sm:text-md text-slate-800 mb-2 flex items-center"><i class="fas fa-image text-brand-700 mr-2"></i> School Logo Management</h3>
+                <p class="text-xs text-slate-500 mb-4">Upload custom school emblem to appear on all Terminal Report Cards and system header.</p>
                 
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-7 gap-2.5 sm:gap-3">
-                    <div>
-                        <label class="block text-[11px] font-semibold text-slate-700 mb-1">CW 1 (0-10)</label>
-                        <input type="number" id="inputCW1" min="0" max="10" step="0.5" required oninput="validateInputRange(this, 0, 10, 'Classwork 1'); calculateLiveTotal();" placeholder="0-10" class="w-full rounded-lg border-slate-300 p-2 border font-bold text-center text-xs sm:text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-semibold text-slate-700 mb-1">CW 2 (0-10)</label>
-                        <input type="number" id="inputCW2" min="0" max="10" step="0.5" required oninput="validateInputRange(this, 0, 10, 'Classwork 2'); calculateLiveTotal();" placeholder="0-10" class="w-full rounded-lg border-slate-300 p-2 border font-bold text-center text-xs sm:text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-semibold text-slate-700 mb-1">HW 1 (0-10)</label>
-                        <input type="number" id="inputHW1" min="0" max="10" step="0.5" required oninput="validateInputRange(this, 0, 10, 'Homework 1'); calculateLiveTotal();" placeholder="0-10" class="w-full rounded-lg border-slate-300 p-2 border font-bold text-center text-xs sm:text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-semibold text-slate-700 mb-1">HW 2 (0-10)</label>
-                        <input type="number" id="inputHW2" min="0" max="10" step="0.5" required oninput="validateInputRange(this, 0, 10, 'Homework 2'); calculateLiveTotal();" placeholder="0-10" class="w-full rounded-lg border-slate-300 p-2 border font-bold text-center text-xs sm:text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-semibold text-slate-700 mb-1">Project (0-20)</label>
-                        <input type="number" id="inputProject" min="0" max="20" step="0.5" required oninput="validateInputRange(this, 0, 20, 'Project Work'); calculateLiveTotal();" placeholder="0-20" class="w-full rounded-lg border-slate-300 p-2 border font-bold text-center text-xs sm:text-sm">
+                <div class="flex flex-col sm:flex-row items-center gap-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <div class="w-28 h-28 border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center bg-white p-2 relative flex-shrink-0 shadow-inner">
+                        <img id="logoPreviewImg" src="" alt="School Logo Preview" class="max-w-full max-h-full object-contain hidden">
+                        <div id="logoPreviewPlaceholder" class="text-center text-slate-400">
+                            <i class="fas fa-school text-3xl mb-1"></i>
+                            <span class="block text-[10px] font-semibold">No Logo Uploaded</span>
+                        </div>
                     </div>
 
-                    <div class="bg-amber-50/70 p-1 rounded-lg border border-amber-200">
-                        <label class="block text-[11px] font-semibold text-amber-800 mb-1 text-center">Raw Total (60)</label>
-                        <input type="number" id="inputRawTotalDisplay" readonly placeholder="0-60" class="w-full bg-transparent font-black text-amber-900 text-center text-xs sm:text-sm border-none p-1">
-                    </div>
-
-                    <div class="bg-brand-50 p-1 rounded-lg border border-brand-200">
-                        <label class="block text-[11px] font-bold text-brand-800 mb-1 text-center">Class Score (50%)</label>
-                        <input type="number" id="inputClassScoreTotal" readonly placeholder="0-50" class="w-full bg-transparent font-black text-brand-900 text-center text-xs sm:text-sm border-none p-1">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-4 pt-4 border-t border-slate-200">
-                    <div>
-                        <label class="block text-[11px] sm:text-xs font-semibold text-slate-700 mb-1">Exam Mark (0-50)</label>
-                        <input type="number" id="inputExamScore" min="0" max="50" step="0.5" required oninput="validateInputRange(this, 0, 50, 'Exam Mark'); calculateLiveTotal();" placeholder="0 - 50" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-brand-500 p-2 sm:p-2.5 border font-bold text-sm sm:text-lg text-center">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] sm:text-xs font-semibold text-slate-700 mb-1">Total Score (100%) & Remark</label>
-                        <div class="flex items-center space-x-3">
-                            <div id="liveTotalDisplay" class="text-xl sm:text-2xl font-black text-brand-700 bg-white px-3 sm:px-4 py-1.5 rounded-lg border border-slate-300 min-w-[70px] sm:min-w-[80px] text-center">0</div>
-                            <span id="liveRemarkDisplay" class="text-xs sm:text-sm font-semibold px-2.5 sm:px-3 py-1 rounded-full bg-slate-200 text-slate-700">N/A</span>
+                    <div class="space-y-3 flex-grow text-xs w-full">
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Select Logo File (PNG, JPG, SVG)</label>
+                            <input type="file" id="logoFileInput" accept="image/*" onchange="previewLogoFile(event)" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 border border-slate-300 rounded-lg bg-white">
+                        </div>
+                        <div class="flex flex-wrap gap-2 pt-1">
+                            <button type="button" onclick="saveUploadedLogo()" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded-lg font-bold text-xs shadow-sm transition flex items-center gap-1.5">
+                                <i class="fas fa-save"></i> Save Logo
+                            </button>
+                            <button type="button" onclick="removeSchoolLogo()" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg font-semibold text-xs transition flex items-center gap-1.5">
+                                <i class="fas fa-trash-alt"></i> Remove Logo
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="flex justify-end space-x-2 sm:space-x-3 pt-2">
-                <button type="reset" class="px-3 sm:px-5 py-2 sm:py-2.5 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 font-medium text-xs sm:text-sm transition">Reset Form</button>
-                <button type="submit" id="btnSubmitScore" class="px-4 sm:px-6 py-2 sm:py-2.5 bg-brand-700 hover:bg-brand-800 text-white rounded-lg font-medium text-xs sm:text-sm transition shadow-sm flex items-center space-x-2">
-                    <i class="fas fa-save"></i>
-                    <span>Save Score</span>
+            <!-- Active Academic Term Control -->
+            <div class="bg-slate-50 p-4 sm:p-5 rounded-xl border border-slate-200 mb-4 sm:mb-6">
+                <h3 class="font-bold text-sm sm:text-md text-slate-800 mb-2"><i class="fas fa-calendar-check text-brand-700 mr-2"></i>Active Academic Term Control</h3>
+                <p class="text-xs text-slate-500 mb-3">Set or edit the active academic term for the entire school system.</p>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs items-end">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Select / Set Active Term</label>
+                        <select id="cfgActiveTermSelect" class="w-full rounded-lg border-slate-300 p-2.5 border font-semibold text-xs">
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Custom Term Name (Optional)</label>
+                        <input type="text" id="cfgCustomTermInput" placeholder="e.g. 2026-2027_Term1" class="w-full rounded-lg border-slate-300 p-2.5 border font-mono text-xs">
+                    </div>
+                    <div>
+                        <button type="button" onclick="handleSaveActiveTerm()" class="w-full py-2.5 bg-brand-700 hover:bg-brand-800 text-white rounded-lg font-bold text-xs shadow-sm transition flex items-center justify-center gap-2">
+                            <i class="fas fa-save"></i> Save Active Term
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Term Dates, Bills & Items Config -->
+            <div class="bg-slate-50 p-4 sm:p-5 rounded-xl border border-slate-200 mb-4 sm:mb-6">
+                <h3 class="font-bold text-sm sm:text-md text-slate-800 mb-3"><i class="fas fa-calendar-alt text-brand-700 mr-2"></i>Academic Term Dates & Financial Notice Config</h3>
+                <form onsubmit="handleSaveTermConfig(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Academic Year</label>
+                        <input type="text" id="cfgAcademicYear" required placeholder="e.g. 2025/2026" class="w-full rounded border-slate-300 p-2 border font-medium">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Next Term Opening Date</label>
+                        <input type="text" id="cfgNextTermDate" required placeholder="e.g. 25th August, 2026" class="w-full rounded border-slate-300 p-2 border font-medium">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Vacation Date</label>
+                        <input type="text" id="cfgVacationDate" required placeholder="e.g. 25th July, 2026" class="w-full rounded border-slate-300 p-2 border font-medium">
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Next Term School Fees (GH₵)</label>
+                        <input type="text" id="cfgNextTermFees" required placeholder="e.g. 350.00" class="w-full rounded border-slate-300 p-2 border font-medium">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">P.T.A. / Maintenance Dues (GH₵)</label>
+                        <input type="text" id="cfgPtaDues" required placeholder="e.g. 30.00" class="w-full rounded border-slate-300 p-2 border font-medium">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Exam Fee (GH₵)</label>
+                        <input type="text" id="cfgExamFee" required placeholder="e.g. 20.00" class="w-full rounded border-slate-300 p-2 border font-medium">
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Creche/KG Required Items</label>
+                        <input type="text" id="cfgItemsKG" required placeholder="e.g. 2 Toilet Rolls, 2 Geisha Soaps" class="w-full rounded border-slate-300 p-2 border font-medium">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Primary Required Items</label>
+                        <input type="text" id="cfgItemsPrimary" required placeholder="e.g. 2 Toilet Rolls, 1 Ream A4 Paper" class="w-full rounded border-slate-300 p-2 border font-medium">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">JHS Required Items</label>
+                        <input type="text" id="cfgItemsJHS" required placeholder="e.g. 2 Toilet Rolls, Math Set" class="w-full rounded border-slate-300 p-2 border font-medium">
+                    </div>
+
+                    <div class="sm:col-span-2 lg:col-span-3 flex justify-end pt-2">
+                        <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded font-bold text-xs shadow-sm transition">
+                            <i class="fas fa-save mr-1"></i> Save Term & Financial Configuration
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Admin Security Password Change Card -->
+            <div class="bg-slate-50 p-4 sm:p-5 rounded-xl border border-slate-200 mb-4 sm:mb-6">
+                <h3 class="font-bold text-sm sm:text-md text-slate-800 mb-2"><i class="fas fa-user-shield text-brand-700 mr-2"></i>Admin Security & Password Control</h3>
+                <p class="text-xs text-slate-500 mb-3">Change the system administrator master password.</p>
+                <form onsubmit="handleAdminPasswordChange(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs items-end">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">New Master Password</label>
+                        <div class="relative">
+                            <input type="password" id="newAdminPassword" required placeholder="Enter new admin password" class="w-full rounded-lg border-slate-300 p-2.5 border pr-10 font-mono text-xs">
+                            <button type="button" onclick="toggleInputVisibility('newAdminPassword', 'newAdminPwdIcon')" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600">
+                                <i id="newAdminPwdIcon" class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Confirm New Password</label>
+                        <div class="relative">
+                            <input type="password" id="confirmAdminPassword" required placeholder="Re-enter new password" class="w-full rounded-lg border-slate-300 p-2.5 border pr-10 font-mono text-xs">
+                            <button type="button" onclick="toggleInputVisibility('confirmAdminPassword', 'confirmAdminPwdIcon')" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600">
+                                <i id="confirmAdminPwdIcon" class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="sm:col-span-2 lg:col-span-1">
+                        <button type="submit" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-bold text-xs shadow-sm transition flex items-center justify-center gap-2">
+                            <i class="fas fa-key"></i> Update Admin Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Teacher Accounts Section -->
+            <div class="bg-slate-50 p-4 sm:p-5 rounded-xl border border-slate-200 mb-4 sm:mb-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 gap-2">
+                    <div>
+                        <h3 class="font-bold text-sm sm:text-md text-slate-800">Teacher Class & Subject Assignments</h3>
+                        <p class="text-xs text-slate-500">Assign multiple classes and subjects with checkbox controls.</p>
+                    </div>
+                    <button onclick="openAddTeacherModal()" class="w-full sm:w-auto px-3 py-1.5 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-xs font-semibold transition flex items-center justify-center space-x-1">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Add New Teacher</span>
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto border border-slate-200 rounded-lg bg-white custom-scrollbar">
+                    <table class="w-full text-xs text-left text-slate-600 min-w-[600px]">
+                        <thead class="uppercase bg-slate-100 text-slate-700 font-semibold">
+                            <tr>
+                                <th class="px-3 py-2">Teacher Name</th>
+                                <th class="px-3 py-2">Assigned Classes</th>
+                                <th class="px-3 py-2">Assigned Subjects</th>
+                                <th class="px-3 py-2">Password</th>
+                                <th class="px-3 py-2 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teacherTableBody">
+                            <tr><td colspan="5" class="px-3 py-3 text-center text-slate-400">Loading teachers...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                <!-- Term Lock -->
+                <div class="bg-slate-50 p-4 sm:p-5 rounded-xl border border-slate-200">
+                    <h3 class="font-bold text-sm sm:text-md text-slate-800 mb-2">Term Lock System</h3>
+                    <p class="text-xs sm:text-sm text-slate-600 mb-4">Locking the term prevents teachers from making accidental score modifications.</p>
+                    <button onclick="toggleTermLock()" id="btnTermLock" class="w-full sm:w-auto px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs sm:text-sm font-medium transition">
+                        <i class="fas fa-lock"></i> Lock Active Term
+                    </button>
+                </div>
+
+                <!-- Cloud Database Control -->
+                <div class="bg-slate-50 p-4 sm:p-5 rounded-xl border border-slate-200">
+                    <h3 class="font-bold text-sm sm:text-md text-slate-800 mb-2">Cloud Database Synchronization</h3>
+                    <p class="text-xs sm:text-sm text-slate-600 mb-3">Sync local state directly with Firebase Firestore cloud database.</p>
+                    <div class="text-xs space-y-1 mb-4 bg-white p-2.5 rounded border border-slate-200 font-mono">
+                        <div><span class="text-slate-500">Backend Status:</span> <strong id="backendStatusDetail" class="text-emerald-600">Connected</strong></div>
+                        <div><span class="text-slate-500">Cloud Students:</span> <strong id="cloudStudentCount">0</strong></div>
+                        <div><span class="text-slate-500">Cloud Score Entries:</span> <strong id="cloudScoreCount">0</strong></div>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="exportDatabaseJSON()" class="flex-1 px-3 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-xs font-semibold transition flex items-center justify-center space-x-1.5">
+                            <i class="fas fa-download"></i>
+                            <span>Export Backup</span>
+                        </button>
+                        <label class="flex-1 px-3 py-2 bg-slate-700 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold transition cursor-pointer flex items-center justify-center space-x-1.5">
+                            <i class="fas fa-upload"></i>
+                            <span>Import Backup</span>
+                            <input type="file" id="importFileInput" accept=".json" onchange="importDatabaseJSON(event)" class="hidden">
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab: Audit Logs (Admin Only) -->
+        <section id="tab-auditLogs" class="tab-content hidden">
+            <div class="border-b border-slate-200 pb-3 mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                <div>
+                    <h2 class="text-lg sm:text-xl font-bold text-slate-800">Cloud Activity & Audit Trail</h2>
+                    <p class="text-xs sm:text-sm text-slate-500">Real-time log of score updates, student registrations, and administrative changes.</p>
+                </div>
+                <button onclick="clearCloudLogs()" class="text-xs text-red-600 hover:text-red-800 font-semibold border border-red-200 bg-red-50 px-3 py-1.5 rounded-lg transition">
+                    Clear Audit Trail
                 </button>
+            </div>
+
+            <div class="overflow-x-auto border border-slate-200 rounded-lg max-h-[500px] custom-scrollbar">
+                <table class="w-full text-xs text-left text-slate-600 min-w-[600px]">
+                    <thead class="text-[11px] uppercase bg-slate-100 text-slate-700 sticky top-0 border-b z-10 font-bold">
+                        <tr>
+                            <th class="px-3 py-2.5">Timestamp</th>
+                            <th class="px-3 py-2.5">Role</th>
+                            <th class="px-3 py-2.5">Action</th>
+                            <th class="px-3 py-2.5">Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="auditLogsTableBody">
+                        <tr><td colspan="4" class="px-4 py-6 text-center text-slate-400">No activity logged yet.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- Modal: Add / Edit Student -->
+<div id="addStudentModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-3 sm:p-4">
+    <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-4 sm:p-6 border border-slate-200 max-h-[90vh] overflow-y-auto custom-scrollbar">
+        <h3 id="studentModalTitle" class="text-base sm:text-lg font-bold text-slate-800 mb-3">Add / Edit Student Profile</h3>
+        <form onsubmit="handleAddStudent(event)" class="space-y-3">
+            <input type="hidden" id="editStudentId">
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Full Student Name</label>
+                <input type="text" id="newStudentName" required placeholder="e.g. ABUDU BLESS" class="w-full rounded-lg border-slate-300 p-2 border text-xs">
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Class Level</label>
+                    <select id="newStudentClass" required class="w-full rounded-lg border-slate-300 p-2 border text-xs">
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Promoted To</label>
+                    <input type="text" id="newStudentPromoted" placeholder="e.g. Basic 6" class="w-full rounded-lg border-slate-300 p-2 border text-xs">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Attendance Days (out of 60)</label>
+                    <input type="number" id="newStudentAttendance" min="0" max="100" value="60" required class="w-full rounded-lg border-slate-300 p-2 border text-xs font-bold">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Arrears Balance (GH₵)</label>
+                    <input type="number" id="newStudentArrears" step="0.01" min="0" value="0.00" class="w-full rounded-lg border-slate-300 p-2 border text-xs font-bold">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Conduct / Character</label>
+                <input type="text" id="newStudentConduct" placeholder="e.g. Respectful, Hardworking & Attentive" value="Satisfactory" class="w-full rounded-lg border-slate-300 p-2 border text-xs">
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Interests / Aptitude</label>
+                <input type="text" id="newStudentInterests" placeholder="e.g. Integrated Science & Computing" value="Integrated Science and Ewe" class="w-full rounded-lg border-slate-300 p-2 border text-xs">
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Class Teacher's Remark</label>
+                <textarea id="newTeacherRemark" rows="2" placeholder="e.g. Good performance. Keep it up!!" class="w-full rounded-lg border-slate-300 p-2 border text-xs font-medium">Good performance. Keep it up!!</textarea>
+            </div>
+
+            <div class="flex justify-end space-x-2 sm:space-x-3 pt-2">
+                <button type="button" onclick="closeAddStudentModal()" class="px-3.5 py-2 border rounded-lg text-xs font-medium text-slate-600">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-brand-700 text-white rounded-lg text-xs font-medium">Save Record</button>
             </div>
         </form>
-
-        <div class="mt-6 sm:mt-8">
-            <h3 class="text-sm sm:text-md font-bold text-slate-800 mb-3">All Subjects Overview for Selected Student</h3>
-            <div class="overflow-x-auto border border-slate-200 rounded-lg custom-scrollbar">
-                <table class="w-full text-xs sm:text-sm text-left text-slate-600 min-w-[850px]">
-                    <thead class="text-[11px] uppercase bg-slate-100 text-slate-700 font-bold">
-                        <tr>
-                            <th class="px-3 py-2.5">Subject</th>
-                            <th class="px-2 py-2.5 text-center">CW1 (10)</th>
-                            <th class="px-2 py-2.5 text-center">CW2 (10)</th>
-                            <th class="px-2 py-2.5 text-center">HW1 (10)</th>
-                            <th class="px-2 py-2.5 text-center">HW2 (10)</th>
-                            <th class="px-2 py-2.5 text-center">Proj (20)</th>
-                            <th class="px-2 py-2.5 text-center text-amber-900 bg-amber-50">Raw (60)</th>
-                            <th class="px-2 py-2.5 text-center bg-brand-50 text-brand-900">Class (50)</th>
-                            <th class="px-2 py-2.5 text-center">Exams (50)</th>
-                            <th class="px-2 py-2.5 text-center font-black">Total (100)</th>
-                            <th class="px-2 py-2.5 text-center">Rank</th>
-                            <th class="px-3 py-2.5">Remark</th>
-                        </tr>
-                    </thead>
-                    <tbody id="studentSubjectOverviewTable">
-                        <tr><td colspan="12" class="px-4 py-4 text-center text-slate-400">Select a student above to view their score sheet.</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </section>
-
-    <!-- Tab: Batch Grid Entry -->
-    <section id="tab-batchScoreEntry" class="tab-content hidden">
-        <div class="border-b border-slate-200 pb-3 mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-            <div>
-                <h2 class="text-lg sm:text-xl font-bold text-slate-800">Batch Grid Entry</h2>
-                <p class="text-xs sm:text-sm text-slate-500">Enter marks for all students in a class simultaneously with automated scaling.</p>
-            </div>
-            <button onclick="saveBatchGridScores()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-2 shadow-sm">
-                <i class="fas fa-check-circle"></i> Save All Batch Scores
-            </button>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 bg-slate-50 p-3 sm:p-4 rounded-xl border border-slate-200">
-            <div>
-                <label class="block text-[11px] font-bold text-slate-700 mb-1">Select Class</label>
-                <select id="batchClassSelect" onchange="renderBatchGridTable()" class="w-full rounded-lg border-slate-300 p-2 border text-xs font-semibold">
-                </select>
-            </div>
-            <div>
-                <label class="block text-[11px] font-bold text-slate-700 mb-1">Select Subject</label>
-                <select id="batchSubjectSelect" onchange="renderBatchGridTable()" class="w-full rounded-lg border-slate-300 p-2 border text-xs font-semibold">
-                </select>
-            </div>
-            <div>
-                <label class="block text-[11px] font-bold text-slate-700 mb-1">Academic Term</label>
-                <select id="batchTermSelect" onchange="renderBatchGridTable()" class="w-full rounded-lg border-slate-300 p-2 border text-xs font-semibold">
-                </select>
-            </div>
-        </div>
-
-        <div class="overflow-x-auto border border-slate-200 rounded-lg max-h-[550px] custom-scrollbar">
-            <table class="w-full text-xs text-left text-slate-700 border-collapse min-w-[950px]">
-                <thead class="uppercase bg-slate-100 text-slate-800 sticky top-0 border-b font-bold z-10">
-                    <tr>
-                        <th class="px-3 py-2.5">Student Name</th>
-                        <th class="px-1 py-2.5 text-center w-16">CW1 (10)</th>
-                        <th class="px-1 py-2.5 text-center w-16">CW2 (10)</th>
-                        <th class="px-1 py-2.5 text-center w-16">HW1 (10)</th>
-                        <th class="px-1 py-2.5 text-center w-16">HW2 (10)</th>
-                        <th class="px-1 py-2.5 text-center w-16">Proj (20)</th>
-                        <th class="px-1 py-2.5 text-center w-20 bg-brand-50 text-brand-900 font-extrabold">Class (50)</th>
-                        <th class="px-1 py-2.5 text-center w-20">Exam (50)</th>
-                        <th class="px-1 py-2.5 text-center w-20 font-black">Total (100)</th>
-                        <th class="px-3 py-2.5 text-center">Remark</th>
-                    </tr>
-                </thead>
-                <tbody id="batchGridTableBody">
-                    <tr><td colspan="10" class="px-4 py-8 text-center text-slate-400">Select a Class and Subject above to begin batch score entry.</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </section>
-
-    <!-- Tab: Student Directory -->
-    <section id="tab-students" class="tab-content hidden">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 pb-3 mb-4 sm:mb-6 gap-2">
-            <div>
-                <h2 class="text-lg sm:text-xl font-bold text-slate-800">Student Directory & Profiles</h2>
-                <p class="text-xs sm:text-sm text-slate-500">Manage enrolled students and basic records.</p>
-            </div>
-            <button onclick="openAddStudentModal()" class="admin-nav-item w-full sm:w-auto bg-brand-700 hover:bg-brand-800 text-white px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition flex items-center justify-center space-x-2">
-                <i class="fas fa-plus"></i>
-                <span>Add New Student</span>
-            </button>
-        </div>
-
-        <div class="overflow-x-auto border border-slate-200 rounded-lg custom-scrollbar">
-            <table class="w-full text-xs sm:text-sm text-left text-slate-600 min-w-[650px]">
-                <thead class="text-[11px] uppercase bg-slate-100 text-slate-700 font-bold">
-                    <tr>
-                        <th class="px-3 py-2.5">ID & Name</th>
-                        <th class="px-3 py-2.5">Class Level</th>
-                        <th class="px-3 py-2.5 text-right">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="studentsTableBody">
-                </tbody>
-            </table>
-        </div>
-    </section>
-
-    <!-- Tab: Class Summary & Ranks -->
-    <section id="tab-classTotals" class="tab-content hidden">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 pb-3 mb-4 sm:mb-6 gap-2">
-            <div>
-                <h2 class="text-lg sm:text-xl font-bold text-slate-800">Class Summary & Rankings</h2>
-                <p class="text-xs sm:text-sm text-slate-500">Computed grand totals and class positions by selected grade level.</p>
-            </div>
-            <div class="flex items-center gap-2 w-full sm:w-auto">
-                <select id="filterClassSelect" onchange="renderClassTotals()" class="w-full sm:w-auto rounded-lg border-slate-300 shadow-sm p-2 border text-xs sm:text-sm font-medium">
-                    <option value="ALL">All Classes</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="overflow-x-auto border border-slate-200 rounded-lg custom-scrollbar">
-            <table class="w-full text-xs sm:text-sm text-left text-slate-600 min-w-[600px]">
-                <thead class="text-[11px] uppercase bg-slate-100 text-slate-700 font-bold">
-                    <tr>
-                        <th class="px-3 py-2.5">Rank</th>
-                        <th class="px-4 py-2.5">Student Name</th>
-                        <th class="px-3 py-2.5">Class</th>
-                        <th class="px-3 py-2.5">Grand Total Score</th>
-                        <th class="px-3 py-2.5">Average (%)</th>
-                    </tr>
-                </thead>
-                <tbody id="classTotalsTableBody">
-                </tbody>
-            </table>
-        </div>
-    </section>
-
-    <!-- Tab: Terminal Reports -->
-    <section id="tab-reportView" class="tab-content hidden">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 pb-3 mb-4 sm:mb-6 no-print gap-3">
-            <div>
-                <h2 class="text-lg sm:text-xl font-bold text-slate-800">Terminal Report Cards</h2>
-                <p class="text-xs sm:text-sm text-slate-500">Generate individual student reports or print full class rosters in batch.</p>
-            </div>
-            <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                <select id="reportModeSelect" onchange="toggleReportPrintMode()" class="rounded-lg border-slate-300 shadow-sm p-2 border text-xs font-bold bg-slate-50 flex-grow sm:flex-grow-0">
-                    <option value="single">Single Student Mode</option>
-                    <option value="batch">Batch Entire Class Mode</option>
-                </select>
-
-                <div id="singleStudentSelectContainer" class="flex items-center gap-2 flex-grow sm:flex-grow-0">
-                    <select id="reportStudentSelect" onchange="generateReportCard()" class="w-full sm:w-auto rounded-lg border-slate-300 shadow-sm p-2 border text-xs font-medium">
-                    </select>
-                </div>
-
-                <div id="batchClassSelectContainer" class="hidden flex items-center gap-2 flex-grow sm:flex-grow-0">
-                    <select id="reportClassBatchSelect" onchange="generateBatchReportCards()" class="w-full sm:w-auto rounded-lg border-slate-300 shadow-sm p-2 border text-xs font-medium">
-                    </select>
-                </div>
-
-                <button onclick="window.print()" class="admin-nav-item bg-slate-800 hover:bg-slate-900 text-white px-3.5 py-2 rounded-lg text-xs font-medium transition flex items-center space-x-1.5 shadow-sm ml-auto sm:ml-0">
-                    <i class="fas fa-print"></i>
-                    <span id="btnPrintText">Print</span>
-                </button>
-            </div>
-        </div>
-
-        <div id="printableReport" class="space-y-6 sm:space-y-8">
-        </div>
-    </section>
-
-    <!-- Tab: System Controls (Admin Only) -->
-    <section id="tab-settings" class="tab-content hidden">
-        <div class="border-b border-slate-200 pb-3 mb-4">
-            <h2 class="text-lg sm:text-xl font-bold text-slate-800">System Controls & Administrative Configuration</h2>
-            <p class="text-xs sm:text-sm text-slate-500">Manage school logo, active term, security passwords, dates, fees, and cloud synchronization.</p>
-        </div>
-
-        <!-- Admin Logo Upload Section -->
-        <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 mb-4 sm:mb-6 shadow-sm">
-            <h3 class="font-bold text-sm sm:text-md text-slate-800 mb-2 flex items-center"><i class="fas fa-image text-brand-700 mr-2"></i> School Logo Management</h3>
-            <p class="text-xs text-slate-500 mb-4">Upload custom school emblem to appear on all Terminal Report Cards and system header.</p>
-            
-            <div class="flex flex-col sm:flex-row items-center gap-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                <div class="w-28 h-28 border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center bg-white p-2 relative flex-shrink-0 shadow-inner">
-                    <img id="logoPreviewImg" src="" alt="School Logo Preview" class="max-w-full max-h-full object-contain hidden">
-                    <div id="logoPreviewPlaceholder" class="text-center text-slate-400">
-                        <i class="fas fa-school text-3xl mb-1"></i>
-                        <span class="block text-[10px] font-semibold">No Logo Uploaded</span>
-                    </div>
-                </div>
-
-                <div class="space-y-3 flex-grow text-xs w-full">
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Select Logo File (PNG, JPG, SVG)</label>
-                        <input type="file" id="logoFileInput" accept="image/*" onchange="previewLogoFile(event)" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 border border-slate-300 rounded-lg bg-white">
-                    </div>
-                    <div class="flex flex-wrap gap-2 pt-1">
-                        <button type="button" onclick="saveUploadedLogo()" class="px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded-lg font-bold text-xs shadow-sm transition flex items-center gap-1.5">
-                            <i class="fas fa-save"></i> Save Logo
-                        </button>
-                        <button type="button" onclick="removeSchoolLogo()" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg font-semibold text-xs transition flex items-center gap-1.5">
-                            <i class="fas fa-trash-alt"></i> Remove Logo
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Active Academic Term Control -->
-        <div class="bg-slate-50 p-4 sm:p-5 rounded-xl border border-slate-200 mb-4 sm:mb-6">
-            <h3 class="font-bold text-sm sm:text-md text-slate-800 mb-2"><i class="fas fa-calendar-check text-brand-700 mr-2"></i>Active Academic Term Control</h3>
-            <p class="text-xs text-slate-500 mb-3">Set or edit the active academic term for the entire school system.</p>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs items-end">
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Select / Set Active Term</label>
-                    <select id="cfgActiveTermSelect" class="w-full rounded-lg border-slate-300 p-2.5 border font-semibold text-xs">
-                    </select>
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Custom Term Name (Optional)</label>
-                    <input type="text" id="cfgCustomTermInput" placeholder="e.g. 2026-2027_Term1" class="w-full rounded-lg border-slate-300 p-2.5 border font-mono text-xs">
-                </div>
-                <div>
-                    <button type="button" onclick="handleSaveActiveTerm()" class="w-full py-2.5 bg-brand-700 hover:bg-brand-800 text-white rounded-lg font-bold text-xs shadow-sm transition flex items-center justify-center gap-2">
-                        <i class="fas fa-save"></i> Save Active Term
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Term Dates Config -->
-        <div class="bg-slate-50 p-4 sm:p-5 rounded-xl border border-slate-200 mb-4 sm:mb-6">
-            <h3 class="font-bold text-sm sm:text-md text-slate-800 mb-3"><i class="fas fa-calendar-alt text-brand-700 mr-2"></i>Academic Term Dates</h3>
-            <form onsubmit="handleSaveTermConfig(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Academic Year</label>
-                    <input type="text" id="cfgAcademicYear" required placeholder="e.g. 2025/2026" class="w-full rounded border-slate-300 p-2 border font-medium">
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Next Term Opening Date</label>
-                    <input type="text" id="cfgNextTermDate" required placeholder="e.g. 25th August, 2026" class="w-full rounded border-slate-300 p-2 border font-medium">
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Vacation Date</label>
-                    <input type="text" id="cfgVacationDate" required placeholder="e.g. 25th July, 2026" class="w-full rounded border-slate-300 p-2 border font-medium">
-                </div>
-
-                <div class="sm:col-span-3 flex justify-end pt-2">
-                    <button type="submit" class="w-full sm:w-auto px-4 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded font-bold text-xs shadow-sm transition">
-                        <i class="fas fa-save mr-1"></i> Save Term Configuration
-                    </button>
-                </div>
-            </form>
-        </div>
-
-        <!-- Admin Security Password Change Card -->
-        <div class="bg-slate-50 p-4 sm:p-5 rounded-xl border border-slate-200 mb-4 sm:mb-6">
-            <h3 class="font-bold text-sm sm:text-md text-slate-800 mb-2"><i class="fas fa-user-shield text-brand-700 mr-2"></i>Admin Security & Password Control</h3>
-            <p class="text-xs text-slate-500 mb-3">Change the system administrator master password.</p>
-            <form onsubmit="handleAdminPasswordChange(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs items-end">
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">New Master Password</label>
-                    <div class="relative">
-                        <input type="password" id="newAdminPassword" required placeholder="Enter new admin password" class="w-full rounded-lg border-slate-300 p-2.5 border pr-10 font-mono text-xs">
-                        <button type="button" onclick="toggleInputVisibility('newAdminPassword', 'newAdminPwdIcon')" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600">
-                            <i id="newAdminPwdIcon" class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Confirm New Password</label>
-                    <div class="relative">
-                        <input type="password" id="confirmAdminPassword" required placeholder="Re-enter new password" class="w-full rounded-lg border-slate-300 p-2.5 border pr-10 font-mono text-xs">
-                        <button type="button" onclick="toggleInputVisibility('confirmAdminPassword', 'confirmAdminPwdIcon')" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600">
-                            <i id="confirmAdminPwdIcon" class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="sm:col-span-2 lg:col-span-1">
-                    <button type="submit" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-bold text-xs shadow-sm transition flex items-center justify-center gap-2">
-                        <i class="fas fa-key"></i> Update Admin Password
-                    </button>
-                </div>
-            </form>
-        </div>
-
-        <!-- Teacher Accounts Section -->
-        <div class="bg-slate-50 p-4 sm:p-5 rounded-xl border border-slate-200 mb-4 sm:mb-6">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 gap-2">
-                <div>
-                    <h3 class="font-bold text-sm sm:text-md text-slate-800">Teacher Class & Subject Assignments</h3>
-                    <p class="text-xs text-slate-500">Assign multiple classes and subjects with checkbox controls.</p>
-                </div>
-                <button onclick="openAddTeacherModal()" class="w-full sm:w-auto px-3 py-1.5 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-xs font-semibold transition flex items-center justify-center space-x-1">
-                    <i class="fas fa-user-plus"></i>
-                    <span>Add New Teacher</span>
-                </button>
-            </div>
-
-            <div class="overflow-x-auto border border-slate-200 rounded-lg bg-white custom-scrollbar">
-                <table class="w-full text-xs text-left text-slate-600 min-w-[600px]">
-                    <thead class="uppercase bg-slate-100 text-slate-700 font-semibold">
-                        <tr>
-                            <th class="px-3 py-2">Teacher Name</th>
-                            <th class="px-3 py-2">Assigned Classes</th>
-                            <th class="px-3 py-2">Assigned Subjects</th>
-                            <th class="px-3 py-2">Password</th>
-                            <th class="px-3 py-2 text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="teacherTableBody">
-                        <tr><td colspan="5" class="px-3 py-3 text-center text-slate-400">Loading teachers...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-            <!-- Term Lock -->
-            <div class="bg-slate-50 p-4 sm:p-5 rounded-xl border border-slate-200">
-                <h3 class="font-bold text-sm sm:text-md text-slate-800 mb-2">Term Lock System</h3>
-                <p class="text-xs sm:text-sm text-slate-600 mb-4">Locking the term prevents teachers from making accidental score modifications.</p>
-                <button onclick="toggleTermLock()" id="btnTermLock" class="w-full sm:w-auto px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs sm:text-sm font-medium transition">
-                    <i class="fas fa-lock"></i> Lock Active Term
-                </button>
-            </div>
-
-            <!-- Cloud Database Control -->
-            <div class="bg-slate-50 p-4 sm:p-5 rounded-xl border border-slate-200">
-                <h3 class="font-bold text-sm sm:text-md text-slate-800 mb-2">Cloud Database Synchronization</h3>
-                <p class="text-xs sm:text-sm text-slate-600 mb-3">Sync local state directly with Firebase Firestore cloud database.</p>
-                <div class="text-xs space-y-1 mb-4 bg-white p-2.5 rounded border border-slate-200 font-mono">
-                    <div><span class="text-slate-500">Backend Status:</span> <strong id="backendStatusDetail" class="text-emerald-600">Connected</strong></div>
-                    <div><span class="text-slate-500">Cloud Students:</span> <strong id="cloudStudentCount">0</strong></div>
-                    <div><span class="text-slate-500">Cloud Score Entries:</span> <strong id="cloudScoreCount">0</strong></div>
-                </div>
-                <div class="flex flex-wrap gap-2">
-                    <button onclick="exportDatabaseJSON()" class="flex-1 px-3 py-2 bg-brand-700 hover:bg-brand-800 text-white rounded-lg text-xs font-semibold transition flex items-center justify-center space-x-1.5">
-                        <i class="fas fa-download"></i>
-                        <span>Export Backup</span>
-                    </button>
-                    <label class="flex-1 px-3 py-2 bg-slate-700 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold transition cursor-pointer flex items-center justify-center space-x-1.5">
-                        <i class="fas fa-upload"></i>
-                        <span>Import Backup</span>
-                        <input type="file" id="importFileInput" accept=".json" onchange="importDatabaseJSON(event)" class="hidden">
-                    </label>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Tab: Audit Logs (Admin Only) -->
-    <section id="tab-auditLogs" class="tab-content hidden">
-        <div class="border-b border-slate-200 pb-3 mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-            <div>
-                <h2 class="text-lg sm:text-xl font-bold text-slate-800">Cloud Activity & Audit Trail</h2>
-                <p class="text-xs sm:text-sm text-slate-500">Real-time log of score updates, student registrations, and administrative changes.</p>
-            </div>
-            <button onclick="clearCloudLogs()" class="text-xs text-red-600 hover:text-red-800 font-semibold border border-red-200 bg-red-50 px-3 py-1.5 rounded-lg transition">
-                Clear Audit Trail
-            </button>
-        </div>
-
-        <div class="overflow-x-auto border border-slate-200 rounded-lg max-h-[500px] custom-scrollbar">
-            <table class="w-full text-xs text-left text-slate-600 min-w-[600px]">
-                <thead class="text-[11px] uppercase bg-slate-100 text-slate-700 sticky top-0 border-b z-10 font-bold">
-                    <tr>
-                        <th class="px-3 py-2.5">Timestamp</th>
-                        <th class="px-3 py-2.5">Role</th>
-                        <th class="px-3 py-2.5">Action</th>
-                        <th class="px-3 py-2.5">Details</th>
-                    </tr>
-                </thead>
-                <tbody id="auditLogsTableBody">
-                    <tr><td colspan="4" class="px-4 py-6 text-center text-slate-400">No activity logged yet.</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </section>
-</main>
-
-
-        <div class="flex justify-end space-x-2 sm:space-x-3 pt-2">
-            <button type="button" onclick="closeAddStudentModal()" class="px-3.5 py-2 border rounded-lg text-xs font-medium text-slate-600">Cancel</button>
-            <button type="submit" class="px-4 py-2 bg-brand-700 text-white rounded-lg text-xs font-medium">Save Record</button>
-        </div>
-    </form>
+    </div>
 </div>
 
+<!-- Modal: Add / Edit Teacher -->
+<div id="addTeacherModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center z-50 p-3 sm:p-4">
+    <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-4 sm:p-6 border border-slate-200 max-h-[90vh] overflow-y-auto custom-scrollbar">
+        <h3 id="teacherModalTitle" class="text-base sm:text-lg font-bold text-slate-800 mb-3">Add / Edit Teacher Account</h3>
+        <form onsubmit="handleSaveTeacher(event)" class="space-y-4">
+            <input type="hidden" id="editTeacherId">
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Teacher Full Name</label>
+                <input type="text" id="teacherNameInput" required placeholder="e.g. Mr. Kwami Mensah" class="w-full rounded-lg border-slate-300 p-2 sm:p-2.5 border text-xs sm:text-sm">
+            </div>
 
-        <div>
-            <div class="flex items-center justify-between mb-1">
-                <label class="block text-xs font-bold text-slate-700">Select Assigned Classes</label>
-                <div class="space-x-2">
-                    <button type="button" onclick="toggleAllTeacherCheckboxes('teacherClassesCheckboxes', true)" class="text-[10px] text-brand-700 hover:underline font-semibold">Select All</button>
-                    <button type="button" onclick="toggleAllTeacherCheckboxes('teacherClassesCheckboxes', false)" class="text-[10px] text-slate-500 hover:underline">Clear</button>
+            <div>
+                <div class="flex items-center justify-between mb-1">
+                    <label class="block text-xs font-bold text-slate-700">Select Assigned Classes</label>
+                    <div class="space-x-2">
+                        <button type="button" onclick="toggleAllTeacherCheckboxes('teacherClassesCheckboxes', true)" class="text-[10px] text-brand-700 hover:underline font-semibold">Select All</button>
+                        <button type="button" onclick="toggleAllTeacherCheckboxes('teacherClassesCheckboxes', false)" class="text-[10px] text-slate-500 hover:underline">Clear</button>
+                    </div>
+                </div>
+                <div id="teacherClassesCheckboxes" class="grid grid-cols-2 sm:grid-cols-3 gap-2 bg-slate-50 p-3 rounded-lg border border-slate-200 max-h-36 overflow-y-auto custom-scrollbar text-xs">
                 </div>
             </div>
-            <div id="teacherClassesCheckboxes" class="grid grid-cols-2 sm:grid-cols-3 gap-2 bg-slate-50 p-3 rounded-lg border border-slate-200 max-h-36 overflow-y-auto custom-scrollbar text-xs">
-            </div>
-        </div>
 
-        <div>
-            <div class="flex items-center justify-between mb-1">
-                <label class="block text-xs font-bold text-slate-700">Select Assigned Subjects (Check none for All Subjects)</label>
-                <div class="space-x-2">
-                    <button type="button" onclick="toggleAllTeacherCheckboxes('teacherSubjectsCheckboxes', true)" class="text-[10px] text-brand-700 hover:underline font-semibold">Select All</button>
-                    <button type="button" onclick="toggleAllTeacherCheckboxes('teacherSubjectsCheckboxes', false)" class="text-[10px] text-slate-500 hover:underline">Clear</button>
+            <div>
+                <div class="flex items-center justify-between mb-1">
+                    <label class="block text-xs font-bold text-slate-700">Select Assigned Subjects (Check none for All Subjects)</label>
+                    <div class="space-x-2">
+                        <button type="button" onclick="toggleAllTeacherCheckboxes('teacherSubjectsCheckboxes', true)" class="text-[10px] text-brand-700 hover:underline font-semibold">Select All</button>
+                        <button type="button" onclick="toggleAllTeacherCheckboxes('teacherSubjectsCheckboxes', false)" class="text-[10px] text-slate-500 hover:underline">Clear</button>
+                    </div>
+                </div>
+                <div id="teacherSubjectsCheckboxes" class="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-slate-50 p-3 rounded-lg border border-slate-200 max-h-40 overflow-y-auto custom-scrollbar text-xs">
                 </div>
             </div>
-            <div id="teacherSubjectsCheckboxes" class="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-slate-50 p-3 rounded-lg border border-slate-200 max-h-40 overflow-y-auto custom-scrollbar text-xs">
-            </div>
-        </div>
 
-        <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Login Password</label>
-            <div class="relative">
-                <input type="password" id="teacherPasswordInput" required placeholder="Enter login password" class="w-full rounded-lg border-slate-300 p-2 sm:p-2.5 border pr-10 text-xs sm:text-sm font-mono">
-                <button type="button" onclick="toggleInputVisibility('teacherPasswordInput', 'teacherPwdToggleIcon')" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 focus:outline-none">
-                    <i id="teacherPwdToggleIcon" class="fas fa-eye"></i>
-                </button>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Login Password</label>
+                <div class="relative">
+                    <input type="password" id="teacherPasswordInput" required placeholder="Enter login password" class="w-full rounded-lg border-slate-300 p-2 sm:p-2.5 border pr-10 text-xs sm:text-sm font-mono">
+                    <button type="button" onclick="toggleInputVisibility('teacherPasswordInput', 'teacherPwdToggleIcon')" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 focus:outline-none">
+                        <i id="teacherPwdToggleIcon" class="fas fa-eye"></i>
+                    </button>
+                </div>
             </div>
-        </div>
-        <div class="flex justify-end space-x-2 sm:space-x-3 pt-2">
-            <button type="button" onclick="closeAddTeacherModal()" class="px-3.5 py-2 border rounded-lg text-xs sm:text-sm font-medium text-slate-600">Cancel</button>
-            <button type="submit" class="px-4 py-2 bg-brand-700 text-white rounded-lg text-xs sm:text-sm font-medium">Save Account</button>
-        </div>
-    </form>
+            <div class="flex justify-end space-x-2 sm:space-x-3 pt-2">
+                <button type="button" onclick="closeAddTeacherModal()" class="px-3.5 py-2 border rounded-lg text-xs sm:text-sm font-medium text-slate-600">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-brand-700 text-white rounded-lg text-xs sm:text-sm font-medium">Save Account</button>
+            </div>
+        </form>
+    </div>
 </div>
 
-
-    <div class="mb-4">
-        <label class="block text-[11px] font-bold uppercase text-slate-600 mb-2">Select Login Role</label>
-        <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-lg text-xs sm:text-sm font-semibold">
-            <button type="button" id="roleBtnTeacher" onclick="toggleRoleTab('Teacher')" class="py-2 text-center rounded-md bg-white text-brand-800 shadow-sm transition">
-                <i class="fas fa-chalkboard-teacher mr-1"></i> Teacher
-            </button>
-            <button type="button" id="roleBtnAdmin" onclick="toggleRoleTab('Admin')" class="py-2 text-center rounded-md text-slate-600 hover:text-slate-900 transition">
-                <i class="fas fa-user-shield mr-1"></i> Admin
-            </button>
+<!-- Modal: Confirmation -->
+<div id="confirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4 no-print">
+    <div class="bg-white rounded-xl shadow-2xl max-w-sm sm:max-w-md w-full p-5 sm:p-6 border border-slate-200 text-center">
+        <div id="confirmIcon" class="w-10 h-10 sm:w-12 sm:h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-3 text-lg sm:text-xl font-bold">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h3 id="confirmTitle" class="text-base sm:text-lg font-bold text-slate-800 mb-2">Confirm Action</h3>
+        <p id="confirmMessage" class="text-xs text-slate-600 mb-5 sm:mb-6">Are you sure you want to proceed with this operation?</p>
+        <div class="flex justify-center space-x-3">
+            <button type="button" onclick="closeConfirmModal(false)" class="px-4 py-2 border rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+            <button type="button" id="btnConfirmAction" onclick="closeConfirmModal(true)" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold shadow-sm">Proceed</button>
         </div>
     </div>
+</div>
 
-    <div id="authErrorAlert" class="hidden mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg font-medium">
-        <i class="fas fa-exclamation-circle mr-1"></i> <span id="authErrorMsg">Invalid password or parameters.</span>
-    </div>
-
-    <form id="teacherLoginForm" onsubmit="handleTeacherLogin(event)" class="space-y-3 sm:space-y-4">
-        <div>
-            <label class="block text-xs sm:text-sm font-medium text-slate-700 mb-1">Select Your Name</label>
-            <select id="loginTeacherSelect" required class="w-full rounded-lg border-slate-300 p-2 sm:p-2.5 border text-xs sm:text-sm font-medium">
-                <option value="">-- Choose Teacher Profile --</option>
-            </select>
+<!-- Modal: Authentication Portal -->
+<div id="loginModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8 border border-slate-100 text-left">
+        <div class="w-12 h-12 sm:w-16 sm:h-16 bg-brand-700 text-white rounded-2xl mx-auto flex items-center justify-center font-bold text-xl sm:text-2xl shadow-lg mb-2 sm:mb-3 overflow-hidden">
+            <span id="loginLogoFallback">VM</span>
+            <img id="loginLogoImg" class="w-full h-full object-contain hidden" alt="Logo">
         </div>
-        <div>
-            <label class="block text-xs sm:text-sm font-medium text-slate-700 mb-1">Teacher Password</label>
-            <div class="relative">
-                <input type="password" id="loginTeacherPassword" required placeholder="••••••••" class="w-full rounded-lg border-slate-300 p-2 sm:p-2.5 border text-xs sm:text-sm pr-10">
-                <button type="button" onclick="toggleInputVisibility('loginTeacherPassword', 'loginTeacherPwdIcon')" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600">
-                    <i id="loginTeacherPwdIcon" class="fas fa-eye"></i>
+        <h2 class="text-xl sm:text-2xl font-black text-slate-800 text-center">VEHEM MAWUNYO INT.</h2>
+        <p class="text-[10px] sm:text-xs text-slate-500 mb-5 sm:mb-6 uppercase tracking-wider font-semibold text-center">Terminal Report Authentication Portal</p>
+
+        <div class="mb-4">
+            <label class="block text-[11px] font-bold uppercase text-slate-600 mb-2">Select Login Role</label>
+            <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-lg text-xs sm:text-sm font-semibold">
+                <button type="button" id="roleBtnTeacher" onclick="toggleRoleTab('Teacher')" class="py-2 text-center rounded-md bg-white text-brand-800 shadow-sm transition">
+                    <i class="fas fa-chalkboard-teacher mr-1"></i> Teacher
+                </button>
+                <button type="button" id="roleBtnAdmin" onclick="toggleRoleTab('Admin')" class="py-2 text-center rounded-md text-slate-600 hover:text-slate-900 transition">
+                    <i class="fas fa-user-shield mr-1"></i> Admin
                 </button>
             </div>
         </div>
-        <button type="submit" class="w-full py-2.5 sm:py-3 bg-brand-700 hover:bg-brand-800 text-white rounded-xl font-bold text-xs sm:text-sm transition shadow-md flex items-center justify-center space-x-2">
-            <i class="fas fa-sign-in-alt"></i>
-            <span>Log In as Class Teacher</span>
-        </button>
-    </form>
 
-    <form id="adminLoginForm" onsubmit="handleAdminLogin(event)" class="space-y-3 sm:space-y-4 hidden">
-        <div>
-            <label class="block text-xs sm:text-sm font-medium text-slate-700 mb-1">Admin Master Password</label>
-            <div class="relative">
-                <input type="password" id="loginAdminPassword" required placeholder="Default: admin123" class="w-full rounded-lg border-slate-300 p-2 sm:p-2.5 border text-xs sm:text-sm pr-10">
-                <button type="button" onclick="toggleInputVisibility('loginAdminPassword', 'loginAdminPwdIcon')" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600">
-                    <i id="loginAdminPwdIcon" class="fas fa-eye"></i>
-                </button>
-            </div>
+        <div id="authErrorAlert" class="hidden mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg font-medium">
+            <i class="fas fa-exclamation-circle mr-1"></i> <span id="authErrorMsg">Invalid password or parameters.</span>
         </div>
-        <button type="submit" class="w-full py-2.5 sm:py-3 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold text-xs sm:text-sm transition shadow-md flex items-center justify-center space-x-2">
-            <i class="fas fa-user-shield"></i>
-            <span>Log In as Administrator</span>
-        </button>
-    </form>
+
+        <form id="teacherLoginForm" onsubmit="handleTeacherLogin(event)" class="space-y-3 sm:space-y-4">
+            <div>
+                <label class="block text-xs sm:text-sm font-medium text-slate-700 mb-1">Select Your Name</label>
+                <select id="loginTeacherSelect" required class="w-full rounded-lg border-slate-300 p-2 sm:p-2.5 border text-xs sm:text-sm font-medium">
+                    <option value="">-- Choose Teacher Profile --</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs sm:text-sm font-medium text-slate-700 mb-1">Teacher Password</label>
+                <div class="relative">
+                    <input type="password" id="loginTeacherPassword" required placeholder="••••••••" class="w-full rounded-lg border-slate-300 p-2 sm:p-2.5 border text-xs sm:text-sm pr-10">
+                    <button type="button" onclick="toggleInputVisibility('loginTeacherPassword', 'loginTeacherPwdIcon')" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600">
+                        <i id="loginTeacherPwdIcon" class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+            <button type="submit" class="w-full py-2.5 sm:py-3 bg-brand-700 hover:bg-brand-800 text-white rounded-xl font-bold text-xs sm:text-sm transition shadow-md flex items-center justify-center space-x-2">
+                <i class="fas fa-sign-in-alt"></i>
+                <span>Log In as Class Teacher</span>
+            </button>
+        </form>
+
+        <form id="adminLoginForm" onsubmit="handleAdminLogin(event)" class="space-y-3 sm:space-y-4 hidden">
+            <div>
+                <label class="block text-xs sm:text-sm font-medium text-slate-700 mb-1">Admin Master Password</label>
+                <div class="relative">
+                    <input type="password" id="loginAdminPassword" required placeholder="Default: admin123" class="w-full rounded-lg border-slate-300 p-2 sm:p-2.5 border text-xs sm:text-sm pr-10">
+                    <button type="button" onclick="toggleInputVisibility('loginAdminPassword', 'loginAdminPwdIcon')" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600">
+                        <i id="loginAdminPwdIcon" class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+            <button type="submit" class="w-full py-2.5 sm:py-3 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold text-xs sm:text-sm transition shadow-md flex items-center justify-center space-x-2">
+                <i class="fas fa-user-shield"></i>
+                <span>Log In as Administrator</span>
+            </button>
+        </form>
+    </div>
 </div>
 
 <!-- Application Script Module -->
